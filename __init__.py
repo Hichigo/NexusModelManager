@@ -17,6 +17,38 @@ import bpy.utils.previews
 from bpy.types import WindowManager
 
 
+
+###########################################################################
+#################### function dinamicaly make category ####################
+###########################################################################
+def get_path_to_library():
+	user_preferences = bpy.context.user_preferences
+	addon_prefs = user_preferences.addons[__name__].preferences
+	path = addon_prefs.path_to_library
+
+	return path
+
+def make_models_category(folder):
+	path_to_library = get_path_to_library()
+	print(path_to_library)
+
+	category_folder_path = os.path.join(path_to_library, folder)
+	print(category_folder_path)
+	dirs = os.listdir(category_folder_path)
+	i = 0
+	mode_options = []
+
+	for dir in dirs:
+		item = (dir, dir, '', i)
+		mode_options.append(item)
+		i += 1
+
+	return mode_options
+
+
+
+
+
 ###########################################################################
 ############################ Addon preferences ############################
 ###########################################################################
@@ -36,6 +68,10 @@ class Preferences(bpy.types.AddonPreferences):
 
 		col = layout.column(align=True)
 		col.prop(self, "path_to_library")
+
+
+
+
 
 #################################################################
 ############################ Toolbar ############################
