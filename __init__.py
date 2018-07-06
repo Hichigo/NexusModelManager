@@ -118,9 +118,30 @@ class PreviewsPanel(bpy.types.Panel):
 
 
 
+		############## Library Panel ##############
+
+
+		box = layout.box()
+		box.label(text="Library Folder:")
+		row = box.row()
+		row.operator("library.path", icon="ZOOMIN", text="Open Library Folder")
+
+
+
+class Lib_Path(bpy.types.Operator):
+
+	bl_idname = "library.path"
+	bl_label = "Library Path"
+	
+	def execute(self, context):
+		filepath = context.window_manager.my_previews_dir
+		bpy.ops.wm.path_open(filepath=filepath)
+		return {'FINISHED'}
+
 def register():
 
 	bpy.utils.register_class(Preferences)
+	bpy.utils.register_class(Lib_Path)
 	bpy.utils.register_class(PreviewsPanel)
 
 	user_preferences = bpy.context.user_preferences
@@ -132,14 +153,15 @@ def register():
 		default=addon_prefs.path_to_library
 		)
 
-	WindowManager.my_previews = EnumProperty(
-		items=enum_previews_from_directory_items,
-		)
+	# WindowManager.my_previews = EnumProperty(
+	# 	items=enum_previews_from_directory_items,
+	# 	)
 
 
 def unregister():
 
 	bpy.utils.unregister_class(Preferences)
+	bpy.utils.unregister_class(Lib_Path)
 	bpy.utils.unregister_class(PreviewsPanel)
 
 	del WindowManager.my_previews
