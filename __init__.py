@@ -48,7 +48,12 @@ def enum_previews_furniture_items(self, context):
 	enum_items = []
 
 	category = context.scene.furniture.furniture_category
-	directory = os.path.join("E:\\Projects\\Blender\\Models", os.sep + "Furniture" + os.sep + category + os.sep + "Renders")
+	path_models = bpy.data.window_managers['WinMan'].my_previews_dir
+	print(path_models)
+	print(category)
+	directory = os.path.join(path_models, "Furniture", category, "Renders")
+	print(directory)
+	image_extensions = (".jpg", ".JPG", ".png", ".jpeg")
 
 	if context is None:
 		return enum_items
@@ -63,7 +68,7 @@ def enum_previews_furniture_items(self, context):
 	if directory and os.path.exists(directory):
 		image_paths = []
 		for fn in os.listdir(directory):
-			if fn.lower().endswith(".jpg"):
+			if fn.lower().endswith(image_extensions):
 				image_paths.append(fn)
 
 		for i, name in enumerate(image_paths):
@@ -84,15 +89,15 @@ furniture_collections = {}
 
 
 class Furniture_Category(bpy.types.PropertyGroup):
-	user_preferences = bpy.context.user_preferences
-	addon_prefs = user_preferences.addons[__name__].preferences
-	mode_options = make_models_category("E:\\Projects\\Blender\\Models", 'Furniture')
+	path_models = bpy.data.window_managers['WinMan'].my_previews_dir
+
+	mode_options = make_models_category(path_models, 'Furniture')
 
 	furniture_category = bpy.props.EnumProperty(
 		name="furniture_category",
 		items=mode_options,
 		description="Select Furniture",
-		default="Beds"
+		default=mode_options[0]
 	)
 
 
@@ -189,10 +194,7 @@ class Lib_Path(bpy.types.Operator):
 def register():
 
 	bpy.utils.register_class(Preferences)
-	bpy.utils.register_class(Furniture_Category)
-	bpy.utils.register_class(Lib_Path)
-	bpy.utils.register_class(PreviewsPanel)
-	bpy.utils.register_module(__name__)
+	
 
 	user_preferences = bpy.context.user_preferences
 	addon_prefs = user_preferences.addons[__name__].preferences
@@ -212,7 +214,10 @@ def register():
 
 	furniture_collections["main"] = pcoll
 
-	
+	bpy.utils.register_class(Furniture_Category)
+	bpy.utils.register_class(Lib_Path)
+	bpy.utils.register_class(PreviewsPanel)
+	bpy.utils.register_module(__name__)
 
 	bpy.types.Scene.furniture = bpy.props.PointerProperty(type=Furniture_Category)
 
