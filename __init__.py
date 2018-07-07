@@ -21,19 +21,10 @@ from bpy.types import WindowManager
 ###########################################################################
 #################### function dinamicaly make category ####################
 ###########################################################################
-def get_path_to_library():
-	user_preferences = bpy.context.user_preferences
-	addon_prefs = user_preferences.addons[__name__].preferences
-	path = addon_prefs.path_to_library
 
-	return path
+def make_models_category(path, folder):
 
-def make_models_category(folder):
-	path_to_library = get_path_to_library()
-	print(path_to_library)
-
-	category_folder_path = os.path.join(path_to_library, folder)
-	print(category_folder_path)
+	category_folder_path = os.path.join(path, folder)
 	dirs = os.listdir(category_folder_path)
 	i = 0
 	mode_options = []
@@ -45,8 +36,34 @@ def make_models_category(folder):
 
 	return mode_options
 
+##################################################################
+############################ Previews ############################
+##################################################################
+
+####### Furniture Previews #######
 
 
+def enum_previews_furniture_items(self, context):
+	""" create furniture items prewiews """
+	enum_items = []
+
+
+	return enum_items
+
+furniture_collections = {}
+
+
+class Furniture_Category(bpy.types.PropertyGroup):
+	user_preferences = bpy.context.user_preferences
+	addon_prefs = user_preferences.addons[__name__].preferences
+	mode_options = make_models_category(addon_prefs.path_to_library, 'Furniture')
+
+	furniture_category = bpy.props.EnumProperty(
+		name="furniture_category",
+		items=mode_options,
+		description="Select Furniture",
+		default="Beds"
+	)
 
 
 ###########################################################################
@@ -58,7 +75,7 @@ class Preferences(bpy.types.AddonPreferences):
 
 	path_to_library = bpy.types.Scene.path_to_library = StringProperty(
 		name="Path",
-		default="C://Users/ivan/AppData/Roaming/Blender Foundation/Blender/2.79/scripts/addons/Chocofur_Model_Manager/Models",
+		default="E:\\Projects\\Blender\\Models",
 		description="The path to your library",
 		subtype="FILE_PATH",
 	)
@@ -86,7 +103,7 @@ class PreviewsPanel(bpy.types.Panel):
 	bl_category = "Nexus Model Manager"
 
 	def draw(self, context):
-		# furniture_prev = bpy.data.window_managers["WinMan"].furniture_previews
+		furniture_prev = bpy.data.window_managers["WinMan"].furniture_previews
 		# accessorie_prev = bpy.data.window_managers["WinMan"].accessorie_previews
 		# detail_prev = bpy.data.window_managers["WinMan"].detail_previews
 		layout = self.layout
@@ -101,17 +118,17 @@ class PreviewsPanel(bpy.types.Panel):
 		box = layout.box()
 		box.label(text="FURNITURE")
 ####### Drop Down Menu
-		# row = box.row()
-		# row.prop(context.scene.furniture, "furniture_category", text="")
+		row = box.row()
+		row.prop(context.scene.furniture, "furniture_category", text="")
 ####### Previews
-		# row = box.row()
-		# row.scale_y = 1.5
-		# row.template_icon_view(context.window_manager, "furniture_previews", show_labels=True)
+		row = box.row()
+		row.scale_y = 1.5
+		row.template_icon_view(context.window_manager, "furniture_previews", show_labels=True)
 ####### Model Name
-		# row = box.row()
-		# row.alignment = 'CENTER'
-		# row.scale_y = 0.5
-		# row.label(furniture_prev.split('.jpg')[0])
+		row = box.row()
+		row.alignment = 'CENTER'
+		row.scale_y = 0.5
+		row.label(furniture_prev.split('.jpg')[0])
 ####### Add Button
 		# row = box.row()
 		# row.operator("add.furniture", icon="ZOOMIN", text="Add Furniture Model")
@@ -141,6 +158,7 @@ class Lib_Path(bpy.types.Operator):
 def register():
 
 	bpy.utils.register_class(Preferences)
+	bpy.utils.register_class(Furniture_Category)
 	bpy.utils.register_class(Lib_Path)
 	bpy.utils.register_class(PreviewsPanel)
 
@@ -153,18 +171,36 @@ def register():
 		default=addon_prefs.path_to_library
 		)
 
-	# WindowManager.my_previews = EnumProperty(
-	# 	items=enum_previews_from_directory_items,
-	# 	)
+	WindowManager.furniture_previews = EnumProperty(
+		items=enum_previews_furniture_items, # TODO: create function
+		)
+	pcoll = bpy.utils.previews.new()
+	pcoll.furniture_previews_dir = ""
+	pcoll.furniture_previews = ()
+
+	furniture_collections["main"] = pcoll
+
+	
+
+	bpy.types.Scene.furniture = bpy.props.PointerProperty(type=Furniture_Category)
+
+
 
 
 def unregister():
 
 	bpy.utils.unregister_class(Preferences)
+	bpy.utils.unregister_class(Furniture_Category)
 	bpy.utils.unregister_class(Lib_Path)
 	bpy.utils.unregister_class(PreviewsPanel)
 
-	del WindowManager.my_previews
+	del WindowManager.furniture_previews
+
+	for pcoll in preview_collections.values():
+		bpy.utils.previews.remove(pcoll)
+	preview_collections.clear()
+
+
 	del bpy.types.Scene.path_to_library
 
 
