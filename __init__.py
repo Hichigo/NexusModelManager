@@ -47,8 +47,38 @@ def enum_previews_furniture_items(self, context):
 	""" create furniture items prewiews """
 	enum_items = []
 
+	category = context.scene.furniture.furniture_category
+	directory = os.path.join("E:\\Projects\\Blender\\Models", os.sep + "Furniture" + os.sep + category + os.sep + "Renders")
 
-	return enum_items
+	if context is None:
+		return enum_items
+
+	wm = context.window_manager
+
+	pcoll = furniture_collections["main"]
+
+	if directory == pcoll.furniture_previews_dir:
+		return pcoll.furniture_previews
+
+	if directory and os.path.exists(directory):
+		image_paths = []
+		for fn in os.listdir(directory):
+			if fn.lower().endswith(".jpg"):
+				image_paths.append(fn)
+
+		for i, name in enumerate(image_paths):
+			filepath = os.path.join(directory, name)
+			
+			if filepath in pcoll:
+				enum_items.append((name, name, "", pcoll[filepath].icon_id, i))
+			else:
+				thumb = pcoll.load(filepath, filepath, 'IMAGE')
+				enum_items.append((name, name, "", thumb.icon_id, i))
+	enum_items.sort()
+
+	pcoll.furniture_previews = enum_items
+	pcoll.furniture_previews_dir = directory
+	return pcoll.furniture_previews
 
 furniture_collections = {}
 
@@ -56,7 +86,7 @@ furniture_collections = {}
 class Furniture_Category(bpy.types.PropertyGroup):
 	user_preferences = bpy.context.user_preferences
 	addon_prefs = user_preferences.addons[__name__].preferences
-	mode_options = make_models_category(addon_prefs.path_to_library, 'Furniture')
+	mode_options = make_models_category("E:\\Projects\\Blender\\Models", 'Furniture')
 
 	furniture_category = bpy.props.EnumProperty(
 		name="furniture_category",
@@ -79,6 +109,7 @@ class Preferences(bpy.types.AddonPreferences):
 		description="The path to your library",
 		subtype="FILE_PATH",
 	)
+	print("olololol ya voditel NLO!")
 
 	def draw(self, context):
 		layout = self.layout
@@ -161,6 +192,7 @@ def register():
 	bpy.utils.register_class(Furniture_Category)
 	bpy.utils.register_class(Lib_Path)
 	bpy.utils.register_class(PreviewsPanel)
+	bpy.utils.register_module(__name__)
 
 	user_preferences = bpy.context.user_preferences
 	addon_prefs = user_preferences.addons[__name__].preferences
@@ -201,7 +233,9 @@ def unregister():
 	preview_collections.clear()
 
 
+	bpy.utils.unregister_module(__name__)
 	del bpy.types.Scene.path_to_library
+	del bpy.types.Scene.furniture
 
 
 if __name__ == "__main__":
