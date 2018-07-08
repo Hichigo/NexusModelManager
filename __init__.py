@@ -89,7 +89,10 @@ furniture_collections = {}
 
 
 class Furniture_Category(bpy.types.PropertyGroup):
-	path_models = bpy.data.window_managers['WinMan'].my_previews_dir
+	user_preferences = bpy.context.user_preferences
+	addon_prefs = user_preferences.addons[__name__].preferences
+	print(addon_prefs)
+	path_models = "D:\\project\\Blender\\Models"#bpy.context.scene.path_to_library #bpy.data.window_managers['WinMan'].my_previews_dir
 
 	mode_options = make_models_category(path_models, 'Furniture')
 
@@ -110,11 +113,10 @@ class Preferences(bpy.types.AddonPreferences):
 
 	path_to_library = bpy.types.Scene.path_to_library = StringProperty(
 		name="Path",
-		default="E:\\Projects\\Blender\\Models",
+		default="D:\\project\\Blender\\Models", #"E:\\Projects\\Blender\\Models",
 		description="The path to your library",
-		subtype="FILE_PATH",
+		subtype="DIR_PATH",
 	)
-	print("olololol ya voditel NLO!")
 
 	def draw(self, context):
 		layout = self.layout
@@ -194,7 +196,10 @@ class Lib_Path(bpy.types.Operator):
 def register():
 
 	bpy.utils.register_class(Preferences)
-	
+	bpy.utils.register_class(Furniture_Category)
+	bpy.utils.register_class(Lib_Path)
+	bpy.utils.register_class(PreviewsPanel)
+	bpy.utils.register_module(__name__)
 
 	user_preferences = bpy.context.user_preferences
 	addon_prefs = user_preferences.addons[__name__].preferences
@@ -213,11 +218,6 @@ def register():
 	pcoll.furniture_previews = ()
 
 	furniture_collections["main"] = pcoll
-
-	bpy.utils.register_class(Furniture_Category)
-	bpy.utils.register_class(Lib_Path)
-	bpy.utils.register_class(PreviewsPanel)
-	bpy.utils.register_module(__name__)
 
 	bpy.types.Scene.furniture = bpy.props.PointerProperty(type=Furniture_Category)
 
