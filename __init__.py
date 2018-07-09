@@ -1,12 +1,12 @@
 bl_info = {
 	"name": "Nexus Model Manager",
 	"author": "Nexus Studio",
-	"version": (0, 0, 1),
+	"version": (0, 8, 1),
 	"blender": (2, 79, 0),
 	"location": "View 3D > Tool Shelf",
 	"description": "Tools",
 	"warning": "",
-	"wiki_url": "None",
+	"wiki_url": "https://github.com/Hichigo/NexusModelManager",
 	"category": "Add Mesh"
 	}
 
@@ -317,7 +317,7 @@ class OBJECT_OT_AddButton(bpy.types.Operator):
 		category = bpy.data.window_managers['WinMan'].furniture_category
 		path_models = bpy.data.window_managers['WinMan'].models_dir
 		scn = bpy.context.scene
-		filepath = os.path.join(path_models, "Furniture", category, selected_preview.split('.jpg')[0] + ".blend")
+		filepath = os.path.join(path_models, "Furniture", category, os.path.splitext(selected_preview)[0], ".blend")
 		
 		bpy.ops.object.select_all(action='DESELECT')
 		
@@ -348,7 +348,7 @@ class OBJECT_OT_AddButton(bpy.types.Operator):
 		category = bpy.data.window_managers['WinMan'].accessorie_category
 		path_models = bpy.data.window_managers['WinMan'].models_dir
 		scn = bpy.context.scene
-		filepath = os.path.join(path_models, "Accessorie", category, selected_preview.split('.jpg')[0] + ".blend")
+		filepath = os.path.join(path_models, "Accessorie", category, os.path.splitext(selected_preview)[0], ".blend")
 		
 		bpy.ops.object.select_all(action='DESELECT')
 		
@@ -379,7 +379,7 @@ class OBJECT_OT_AddButton(bpy.types.Operator):
 		category = bpy.data.window_managers['WinMan'].detail_category
 		path_models = bpy.data.window_managers['WinMan'].models_dir
 		scn = bpy.context.scene
-		filepath = os.path.join(path_models, "Detail", category, selected_preview.split('.jpg')[0] + ".blend")
+		filepath = os.path.join(path_models, "Detail", category, os.path.splitext(selected_preview)[0], ".blend")
 		
 		bpy.ops.object.select_all(action='DESELECT')
 		
