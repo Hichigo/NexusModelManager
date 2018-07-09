@@ -41,9 +41,9 @@ def make_models_category(path, folder):
 ############################ Previews ############################
 ##################################################################
 
-####### Furniture Previews #######
-def update_furniture_category(self, context):
-	enum_previews_furniture_items(self, context)
+# ####### Furniture Previews #######
+# def update_furniture_category(self, context):
+# 	enum_previews_furniture_items(self, context)
 
 def enum_previews_furniture_items(self, context):
 	""" create furniture items prewiews """
@@ -96,7 +96,7 @@ class Furniture_Category(bpy.types.PropertyGroup):
 		name="furniture_category",
 		items=mode_options,
 		description="Select Furniture",
-		default=mode_options[0]
+		default=mode_options[0][0]
 	)
 
 
@@ -105,7 +105,7 @@ class Furniture_Category(bpy.types.PropertyGroup):
 ###########################################################################
 
 class Preferences(bpy.types.AddonPreferences):
-	bl_idname = __package__
+	bl_idname = __name__
 
 	path_to_library = bpy.types.Scene.path_to_library = StringProperty(
 		name="Path",
@@ -178,21 +178,6 @@ class PreviewsPanel(bpy.types.Panel):
 		row = box.row()
 		row.operator("library.path", icon="ZOOMIN", text="Open Library Folder")
 
-
-######################################################################
-######################### Button load models #########################
-######################################################################
-
-class OBJECT_OT_LoadModlesButton(bpy.types.Operator):
-	bl_idname = "load_models.load"
-	bl_label = "Load Models"
-
-	def execute(self, context):
-		
-		# update_furniture_category(self, context)
-
-		return{'FINISHED'}
-
 ######################################################################
 ############################ Library path ############################
 ######################################################################
@@ -210,9 +195,7 @@ class Lib_Path(bpy.types.Operator):
 def register():
 
 	bpy.utils.register_class(Preferences)
-	#bpy.utils.register_class(Furniture_Category)
 	bpy.utils.register_class(Lib_Path)
-	#bpy.utils.register_class(PreviewsPanel)
 	bpy.utils.register_module(__name__)
 
 	user_preferences = bpy.context.user_preferences
@@ -241,9 +224,7 @@ def register():
 def unregister():
 
 	bpy.utils.unregister_class(Preferences)
-	#bpy.utils.unregister_class(Furniture_Category)
 	bpy.utils.unregister_class(Lib_Path)
-	#bpy.utils.unregister_class(PreviewsPanel)
 
 	del WindowManager.furniture_previews
 
