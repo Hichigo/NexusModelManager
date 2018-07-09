@@ -34,24 +34,39 @@ def make_models_category(path, folder):
 		mode_options.append(item)
 		i += 1
 
-	print("MODE: ", mode_options)
 	return mode_options
+
+############################ Furniture ##########################
+def make_furniture_category(self, context):
+	path_models = bpy.context.window_manager.models_dir
+
+	return make_models_category(path_models, "Furniture")
+
+############################ Detail ############################
+def make_detail_category(self, context):
+	path_models = bpy.context.window_manager.models_dir
+
+	return make_models_category(path_models, "Detail")
+
+########################## Accessorie ##########################
+def make_accessorie_category(self, context):
+	path_models = bpy.context.window_manager.models_dir
+
+	return make_models_category(path_models, "Accessorie")
 
 ##################################################################
 ############################ Previews ############################
 ##################################################################
 
 # ####### Furniture Previews #######
-# def update_furniture_category(self, context):
-# 	enum_previews_furniture_items(self, context)
 
 def enum_previews_furniture_items(self, context):
 	""" create furniture items prewiews """
 	enum_items = []
 
-	category = context.scene.furniture.furniture_category
+	category = bpy.data.window_managers['WinMan'].furniture_category
 	path_models = bpy.data.window_managers['WinMan'].models_dir
-	directory = os.path.join(path_models, "Furniture", category, "Renders")
+	directory = os.path.join(path_models, "Furniture", category, "renders")
 	image_extensions = (".jpg", ".JPG", ".png", ".jpeg")
 
 	if context is None:
@@ -88,15 +103,19 @@ furniture_collections = {}
 
 
 class Furniture_Category(bpy.types.PropertyGroup):
-	path_models = "E:\\Projects\\Blender\\Models"
 
-	mode_options = make_models_category(path_models, 'Furniture')
+	# if bpy.context.window_manager.get('models_dir') is not None:
+	# 	path_models = bpy.context.window_manager.models_dir
+	# else:
+	# 	path_models = os.path.join(os.path.dirname(__file__), "Models")
+
+	# mode_options = make_models_category(path_models, 'Furniture')
 
 	furniture_category = bpy.props.EnumProperty(
 		name="furniture_category",
-		items=mode_options,
+		items=make_furniture_category,
 		description="Select Furniture",
-		default=mode_options[0][0]
+		default="Beds"#mode_options[0][0]
 	)
 
 
@@ -109,7 +128,7 @@ class Preferences(bpy.types.AddonPreferences):
 
 	path_to_library = bpy.types.Scene.path_to_library = StringProperty(
 		name="Path",
-		default="E:\\Projects\\Blender\\Models",
+		default=os.path.join(os.path.dirname(__file__), "Models"),
 		description="The path to your library",
 		subtype="DIR_PATH",
 	)
@@ -154,11 +173,11 @@ class PreviewsPanel(bpy.types.Panel):
 		box.label(text="FURNITURE")
 ####### Drop Down Menu
 		row = box.row()
-		row.prop(context.scene.furniture, "furniture_category", text="")
+		row.prop(wm, "furniture_category", text="")
 ####### Previews
 		row = box.row()
 		row.scale_y = 1.5
-		row.template_icon_view(context.window_manager, "furniture_previews", show_labels=True)
+		row.template_icon_view(wm, "furniture_previews", show_labels=True)
 ####### Model Name
 		row = box.row()
 		row.alignment = 'CENTER'
@@ -192,6 +211,19 @@ class Lib_Path(bpy.types.Operator):
 		bpy.ops.wm.path_open(filepath=filepath)
 		return {'FINISHED'}
 
+
+class OBJECT_OT_LoadModlesButton(bpy.types.Operator):
+	bl_idname = "load_models.load"
+	bl_label = "Load Models"
+
+	def execute(self, context):
+		
+		bpy.types.Scene.furniture = bpy.props.PointerProperty(type=Furniture_Category)
+
+		return{'FINISHED'}
+
+
+
 def register():
 
 	bpy.utils.register_class(Preferences)
@@ -210,13 +242,18 @@ def register():
 	WindowManager.furniture_previews = EnumProperty(
 		items=enum_previews_furniture_items,
 		)
+
+	WindowManager.furniture_category = EnumProperty(
+		items=make_furniture_category,
+		)
+
 	pcoll = bpy.utils.previews.new()
 	pcoll.furniture_previews_dir = ""
 	pcoll.furniture_previews = ()
 
 	furniture_collections["main"] = pcoll
 
-	bpy.types.Scene.furniture = bpy.props.PointerProperty(type=Furniture_Category)
+	# bpy.types.Scene.furniture = bpy.props.PointerProperty(type=Furniture_Category)
 
 
 
