@@ -1,7 +1,7 @@
 bl_info = {
 	"name": "Nexus Model Manager",
 	"author": "Nexus Studio",
-	"version": (0, 8, 1),
+	"version": (0, 8, 2),
 	"blender": (2, 79, 0),
 	"location": "View 3D > Tool Shelf",
 	"description": "Tools",
@@ -421,6 +421,9 @@ class Lib_Path(bpy.types.Operator):
 		return {'FINISHED'}
 
 
+######################################################################
+############################## Register ##############################
+######################################################################
 
 def register():
 
@@ -483,7 +486,9 @@ def register():
 	detail_collections["main"] = pcoll
 
 
-
+######################################################################
+############################# Unregister #############################
+######################################################################
 
 def unregister():
 
@@ -491,27 +496,31 @@ def unregister():
 	bpy.utils.unregister_class(Lib_Path)
 
 	del WindowManager.furniture_previews
+	del WindowManager.furniture_category
 
-	for pcoll in preview_collections.values():
+	for pcoll in furniture_collections.values():
 		bpy.utils.previews.remove(pcoll)
-	preview_collections.clear()
+	furniture_collections.clear()
 
 	del WindowManager.accessorie_previews
+	del WindowManager.accessorie_category
 
-	for pcoll in preview_collections.values():
+	for pcoll in accessorie_collections.values():
 		bpy.utils.previews.remove(pcoll)
-	preview_collections.clear()
+	accessorie_collections.clear()
 
 	del WindowManager.detail_previews
+	del WindowManager.detail_category
 
-	for pcoll in preview_collections.values():
+	for pcoll in detail_collections.values():
 		bpy.utils.previews.remove(pcoll)
-	preview_collections.clear()
+	detail_collections.clear()
 
 	bpy.utils.unregister_module(__name__)
 	del bpy.types.Scene.path_to_library
-	del bpy.types.Scene.furniture
 	del WindowManager.models_dir
+
+
 
 
 if __name__ == "__main__":
