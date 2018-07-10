@@ -317,9 +317,6 @@ class OBJECT_OT_AddButton(bpy.types.Operator):
 		category = bpy.data.window_managers['WinMan'].furniture_category
 		path_models = bpy.data.window_managers['WinMan'].models_dir
 		scn = bpy.context.scene
-		print("---------------------------", selected_preview)
-		print("---------------------------", os.path.splitext(selected_preview))
-		print("---------------------------", os.path.splitext(selected_preview)[0])
 		filepath = os.path.join(path_models, "Furniture", category, os.path.splitext(selected_preview)[0] + ".blend")
 		
 		bpy.ops.object.select_all(action='DESELECT')
