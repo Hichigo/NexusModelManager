@@ -246,7 +246,7 @@ class PreviewsPanel(bpy.types.Panel):
 		row = box.row()
 		row.alignment = 'CENTER'
 		row.scale_y = 0.5
-		row.label(furniture_prev.split('.jpg')[0])
+		row.label(os.path.splitext(furniture_prev)[0])
 ####### Add Button
 		row = box.row()
 		row.operator("add.furniture", icon="ZOOMIN", text="Add Furniture Model")
@@ -266,7 +266,7 @@ class PreviewsPanel(bpy.types.Panel):
 		row = box.row()
 		row.alignment = 'CENTER'
 		row.scale_y = 0.5
-		row.label(accessorie_prev.split('.jpg')[0])
+		row.label(os.path.splitext(accessorie_prev)[0])
 ####### Add Button
 		row = box.row()
 		row.operator("add.accessorie", icon="ZOOMIN", text="Add Accessorie Model")
@@ -286,7 +286,7 @@ class PreviewsPanel(bpy.types.Panel):
 		row = box.row()
 		row.alignment = 'CENTER'
 		row.scale_y = 0.5
-		row.label(detail_prev.split('.jpg')[0])
+		row.label(os.path.splitext(detail_prev)[0])
 ####### Add Button
 		row = box.row()
 		row.operator("add.detail", icon="ZOOMIN", text="Add Detail Model")
@@ -436,7 +436,7 @@ def register():
 
 	WindowManager.models_dir = StringProperty(
 		name="Folder Path",
-		subtype='DIR_PATH',
+		subtype="DIR_PATH",
 		default=addon_prefs.path_to_library
 		)
 
@@ -517,7 +517,6 @@ def unregister():
 	detail_collections.clear()
 
 	bpy.utils.unregister_module(__name__)
-	del bpy.types.Scene.path_to_library
 	del WindowManager.models_dir
 
 
