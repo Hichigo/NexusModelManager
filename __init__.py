@@ -332,7 +332,6 @@ class OBJECT_OT_AddButton(bpy.types.Operator):
 		for obj in bpy.data.objects:
 			for data in object_list:
 				if obj.name.startswith(data) and obj.name not in bpy.context.scene.objects:
-					idx = object_list.index(data)
 					scn.objects.link(obj)
 					obj.select = True
 
@@ -364,7 +363,6 @@ class OBJECT_OT_AddButton(bpy.types.Operator):
 		for obj in bpy.data.objects:
 			for data in object_list:
 				if obj.name.startswith(data) and obj.name not in bpy.context.scene.objects:
-					idx = object_list.index(data)
 					scn.objects.link(obj)
 					obj.select = True
 
@@ -396,7 +394,6 @@ class OBJECT_OT_AddButton(bpy.types.Operator):
 		for obj in bpy.data.objects:
 			for data in object_list:
 				if obj.name.startswith(data) and obj.name not in bpy.context.scene.objects:
-					idx = object_list.index(data)
 					scn.objects.link(obj)
 					obj.select = True
 
