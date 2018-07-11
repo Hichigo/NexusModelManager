@@ -232,6 +232,7 @@ class PreviewsPanel(bpy.types.Panel):
 
 		col = layout.column()
 		col.prop(wm, "models_dir")
+		col.prop(wm, "link_model")
 
 		box = layout.box()
 		box.label(text="FURNITURE")
@@ -316,12 +317,13 @@ class OBJECT_OT_AddButton(bpy.types.Operator):
 		selected_preview = bpy.data.window_managers["WinMan"].furniture_previews
 		category = bpy.data.window_managers['WinMan'].furniture_category
 		path_models = bpy.data.window_managers['WinMan'].models_dir
+		is_link = bpy.data.window_managers["WinMan"].link_model
 		scn = bpy.context.scene
 		filepath = os.path.join(path_models, "Furniture", category, os.path.splitext(selected_preview)[0] + ".blend")
 		
 		bpy.ops.object.select_all(action='DESELECT')
 		
-		with bpy.data.libraries.load(filepath) as (data_from, data_to):
+		with bpy.data.libraries.load(filepath, link=is_link) as (data_from, data_to):
 			object_list = [obj for obj in data_from.objects]
 			data_to.objects = data_from.objects
 			if data_from.groups:
@@ -347,12 +349,13 @@ class OBJECT_OT_AddButton(bpy.types.Operator):
 		selected_preview = bpy.data.window_managers["WinMan"].accessorie_previews
 		category = bpy.data.window_managers['WinMan'].accessorie_category
 		path_models = bpy.data.window_managers['WinMan'].models_dir
+		is_link = bpy.data.window_managers["WinMan"].link_model
 		scn = bpy.context.scene
 		filepath = os.path.join(path_models, "Accessorie", category, os.path.splitext(selected_preview)[0] + ".blend")
 		
 		bpy.ops.object.select_all(action='DESELECT')
 		
-		with bpy.data.libraries.load(filepath) as (data_from, data_to):
+		with bpy.data.libraries.load(filepath, link=is_link) as (data_from, data_to):
 			object_list = [obj for obj in data_from.objects]
 			data_to.objects = data_from.objects
 			if data_from.groups:
@@ -378,12 +381,13 @@ class OBJECT_OT_AddButton(bpy.types.Operator):
 		selected_preview = bpy.data.window_managers["WinMan"].detail_previews
 		category = bpy.data.window_managers['WinMan'].detail_category
 		path_models = bpy.data.window_managers['WinMan'].models_dir
+		is_link = bpy.data.window_managers["WinMan"].link_model
 		scn = bpy.context.scene
 		filepath = os.path.join(path_models, "Detail", category, os.path.splitext(selected_preview)[0] + ".blend")
 		
 		bpy.ops.object.select_all(action='DESELECT')
 		
-		with bpy.data.libraries.load(filepath) as (data_from, data_to):
+		with bpy.data.libraries.load(filepath, link=is_link) as (data_from, data_to):
 			object_list = [obj for obj in data_from.objects]
 			data_to.objects = data_from.objects
 			if data_from.groups:
@@ -435,6 +439,12 @@ def register():
 		name="Folder Path",
 		subtype="DIR_PATH",
 		default=addon_prefs.path_to_library
+		)
+
+	WindowManager.link_model = BoolProperty(
+		name="Link",
+		description="If True link model else append model",
+		default=False
 		)
 
 # Furniture
@@ -515,6 +525,7 @@ def unregister():
 
 	bpy.utils.unregister_module(__name__)
 	del WindowManager.models_dir
+	del WindowManager.link_model
 
 
 
