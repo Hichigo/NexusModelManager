@@ -306,7 +306,7 @@ class PreviewsPanel(bpy.types.Panel):
 ############################ Append ############################
 ################################################################
 
-####### Append Furniture ####### 
+####### Append Furniture #######
 
 
 class OBJECT_OT_AddButton(bpy.types.Operator):
@@ -320,20 +320,27 @@ class OBJECT_OT_AddButton(bpy.types.Operator):
 		is_link = bpy.data.window_managers["WinMan"].link_model
 		scn = bpy.context.scene
 		filepath = os.path.join(path_models, "Furniture", category, os.path.splitext(selected_preview)[0] + ".blend")
+		filepath_group = filepath + "\\Group\\"
 		
 		bpy.ops.object.select_all(action='DESELECT')
-		
-		with bpy.data.libraries.load(filepath, link=is_link) as (data_from, data_to):
-			object_list = [obj for obj in data_from.objects]
-			data_to.objects = data_from.objects
-			if data_from.groups:
+
+		if is_link:
+			with bpy.data.libraries.load(filepath, link=True) as (data_from, data_to):
 				data_to.groups = data_from.groups
 
-		for obj in bpy.data.objects:
-			for data in object_list:
-				if obj.name.startswith(data) and obj.name not in bpy.context.scene.objects:
-					scn.objects.link(obj)
-					obj.select = True
+			for group in data_to.groups:
+				ob = bpy.data.objects.new(group.name, None)
+				ob.dupli_group = group
+				ob.dupli_type = 'GROUP'
+				scn.objects.link(ob)
+		else:
+			with bpy.data.libraries.load(filepath) as (data_from, data_to):
+				data_to.groups = data_from.groups
+
+			for group in data_to.groups:
+				filepath_group_name = filepath_group + group.name
+				bpy.ops.wm.append(filepath=filepath_group_name, filename=group.name, directory=filepath_group)
+
 
 		return{'FINISHED'}
 
@@ -351,20 +358,26 @@ class OBJECT_OT_AddButton(bpy.types.Operator):
 		is_link = bpy.data.window_managers["WinMan"].link_model
 		scn = bpy.context.scene
 		filepath = os.path.join(path_models, "Accessorie", category, os.path.splitext(selected_preview)[0] + ".blend")
+		filepath_group = filepath + "\\Group\\"
 		
 		bpy.ops.object.select_all(action='DESELECT')
-		
-		with bpy.data.libraries.load(filepath, link=is_link) as (data_from, data_to):
-			object_list = [obj for obj in data_from.objects]
-			data_to.objects = data_from.objects
-			if data_from.groups:
+
+		if is_link:
+			with bpy.data.libraries.load(filepath, link=True) as (data_from, data_to):
 				data_to.groups = data_from.groups
 
-		for obj in bpy.data.objects:
-			for data in object_list:
-				if obj.name.startswith(data) and obj.name not in bpy.context.scene.objects:
-					scn.objects.link(obj)
-					obj.select = True
+			for group in data_to.groups:
+				ob = bpy.data.objects.new(group.name, None)
+				ob.dupli_group = group
+				ob.dupli_type = 'GROUP'
+				scn.objects.link(ob)
+		else:
+			with bpy.data.libraries.load(filepath) as (data_from, data_to):
+				data_to.groups = data_from.groups
+
+			for group in data_to.groups:
+				filepath_group_name = filepath_group + group.name
+				bpy.ops.wm.append(filepath=filepath_group_name, filename=group.name, directory=filepath_group)
 
 		return{'FINISHED'}
 
@@ -382,20 +395,26 @@ class OBJECT_OT_AddButton(bpy.types.Operator):
 		is_link = bpy.data.window_managers["WinMan"].link_model
 		scn = bpy.context.scene
 		filepath = os.path.join(path_models, "Detail", category, os.path.splitext(selected_preview)[0] + ".blend")
+		filepath_group = filepath + "\\Group\\"
 		
 		bpy.ops.object.select_all(action='DESELECT')
-		
-		with bpy.data.libraries.load(filepath, link=is_link) as (data_from, data_to):
-			object_list = [obj for obj in data_from.objects]
-			data_to.objects = data_from.objects
-			if data_from.groups:
+
+		if is_link:
+			with bpy.data.libraries.load(filepath, link=True) as (data_from, data_to):
 				data_to.groups = data_from.groups
 
-		for obj in bpy.data.objects:
-			for data in object_list:
-				if obj.name.startswith(data) and obj.name not in bpy.context.scene.objects:
-					scn.objects.link(obj)
-					obj.select = True
+			for group in data_to.groups:
+				ob = bpy.data.objects.new(group.name, None)
+				ob.dupli_group = group
+				ob.dupli_type = 'GROUP'
+				scn.objects.link(ob)
+		else:
+			with bpy.data.libraries.load(filepath) as (data_from, data_to):
+				data_to.groups = data_from.groups
+
+			for group in data_to.groups:
+				filepath_group_name = filepath_group + group.name
+				bpy.ops.wm.append(filepath=filepath_group_name, filename=group.name, directory=filepath_group)
 
 		return{'FINISHED'}
 
