@@ -38,21 +38,9 @@ def make_models_category(path, folder):
 
 ############################ Furniture ##########################
 def make_furniture_category(self, context):
-	path_models = bpy.context.window_manager.models_dir
+	path_models = context.window_manager.models_dir
 
 	return make_models_category(path_models, "Furniture")
-
-############################ Detail ############################
-def make_detail_category(self, context):
-	path_models = bpy.context.window_manager.models_dir
-
-	return make_models_category(path_models, "Detail")
-
-########################## Accessorie ##########################
-def make_accessorie_category(self, context):
-	path_models = bpy.context.window_manager.models_dir
-
-	return make_models_category(path_models, "Accessorie")
 
 ##################################################################
 ############################ Previews ############################
@@ -102,88 +90,6 @@ def enum_previews_furniture_items(self, context):
 
 furniture_collections = {}
 
-def enum_previews_accessorie_items(self, context):
-	""" create accessorie items prewiews """
-	enum_items = []
-
-	category = bpy.data.window_managers['WinMan'].accessorie_category
-	path_models = bpy.data.window_managers['WinMan'].models_dir
-	directory = os.path.join(path_models, "Accessorie", category, "renders")
-	image_extensions = (".jpg", ".JPG", ".png", ".jpeg")
-
-	if context is None:
-		return enum_items
-
-	wm = context.window_manager
-
-	pcoll = accessorie_collections["main"]
-
-	if directory == pcoll.accessorie_previews_dir:
-		return pcoll.accessorie_previews
-
-	if directory and os.path.exists(directory):
-		image_paths = []
-		for fn in os.listdir(directory):
-			if fn.lower().endswith(image_extensions):
-				image_paths.append(fn)
-
-		for i, name in enumerate(image_paths):
-			filepath = os.path.join(directory, name)
-			
-			if filepath in pcoll:
-				enum_items.append((name, name, "", pcoll[filepath].icon_id, i))
-			else:
-				thumb = pcoll.load(filepath, filepath, 'IMAGE')
-				enum_items.append((name, name, "", thumb.icon_id, i))
-	enum_items.sort()
-
-	pcoll.accessorie_previews = enum_items
-	pcoll.accessorie_previews_dir = directory
-	return pcoll.accessorie_previews
-
-accessorie_collections = {}
-
-def enum_previews_detail_items(self, context):
-	""" create detail items prewiews """
-	enum_items = []
-
-	category = bpy.data.window_managers['WinMan'].detail_category
-	path_models = bpy.data.window_managers['WinMan'].models_dir
-	directory = os.path.join(path_models, "Detail", category, "renders")
-	image_extensions = (".jpg", ".JPG", ".png", ".jpeg")
-
-	if context is None:
-		return enum_items
-
-	wm = context.window_manager
-
-	pcoll = detail_collections["main"]
-
-	if directory == pcoll.detail_previews_dir:
-		return pcoll.detail_previews
-
-	if directory and os.path.exists(directory):
-		image_paths = []
-		for fn in os.listdir(directory):
-			if fn.lower().endswith(image_extensions):
-				image_paths.append(fn)
-
-		for i, name in enumerate(image_paths):
-			filepath = os.path.join(directory, name)
-			
-			if filepath in pcoll:
-				enum_items.append((name, name, "", pcoll[filepath].icon_id, i))
-			else:
-				thumb = pcoll.load(filepath, filepath, 'IMAGE')
-				enum_items.append((name, name, "", thumb.icon_id, i))
-	enum_items.sort()
-
-	pcoll.detail_previews = enum_items
-	pcoll.detail_previews_dir = directory
-	return pcoll.detail_previews
-
-detail_collections = {}
-
 ###########################################################################
 ############################ Addon preferences ############################
 ###########################################################################
@@ -220,10 +126,12 @@ class PreviewsPanel(bpy.types.Panel):
 	bl_region_type = 'TOOLS'
 	bl_category = "Nexus Model Manager"
 
+	@classmethod
+	def poll(cls, context):
+		return context.object.mode == 'OBJECT'
+
 	def draw(self, context):
 		furniture_prev = bpy.data.window_managers["WinMan"].furniture_previews
-		accessorie_prev = bpy.data.window_managers["WinMan"].accessorie_previews
-		detail_prev = bpy.data.window_managers["WinMan"].detail_previews
 		layout = self.layout
 		wm = context.window_manager
 
@@ -252,46 +160,6 @@ class PreviewsPanel(bpy.types.Panel):
 		row = box.row()
 		row.operator("add.furniture", icon="ZOOMIN", text="Add Furniture Model")
 
-############## Accessorie Panel ##############
-
-		box = layout.box()
-		box.label(text="ACCESSORIE")
-####### Drop Down Menu
-		row = box.row()
-		row.prop(wm, "accessorie_category", text="")
-####### Previews
-		row = box.row()
-		row.scale_y = 1.5
-		row.template_icon_view(wm, "accessorie_previews", show_labels=True)
-####### Model Name
-		row = box.row()
-		row.alignment = 'CENTER'
-		row.scale_y = 0.5
-		row.label(os.path.splitext(accessorie_prev)[0])
-####### Add Button
-		row = box.row()
-		row.operator("add.accessorie", icon="ZOOMIN", text="Add Accessorie Model")
-
-############## Detail Panel ##############
-
-		box = layout.box()
-		box.label(text="DETAIL")
-####### Drop Down Menu
-		row = box.row()
-		row.prop(wm, "detail_category", text="")
-####### Previews
-		row = box.row()
-		row.scale_y = 1.5
-		row.template_icon_view(wm, "detail_previews", show_labels=True)
-####### Model Name
-		row = box.row()
-		row.alignment = 'CENTER'
-		row.scale_y = 0.5
-		row.label(os.path.splitext(detail_prev)[0])
-####### Add Button
-		row = box.row()
-		row.operator("add.detail", icon="ZOOMIN", text="Add Detail Model")
-
 
 		############## Library Panel ##############
 
@@ -314,12 +182,15 @@ class OBJECT_OT_AddButton(bpy.types.Operator):
 	bl_label = "Add Furniture"
 
 	def execute(self, context):
+		
+		scn = context.scene
 		selected_preview = bpy.data.window_managers["WinMan"].furniture_previews
-		category = bpy.data.window_managers['WinMan'].furniture_category
-		path_models = bpy.data.window_managers['WinMan'].models_dir
+		category = bpy.data.window_managers["WinMan"].furniture_category
+		path_models = bpy.data.window_managers["WinMan"].models_dir
 		is_link = bpy.data.window_managers["WinMan"].link_model
-		scn = bpy.context.scene
-		filepath = os.path.join(path_models, "Furniture", category, os.path.splitext(selected_preview)[0] + ".blend")
+
+		filename = os.path.splitext(selected_preview)[0]
+		filepath = os.path.join(path_models, "Furniture", category, filename + ".blend")
 		filepath_group = filepath + "\\Group\\"
 		
 		bpy.ops.object.select_all(action='DESELECT')
@@ -334,94 +205,18 @@ class OBJECT_OT_AddButton(bpy.types.Operator):
 				ob.dupli_type = 'GROUP'
 				scn.objects.link(ob)
 		else:
-			with bpy.data.libraries.load(filepath) as (data_from, data_to):
-				data_to.groups = data_from.groups
+			# with bpy.data.libraries.load(filepath) as (data_from, data_to):
+			# 	data_to.groups = [selected_preview]
 
-			for group in data_to.groups:
-				filepath_group_name = filepath_group + group.name
-				bpy.ops.wm.append(filepath=filepath_group_name, filename=group.name, directory=filepath_group)
+			# for group in data_to.groups:
+			filepath_group_name = filepath_group + filename
+			print("TRRRRRRRYAU", filepath_group)
+			print("TRRRRRRRYAU", filename)
+			print("TRRRRRRRYAU", filepath_group_name)
+			bpy.ops.wm.append(filepath=filepath_group_name, filename=filename, directory=filepath_group)
 
 
 		return{'FINISHED'}
-
-####### Append Accessorie ####### 
-
-
-class OBJECT_OT_AddButton(bpy.types.Operator):
-	bl_idname = "add.accessorie"
-	bl_label = "Add Accessorie"
-
-	def execute(self, context):
-		selected_preview = bpy.data.window_managers["WinMan"].accessorie_previews
-		category = bpy.data.window_managers['WinMan'].accessorie_category
-		path_models = bpy.data.window_managers['WinMan'].models_dir
-		is_link = bpy.data.window_managers["WinMan"].link_model
-		scn = bpy.context.scene
-		filepath = os.path.join(path_models, "Accessorie", category, os.path.splitext(selected_preview)[0] + ".blend")
-		filepath_group = filepath + "\\Group\\"
-		
-		bpy.ops.object.select_all(action='DESELECT')
-
-		if is_link:
-			with bpy.data.libraries.load(filepath, link=True) as (data_from, data_to):
-				data_to.groups = data_from.groups
-
-			for group in data_to.groups:
-				ob = bpy.data.objects.new(group.name, None)
-				ob.dupli_group = group
-				ob.dupli_type = 'GROUP'
-				scn.objects.link(ob)
-		else:
-			with bpy.data.libraries.load(filepath) as (data_from, data_to):
-				data_to.groups = data_from.groups
-
-			for group in data_to.groups:
-				filepath_group_name = filepath_group + group.name
-				bpy.ops.wm.append(filepath=filepath_group_name, filename=group.name, directory=filepath_group)
-
-		return{'FINISHED'}
-
-####### Append Detail ####### 
-
-
-class OBJECT_OT_AddButton(bpy.types.Operator):
-	bl_idname = "add.detail"
-	bl_label = "Add Detail"
-
-	def execute(self, context):
-		selected_preview = bpy.data.window_managers["WinMan"].detail_previews
-		category = bpy.data.window_managers['WinMan'].detail_category
-		path_models = bpy.data.window_managers['WinMan'].models_dir
-		is_link = bpy.data.window_managers["WinMan"].link_model
-		scn = bpy.context.scene
-		filepath = os.path.join(path_models, "Detail", category, os.path.splitext(selected_preview)[0] + ".blend")
-		filepath_group = filepath + "\\Group\\"
-		
-		bpy.ops.object.select_all(action='DESELECT')
-
-		if is_link:
-			with bpy.data.libraries.load(filepath, link=True) as (data_from, data_to):
-				data_to.groups = data_from.groups
-
-			for group in data_to.groups:
-				ob = bpy.data.objects.new(group.name, None)
-				ob.dupli_group = group
-				ob.dupli_type = 'GROUP'
-				scn.objects.link(ob)
-		else:
-			with bpy.data.libraries.load(filepath) as (data_from, data_to):
-				data_to.groups = data_from.groups
-
-			for group in data_to.groups:
-				filepath_group_name = filepath_group + group.name
-				bpy.ops.wm.append(filepath=filepath_group_name, filename=group.name, directory=filepath_group)
-
-		return{'FINISHED'}
-
-
-
-
-
 
 ######################################################################
 ############################ Library path ############################
@@ -478,36 +273,6 @@ def register():
 
 	furniture_collections["main"] = pcoll
 
-# Accessorie
-	WindowManager.accessorie_previews = EnumProperty(
-		items=enum_previews_accessorie_items,
-		)
-
-	WindowManager.accessorie_category = EnumProperty(
-		items=make_accessorie_category,
-		)
-
-	pcoll = bpy.utils.previews.new()
-	pcoll.accessorie_previews_dir = ""
-	pcoll.accessorie_previews = ()
-
-	accessorie_collections["main"] = pcoll
-
-# Detail
-	WindowManager.detail_previews = EnumProperty(
-		items=enum_previews_detail_items,
-		)
-
-	WindowManager.detail_category = EnumProperty(
-		items=make_detail_category,
-		)
-
-	pcoll = bpy.utils.previews.new()
-	pcoll.detail_previews_dir = ""
-	pcoll.detail_previews = ()
-
-	detail_collections["main"] = pcoll
-
 
 ######################################################################
 ############################# Unregister #############################
@@ -524,20 +289,6 @@ def unregister():
 	for pcoll in furniture_collections.values():
 		bpy.utils.previews.remove(pcoll)
 	furniture_collections.clear()
-
-	del WindowManager.accessorie_previews
-	del WindowManager.accessorie_category
-
-	for pcoll in accessorie_collections.values():
-		bpy.utils.previews.remove(pcoll)
-	accessorie_collections.clear()
-
-	del WindowManager.detail_previews
-	del WindowManager.detail_category
-
-	for pcoll in detail_collections.values():
-		bpy.utils.previews.remove(pcoll)
-	detail_collections.clear()
 
 	bpy.utils.unregister_module(__name__)
 	del WindowManager.models_dir
