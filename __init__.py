@@ -41,13 +41,6 @@ def make_category_list(self, context):
 	path_library = context.window_manager.models_dir
 	library = context.window_manager.library_list
 	path_category = os.path.join(path_library, library)
-	# dirs = os.listdir(path_dirs)
-	# path_category = os.path.join(path_dirs, dirs[0])
-	# print("path_library--", path_library)
-	# print("library-------", library)
-	# print("path_dirs-----", path_dirs)
-	# print("dirs----------", dirs)
-	# print("path_category-", path_category)
 
 	return make_list_folder(path_category)
 
@@ -72,12 +65,6 @@ def enum_previews_asset_items(self, context):
 	path_models = bpy.data.window_managers['WinMan'].models_dir
 	library = bpy.data.window_managers["WinMan"].library_list
 	directory = os.path.join(path_models, library, category)
-	image_extensions = (".jpg", ".JPG", ".png", ".jpeg")
-
-	# print("category---", category)
-	# print("path_models", path_models)
-	# print("library----", library)
-	# print("directory--", directory)
 
 
 	if context is None:
@@ -93,15 +80,11 @@ def enum_previews_asset_items(self, context):
 	if directory and os.path.exists(directory):
 		assets_names = []
 		for fn in os.listdir(directory):
-			# print("fn", fn)
-			# render = os.path.join(directory, fn, "render")
-			# image = os.listdir(render)
-			# if fn.lower().endswith(image_extensions):
 			assets_names.append(fn)
 
 		for i, name in enumerate(assets_names):
 			filepath = os.path.join(directory, name, "render", name + ".png")
-			print("FILEPATH: ", filepath)
+
 			if filepath in pcoll:
 				enum_items.append((name, name, "", pcoll[filepath].icon_id, i))
 			else:
@@ -226,9 +209,9 @@ class OBJECT_OT_AddButton(bpy.types.Operator):
 		is_link = bpy.data.window_managers["WinMan"].link_model
 
 		filename = os.path.splitext(selected_preview)[0]
-		filepath = os.path.join(path_models, library, category, filename + ".blend")
-		filepath_group = filepath + "\\Group\\"
-		
+		filepath = os.path.join(path_models, library, category, filename, filename + ".blend")
+		filepath_group = os.path.join(filepath, "Group")
+
 		bpy.ops.object.select_all(action='DESELECT')
 
 		if is_link:
