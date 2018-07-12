@@ -136,7 +136,7 @@ class PreviewsPanel(bpy.types.Panel):
 
 	@classmethod
 	def poll(cls, context):
-		return context.object.mode == 'OBJECT'
+		return context.mode == 'OBJECT'
 
 	def draw(self, context):
 		furniture_prev = bpy.data.window_managers["WinMan"].asset_previews
@@ -163,23 +163,28 @@ class PreviewsPanel(bpy.types.Panel):
 		row.label(text="Category")
 		row.prop(wm, "category_list", text="")
 
+####### Previews scale
+		col = box.column()
+		col.prop(wm, "scale_preview", slider=True)
 ####### Previews
-		row = box.row()
-		row.scale_y = 1.5
-		row.template_icon_view(wm, "asset_previews", show_labels=True)
-
+		col = box.column()
+		col.scale_y = wm.scale_preview
+		col.template_icon_view(wm, "asset_previews", show_labels=True)
 ####### Model Name
 		row = box.row()
 		row.alignment = 'CENTER'
 		row.scale_y = 0.5
 		row.label(os.path.splitext(furniture_prev)[0])
+####### Asset folder button
+		col = box.column(align=True)
+		col.operator("library.asset_path", icon="ZOOMIN", text="Open Asset Folder")
 
 ####### Add Button
-		row = box.row()
-		row.operator("add.furniture", icon="ZOOMIN", text="Add Model")
+
+		col.operator("add.furniture", icon="ZOOMIN", text="Add Asset")
 
 
-############## Library Panel ##############
+############## Library folder button ##############
 
 
 		box = layout.box()
@@ -244,6 +249,27 @@ class Lib_Path(bpy.types.Operator):
 		bpy.ops.wm.path_open(filepath=filepath)
 		return {'FINISHED'}
 
+######################################################################
+############################ Asset path ############################
+######################################################################
+
+class Lib_AssetPath(bpy.types.Operator):
+
+	bl_idname = "library.asset_path"
+	bl_label = "Library Asset Path"
+	
+	def execute(self, context):
+		
+		model_dir = context.window_manager.models_dir
+		library = bpy.data.window_managers["WinMan"].library_list
+		category = bpy.data.window_managers["WinMan"].category_list
+		selected_preview = bpy.data.window_managers["WinMan"].asset_previews
+
+		filepath = os.path.join(model_dir, library, category, selected_preview)
+
+		bpy.ops.wm.path_open(filepath=filepath)
+		return {'FINISHED'}
+
 
 ######################################################################
 ############################## Register ##############################
@@ -257,30 +283,40 @@ def register():
 
 	user_preferences = bpy.context.user_preferences
 	addon_prefs = user_preferences.addons[__name__].preferences
+	
+	WindowManager.scale_preview = FloatProperty(
+		name="Scale preview",
+		default=1.5,
+		min=1.0,
+		max=10.0,
+		soft_min=1.0,
+		soft_max=10.0
+	)
+
 
 	WindowManager.models_dir = StringProperty(
 		name="Folder Path",
 		subtype="DIR_PATH",
 		default=addon_prefs.path_to_library
-		)
+	)
 
 	WindowManager.link_model = BoolProperty(
 		name="Link",
 		description="If True link model else append model",
 		default=False
-		)
+	)
 
 	WindowManager.asset_previews = EnumProperty(
 		items=enum_previews_asset_items,
-		)
+	)
 
 	WindowManager.library_list = EnumProperty(
 		items=make_library_list,
-		)
+	)
 
 	WindowManager.category_list = EnumProperty(
 		items=make_category_list,
-		)
+	)
 
 	pcoll = bpy.utils.previews.new()
 	pcoll.asset_previews_dir = ""
@@ -306,6 +342,7 @@ def unregister():
 	asset_collections.clear()
 
 	bpy.utils.unregister_module(__name__)
+	del WindowManager.scale_preview
 	del WindowManager.models_dir
 	del WindowManager.library_list
 	del WindowManager.link_model
