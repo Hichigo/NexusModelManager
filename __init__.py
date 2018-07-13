@@ -177,7 +177,7 @@ class PreviewsPanel(bpy.types.Panel):
 		row.label(os.path.splitext(furniture_prev)[0])
 ####### Asset folder button
 		col = box.column(align=True)
-		col.operator("library.asset_path", icon="ZOOMIN", text="Open Asset Folder")
+		col.operator("library.asset_path", icon="FILE_FOLDER", text="Open Asset Folder")
 
 ####### Add Button
 
@@ -190,7 +190,7 @@ class PreviewsPanel(bpy.types.Panel):
 		box = layout.box()
 		box.label(text="Library Folder:")
 		row = box.row()
-		row.operator("library.path", icon="ZOOMIN", text="Open Library Folder")
+		row.operator("library.path", icon="FILE_FOLDER", text="Open Library Folder")
 
 
 ################################################################
