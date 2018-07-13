@@ -173,9 +173,12 @@ class PreviewsPanel(bpy.types.Panel):
 		col = box.column()
 		col.prop(wm, "scale_preview", slider=True)
 ####### Previews
-		col = box.column()
+		row = box.row()
+		col = row.column()
 		col.scale_y = wm.scale_preview
 		col.template_icon_view(wm, "asset_previews", show_labels=True)
+		col = row.column()
+		col.operator("preview.big_preview", icon="ZOOM_IN", text="")
 ####### Model Name
 		row = box.row()
 		row.alignment = 'CENTER'
@@ -193,15 +196,34 @@ class PreviewsPanel(bpy.types.Panel):
 		col.operator("add.furniture", icon="ZOOMIN", text="Add Asset")
 
 
+class BigPreview(bpy.types.Operator):
+	bl_idname = "preview.big_preview"
+	bl_label = "Big Preview"
 
+	def execute(self, context):
+		print("Running big preview")
+		return {'FINISHED'}
+
+	def check(self, context):
+		return False
+
+	def invoke(self, context, event):
+		wm = context.window_manager
+		print("Invoke big preview")
+		return wm.invoke_props_dialog(self, width=800, height=800)
+
+	def draw(self, context):
+		layout = self.layout
+		wm = context.window_manager
+		col = layout.column()
+		col.scale_y = 5
+		# col.template_preview(wm, show_buttons=False, preview_id="asset_previews")
+		col.template_icon_view(wm, "asset_previews", show_labels=True)
 
 
 ################################################################
 ############################ Append ############################
 ################################################################
-
-####### Append Furniture #######
-
 
 class OBJECT_OT_AddButton(bpy.types.Operator):
 	bl_idname = "add.furniture"
