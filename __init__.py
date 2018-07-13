@@ -146,9 +146,15 @@ class PreviewsPanel(bpy.types.Panel):
 
 ############## Furniture Panel ##############
 
-		col = layout.column()
+############## Library folder button ##############
+
+		box = layout.box()
+		box.label(text="Library Folder:")
+		col = box.column(align=True)
 		col.prop(wm, "models_dir")
-		col.prop(wm, "link_model")
+		col.operator("library.path", icon="FILE_FOLDER", text="Open Library Folder")
+
+
 
 		box = layout.box()
 		box.label(text="Manager")
@@ -175,6 +181,9 @@ class PreviewsPanel(bpy.types.Panel):
 		row.alignment = 'CENTER'
 		row.scale_y = 0.5
 		row.label(os.path.splitext(furniture_prev)[0])
+####### link from file
+		col = box.column()
+		col.prop(wm, "link_model")
 ####### Asset folder button
 		col = box.column(align=True)
 		col.operator("library.asset_path", icon="FILE_FOLDER", text="Open Asset Folder")
@@ -184,13 +193,7 @@ class PreviewsPanel(bpy.types.Panel):
 		col.operator("add.furniture", icon="ZOOMIN", text="Add Asset")
 
 
-############## Library folder button ##############
 
-
-		box = layout.box()
-		box.label(text="Library Folder:")
-		row = box.row()
-		row.operator("library.path", icon="FILE_FOLDER", text="Open Library Folder")
 
 
 ################################################################
