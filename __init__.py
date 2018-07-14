@@ -152,7 +152,7 @@ class PreviewsPanel(bpy.types.Panel):
 		box.label(text="Library Folder:")
 		col = box.column(align=True)
 		col.prop(wm, "models_dir")
-		col.operator("library.path", icon="FILE_FOLDER", text="Open Library Folder")
+		col.operator("library.library_path", icon="FILE_FOLDER", text="Open Library Folder")
 
 
 
@@ -264,9 +264,9 @@ class OBJECT_OT_AddButton(bpy.types.Operator):
 ############################ Library path ############################
 ######################################################################
 
-class Lib_Path(bpy.types.Operator):
+class Library_Path(bpy.types.Operator):
 
-	bl_idname = "library.path"
+	bl_idname = "library.library_path"
 	bl_label = "Library Path"
 	
 	def execute(self, context):
@@ -278,7 +278,7 @@ class Lib_Path(bpy.types.Operator):
 ############################ Asset path ############################
 ######################################################################
 
-class Lib_AssetPath(bpy.types.Operator):
+class Asset_Path(bpy.types.Operator):
 
 	bl_idname = "library.asset_path"
 	bl_label = "Library Asset Path"
@@ -303,7 +303,7 @@ class Lib_AssetPath(bpy.types.Operator):
 def register():
 
 	bpy.utils.register_class(Preferences)
-	bpy.utils.register_class(Lib_Path)
+	bpy.utils.register_class(Library_Path)
 	bpy.utils.register_module(__name__)
 
 	user_preferences = bpy.context.user_preferences
@@ -357,7 +357,7 @@ def register():
 def unregister():
 
 	bpy.utils.unregister_class(Preferences)
-	bpy.utils.unregister_class(Lib_Path)
+	bpy.utils.unregister_class(Library_Path)
 
 	del WindowManager.asset_previews
 	del WindowManager.category_list
