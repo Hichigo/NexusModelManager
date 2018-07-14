@@ -1,7 +1,7 @@
 bl_info = {
 	"name": "Nexus Model Manager",
 	"author": "Nexus Studio",
-	"version": (0, 8, 2),
+	"version": (0, 8, 4),
 	"blender": (2, 79, 0),
 	"location": "View 3D > Tool Shelf",
 	"description": "Tools",
@@ -184,6 +184,11 @@ class ManagerPreviewsPanel(bpy.types.Panel):
 		row.alignment = 'CENTER'
 		row.scale_y = 0.5
 		row.label(os.path.splitext(furniture_prev)[0])
+####### Add location
+		row = box.row()
+		row.label("Add location")
+		row = box.row()
+		row.prop(wm, "add_location", expand=True)
 ####### link from file
 		col = box.column()
 		col.prop(wm, "link_model")
@@ -253,10 +258,13 @@ class OBJECT_OT_AddButton(bpy.types.Operator):
 				ob.dupli_group = group
 				ob.dupli_type = 'GROUP'
 				scn.objects.link(ob)
+				ob.select = True
 		else:
 			filepath_group_name = filepath_group + filename
 			bpy.ops.wm.append(filepath=filepath_group_name, filename=filename, directory=filepath_group)
 
+		if bpy.data.window_managers["WinMan"].add_location == "CURSOR":
+			bpy.ops.transform.translate(value=context.scene.cursor_location, constraint_axis=(False, False, False), constraint_orientation='GLOBAL', mirror=False, proportional='DISABLED', proportional_edit_falloff='SMOOTH', proportional_size=1)
 
 		return{'FINISHED'}
 
@@ -343,6 +351,15 @@ def register():
 		items=make_category_list,
 	)
 
+	WindowManager.add_location = EnumProperty(
+		name="Add location",
+		items=[
+			("CENTER", "Center", "", 0),
+			("CURSOR", "Cursor", "", 1)
+		],
+		default = "CENTER"
+	)
+
 	pcoll = bpy.utils.previews.new()
 	pcoll.asset_previews_dir = ""
 	pcoll.asset_previews = ()
@@ -371,6 +388,7 @@ def unregister():
 	del WindowManager.models_dir
 	del WindowManager.library_list
 	del WindowManager.link_model
+	del WindowManager.add_location
 
 
 
