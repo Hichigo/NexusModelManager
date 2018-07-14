@@ -127,7 +127,7 @@ class Preferences(bpy.types.AddonPreferences):
 #################################################################
 
 
-class PreviewsPanel(bpy.types.Panel):
+class ManagerPreviewsPanel(bpy.types.Panel):
 
 	bl_label = "Nexus Model Manager"
 	bl_space_type = 'VIEW_3D'
