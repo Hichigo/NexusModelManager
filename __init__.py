@@ -157,7 +157,7 @@ class ManagerPreviewsPanel(bpy.types.Panel):
 
 
 		box = layout.box()
-		box.label(text="Manager")
+		box.label(text="Model Manager")
 
 ####### Drop Down Menu library
 		row = box.row()
