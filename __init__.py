@@ -74,8 +74,8 @@ def enum_previews_asset_items(self, context):
 
 	pcoll = asset_collections["main"]
 
-	if directory == pcoll.asset_previews_dir:
-		return pcoll.asset_previews
+	if directory == pcoll.model_previews_dir:
+		return pcoll.model_previews
 
 	if directory and os.path.exists(directory):
 		assets_names = []
@@ -92,9 +92,9 @@ def enum_previews_asset_items(self, context):
 				enum_items.append((name, name, "", thumb.icon_id, i))
 	enum_items.sort()
 
-	pcoll.asset_previews = enum_items
-	pcoll.asset_previews_dir = directory
-	return pcoll.asset_previews
+	pcoll.model_previews = enum_items
+	pcoll.model_previews_dir = directory
+	return pcoll.model_previews
 
 asset_collections = {}
 
@@ -139,7 +139,7 @@ class ManagerPreviewsPanel(bpy.types.Panel):
 		return context.mode == 'OBJECT'
 
 	def draw(self, context):
-		furniture_prev = bpy.data.window_managers["WinMan"].asset_previews
+		model_prev = bpy.data.window_managers["WinMan"].model_previews
 		layout = self.layout
 		wm = context.window_manager
 
@@ -176,14 +176,14 @@ class ManagerPreviewsPanel(bpy.types.Panel):
 		row = box.row()
 		col = row.column()
 		col.scale_y = wm.scale_preview
-		col.template_icon_view(wm, "asset_previews", show_labels=True)
+		col.template_icon_view(wm, "model_previews", show_labels=True)
 		col = row.column()
 		col.operator("preview.big_preview", icon="ZOOM_IN", text="")
 ####### Model Name
 		row = box.row()
 		row.alignment = 'CENTER'
 		row.scale_y = 0.5
-		row.label(os.path.splitext(furniture_prev)[0])
+		row.label(os.path.splitext(model_prev)[0])
 ####### Add location
 		row = box.row()
 		row.label("Add location")
@@ -198,7 +198,7 @@ class ManagerPreviewsPanel(bpy.types.Panel):
 
 ####### Add Button
 
-		col.operator("add.furniture", icon="ZOOMIN", text="Add Asset")
+		col.operator("add.model", icon="ZOOMIN", text="Add Asset")
 
 
 class BigPreview(bpy.types.Operator):
@@ -222,22 +222,21 @@ class BigPreview(bpy.types.Operator):
 		wm = context.window_manager
 		col = layout.column()
 		col.scale_y = 5
-		# col.template_preview(wm, show_buttons=False, preview_id="asset_previews")
-		col.template_icon_view(wm, "asset_previews", show_labels=True)
+		col.template_icon_view(wm, "model_previews", show_labels=True)
 
 
 ################################################################
 ############################ Append ############################
 ################################################################
 
-class OBJECT_OT_AddButton(bpy.types.Operator):
-	bl_idname = "add.furniture"
+class OBJECT_OT_AddModel(bpy.types.Operator):
+	bl_idname = "add.model"
 	bl_label = "Add Furniture"
 
 	def execute(self, context):
 		
 		scn = context.scene
-		selected_preview = bpy.data.window_managers["WinMan"].asset_previews
+		selected_preview = bpy.data.window_managers["WinMan"].model_previews
 		category = bpy.data.window_managers["WinMan"].category_list
 		library = bpy.data.window_managers["WinMan"].library_list
 		path_models = bpy.data.window_managers["WinMan"].models_dir
@@ -296,7 +295,7 @@ class Asset_Path(bpy.types.Operator):
 		model_dir = context.window_manager.models_dir
 		library = bpy.data.window_managers["WinMan"].library_list
 		category = bpy.data.window_managers["WinMan"].category_list
-		selected_preview = bpy.data.window_managers["WinMan"].asset_previews
+		selected_preview = bpy.data.window_managers["WinMan"].model_previews
 
 		filepath = os.path.join(model_dir, library, category, selected_preview)
 
@@ -339,7 +338,7 @@ def register():
 		default=False
 	)
 
-	WindowManager.asset_previews = EnumProperty(
+	WindowManager.model_previews = EnumProperty(
 		items=enum_previews_asset_items,
 	)
 
@@ -361,8 +360,8 @@ def register():
 	)
 
 	pcoll = bpy.utils.previews.new()
-	pcoll.asset_previews_dir = ""
-	pcoll.asset_previews = ()
+	pcoll.model_previews_dir = ""
+	pcoll.model_previews = ()
 
 	asset_collections["main"] = pcoll
 
@@ -376,7 +375,7 @@ def unregister():
 	bpy.utils.unregister_class(Preferences)
 	bpy.utils.unregister_class(Library_Path)
 
-	del WindowManager.asset_previews
+	del WindowManager.model_previews
 	del WindowManager.category_list
 
 	for pcoll in asset_collections.values():
