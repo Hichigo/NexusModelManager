@@ -144,7 +144,7 @@ class ManagerPreviewsPanel(bpy.types.Panel):
 		wm = context.window_manager
 
 
-############## Furniture Panel ##############
+############## Panel ##############
 
 ############## Library folder button ##############
 
@@ -230,7 +230,7 @@ class BigPreview(bpy.types.Operator):
 class AddModelOperator(bpy.types.Operator):
 	""" The asset is already added. Add more?"""
 	bl_idname = "add.model"
-	bl_label = "Add Furniture"
+	bl_label = "Add Model"
 
 	def invoke(self, context, event):
 		filename = bpy.data.window_managers["WinMan"].model_previews
@@ -257,7 +257,7 @@ class AddModelOperator(bpy.types.Operator):
 
 		if is_link:
 			with bpy.data.libraries.load(filepath, link=True) as (data_from, data_to):
-				data_to.groups = data_from.groups
+				data_to.groups = [filename]#data_from.groups
 
 			for group in data_to.groups:
 				ob = bpy.data.objects.new(group.name, None)
