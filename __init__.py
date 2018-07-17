@@ -1,7 +1,7 @@
 bl_info = {
 	"name": "Nexus Model Manager",
 	"author": "Nexus Studio",
-	"version": (0, 8, 4),
+	"version": (0, 8, 8),
 	"blender": (2, 79, 0),
 	"location": "View 3D > Tool Shelf",
 	"description": "Tools",
@@ -195,9 +195,7 @@ class ManagerPreviewsPanel(bpy.types.Panel):
 ####### Asset folder button
 		col = box.column(align=True)
 		col.operator("library.asset_path", icon="FILE_FOLDER", text="Open Asset Folder")
-
 ####### Add Button
-
 		col.operator("add.model", icon="ZOOMIN", text="Add Asset")
 
 
@@ -229,20 +227,29 @@ class BigPreview(bpy.types.Operator):
 ############################ Append ############################
 ################################################################
 
-class OBJECT_OT_AddModel(bpy.types.Operator):
+class AddModelOperator(bpy.types.Operator):
+	""" The asset is already added. Add more?"""
 	bl_idname = "add.model"
 	bl_label = "Add Furniture"
+
+	def invoke(self, context, event):
+		filename = bpy.data.window_managers["WinMan"].model_previews
+		if bpy.data.objects.get(filename) is not None:
+			return context.window_manager.invoke_confirm(self, event)
+		else:
+			self.execute(context)
+			return {'FINISHED'}
+
 
 	def execute(self, context):
 		
 		scn = context.scene
-		selected_preview = bpy.data.window_managers["WinMan"].model_previews
+		filename = bpy.data.window_managers["WinMan"].model_previews
 		category = bpy.data.window_managers["WinMan"].category_list
 		library = bpy.data.window_managers["WinMan"].library_list
 		path_models = bpy.data.window_managers["WinMan"].models_dir
 		is_link = bpy.data.window_managers["WinMan"].link_model
 
-		filename = os.path.splitext(selected_preview)[0]
 		filepath = os.path.join(path_models, library, category, filename, filename + ".blend")
 		filepath_group = os.path.join(filepath, "Group")
 
@@ -265,7 +272,8 @@ class OBJECT_OT_AddModel(bpy.types.Operator):
 		if bpy.data.window_managers["WinMan"].add_location == "CURSOR":
 			bpy.ops.transform.translate(value=context.scene.cursor_location, constraint_axis=(False, False, False), constraint_orientation='GLOBAL', mirror=False, proportional='DISABLED', proportional_edit_falloff='SMOOTH', proportional_size=1)
 
-		return{'FINISHED'}
+		return {'FINISHED'}
+
 
 ######################################################################
 ############################ Library path ############################
@@ -311,6 +319,7 @@ def register():
 
 	bpy.utils.register_class(Preferences)
 	bpy.utils.register_class(Library_Path)
+	# bpy.utils.register_class(AddModelOperator)
 	bpy.utils.register_module(__name__)
 
 	user_preferences = bpy.context.user_preferences
@@ -374,6 +383,7 @@ def unregister():
 
 	bpy.utils.unregister_class(Preferences)
 	bpy.utils.unregister_class(Library_Path)
+	# bpy.utils.unregister_class(AddModelOperator)
 
 	del WindowManager.model_previews
 	del WindowManager.category_list
