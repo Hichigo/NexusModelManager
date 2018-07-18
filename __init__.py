@@ -183,6 +183,9 @@ class ManagerPreviewsPanel(bpy.types.Panel):
 		row.alignment = 'CENTER'
 		row.scale_y = 0.5
 		row.label(os.path.splitext(model_prev)[0])
+####### Asset folder button
+		col = box.column()
+		col.operator("library.asset_path", icon="FILE_FOLDER", text="Open Asset Folder")
 ####### Add location
 		row = box.row()
 		row.label("Add location")
@@ -198,10 +201,8 @@ class ManagerPreviewsPanel(bpy.types.Panel):
 		row = col.row()
 		row.enabled = nexus_model_WM.link_model
 		row.prop(nexus_model_WM, "instance_groups")
-####### Asset folder button
-		col = box.column(align=True)
-		col.operator("library.asset_path", icon="FILE_FOLDER", text="Open Asset Folder")
 ####### Add Button
+		col = box.column(align=True)
 		col.operator("add.model", icon="ZOOMIN", text="Add Asset")
 
 
@@ -234,7 +235,7 @@ class BigPreview(bpy.types.Operator):
 ################################################################
 
 class AddModelOperator(bpy.types.Operator):
-	""" The asset is already added. Add more?"""
+	""" The asset is already added. Add more? """
 	bl_idname = "add.model"
 	bl_label = "Add Model"
 
