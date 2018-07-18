@@ -38,15 +38,15 @@ def make_list_folder(path):
 
 ############################ Category ##########################
 def make_category_list(self, context):
-	path_library = context.window_manager.models_dir
-	library = context.window_manager.library_list
+	path_library = context.window_manager.nexus_model_manager_dir_resource
+	library = context.window_manager.nexus_model_manager.library_list
 	path_category = os.path.join(path_library, library)
 
 	return make_list_folder(path_category)
 
 ############################ Library ##########################
 def make_library_list(self, context):
-	path_library = context.window_manager.models_dir
+	path_library = context.window_manager.nexus_model_manager_dir_resource
 
 	return make_list_folder(path_library)
 
@@ -61,9 +61,9 @@ def enum_previews_asset_items(self, context):
 	""" create assets items prewiews """
 	enum_items = []
 
-	category = bpy.data.window_managers['WinMan'].category_list
-	path_models = bpy.data.window_managers['WinMan'].models_dir
-	library = bpy.data.window_managers["WinMan"].library_list
+	path_models = bpy.data.window_managers['WinMan'].nexus_model_manager_dir_resource
+	category = bpy.data.window_managers['WinMan'].nexus_model_manager.category_list
+	library = bpy.data.window_managers["WinMan"].nexus_model_manager.library_list
 	directory = os.path.join(path_models, library, category)
 
 
@@ -120,8 +120,6 @@ class Preferences(bpy.types.AddonPreferences):
 
 
 
-
-
 #################################################################
 ############################ Toolbar ############################
 #################################################################
@@ -139,9 +137,10 @@ class ManagerPreviewsPanel(bpy.types.Panel):
 		return context.mode == 'OBJECT'
 
 	def draw(self, context):
-		model_prev = bpy.data.window_managers["WinMan"].model_previews
+		model_prev = bpy.data.window_managers["WinMan"].nexus_model_manager.model_previews
 		layout = self.layout
 		wm = context.window_manager
+		nexus_model_WM = wm.nexus_model_manager
 
 
 ############## Panel ##############
@@ -151,7 +150,7 @@ class ManagerPreviewsPanel(bpy.types.Panel):
 		box = layout.box()
 		box.label(text="Library Folder:")
 		col = box.column(align=True)
-		col.prop(wm, "models_dir")
+		col.prop(wm, "nexus_model_manager_dir_resource")
 		col.operator("library.library_path", icon="FILE_FOLDER", text="Open Library Folder")
 
 
@@ -162,21 +161,21 @@ class ManagerPreviewsPanel(bpy.types.Panel):
 ####### Drop Down Menu library
 		row = box.row()
 		row.label(text="Library")
-		row.prop(wm, "library_list", text="")
+		row.prop(nexus_model_WM, "library_list", text="")
 
 ####### Drop Down Menu category
 		row = box.row()
 		row.label(text="Category")
-		row.prop(wm, "category_list", text="")
+		row.prop(nexus_model_WM, "category_list", text="")
 
 ####### Previews scale
 		col = box.column()
-		col.prop(wm, "scale_preview", slider=True)
+		col.prop(nexus_model_WM, "scale_preview", slider=True)
 ####### Previews
 		row = box.row()
 		col = row.column()
-		col.scale_y = wm.scale_preview
-		col.template_icon_view(wm, "model_previews", show_labels=True)
+		col.scale_y = nexus_model_WM.scale_preview
+		col.template_icon_view(nexus_model_WM, "model_previews", show_labels=True)
 		col = row.column()
 		col.operator("preview.big_preview", icon="ZOOM_IN", text="")
 ####### Model Name
@@ -188,10 +187,16 @@ class ManagerPreviewsPanel(bpy.types.Panel):
 		row = box.row()
 		row.label("Add location")
 		row = box.row()
-		row.prop(wm, "add_location", expand=True)
-####### link from file
+		row.prop(nexus_model_WM, "add_location", expand=True)
+####### link and dupli
 		col = box.column()
-		col.prop(wm, "link_model")
+		row = col.row()
+		row.prop(nexus_model_WM, "link_model")
+		row.prop(nexus_model_WM, "add_dupligroup")
+####### instance groups
+		col = box.column()
+		row = col.row()
+		row.prop(nexus_model_WM, "instance_groups")
 ####### Asset folder button
 		col = box.column(align=True)
 		col.operator("library.asset_path", icon="FILE_FOLDER", text="Open Asset Folder")
@@ -217,10 +222,10 @@ class BigPreview(bpy.types.Operator):
 
 	def draw(self, context):
 		layout = self.layout
-		wm = context.window_manager
+		nexus_model_WM = context.window_manager.nexus_model_manager
 		col = layout.column()
 		col.scale_y = 5
-		col.template_icon_view(wm, "model_previews", show_labels=True)
+		col.template_icon_view(nexus_model_WM, "model_previews", show_labels=True)
 
 
 ################################################################
@@ -233,7 +238,16 @@ class AddModelOperator(bpy.types.Operator):
 	bl_label = "Add Model"
 
 	def invoke(self, context, event):
-		filename = bpy.data.window_managers["WinMan"].model_previews
+		nexus_model_WM = bpy.data.window_managers["WinMan"].nexus_model_manager
+		filename = nexus_model_WM.model_previews
+		is_link = nexus_model_WM.link_model
+		add_dupli_to_sel = nexus_model_WM.add_dupligroup
+
+		if not is_link and add_dupli_to_sel:
+			self.report({'INFO'}, 'Set Add location to "Center"')
+			nexus_model_WM.add_location = "CENTER"
+
+
 		if bpy.data.objects.get(filename) is not None:
 			return context.window_manager.invoke_confirm(self, event)
 		else:
@@ -244,32 +258,62 @@ class AddModelOperator(bpy.types.Operator):
 	def execute(self, context):
 		
 		scn = context.scene
-		filename = bpy.data.window_managers["WinMan"].model_previews
-		category = bpy.data.window_managers["WinMan"].category_list
-		library = bpy.data.window_managers["WinMan"].library_list
-		path_models = bpy.data.window_managers["WinMan"].models_dir
-		is_link = bpy.data.window_managers["WinMan"].link_model
+		nexus_model_WM = bpy.data.window_managers["WinMan"].nexus_model_manager
+		path_models = bpy.data.window_managers["WinMan"].nexus_model_manager_dir_resource
+		filename = nexus_model_WM.model_previews
+		category = nexus_model_WM.category_list
+		library = nexus_model_WM.library_list
+		is_link = nexus_model_WM.link_model
+		inst_groups = nexus_model_WM.instance_groups
+		add_dupli_to_sel = nexus_model_WM.add_dupligroup
 
 		filepath = os.path.join(path_models, library, category, filename, filename + ".blend")
 		filepath_group = os.path.join(filepath, "Group")
+		filepath_group_name = filepath_group + filename
 
-		bpy.ops.object.select_all(action='DESELECT')
 
-		# if is_link:
-		with bpy.data.libraries.load(filepath, link=is_link) as (data_from, data_to):
-			data_to.groups = [filename]#data_from.groups
+		selected_objects = context.selected_objects
 
-		for group in data_to.groups:
-			ob = bpy.data.objects.new(group.name, None)
-			ob.dupli_group = group
-			ob.dupli_type = 'GROUP'
-			scn.objects.link(ob)
-			ob.select = True
-		# else:
-		# 	filepath_group_name = filepath_group + filename
-		# 	bpy.ops.wm.append(filepath=filepath_group_name, filename=filename, directory=filepath_group)
+		if not add_dupli_to_sel:
+			bpy.ops.object.select_all(action='DESELECT')
 
-		if bpy.data.window_managers["WinMan"].add_location == "CURSOR":
+
+		if is_link:
+			bpy.ops.wm.link(
+				filepath=filepath_group_name,
+				filename=filename,
+				directory=filepath_group,
+				link=True,
+				instance_groups=inst_groups
+			)
+			# with bpy.data.libraries.load(filepath, link=True) as (data_from, data_to):
+			# 	data_to.groups = [filename]#data_from.groups
+
+			# for group in data_to.groups:
+			# 	ob = bpy.data.objects.new(group.name, None)
+			# 	ob.dupli_group = group
+			# 	ob.dupli_type = 'GROUP'
+			# 	scn.objects.link(ob)
+			# 	ob.select = True
+		else:
+			bpy.ops.wm.append(
+				filepath=filepath_group_name,
+				filename=filename,
+				directory=filepath_group,
+				link=False,
+				instance_groups=inst_groups
+			)
+
+		if add_dupli_to_sel:
+			group = bpy.data.groups[filename]
+
+			# bpy.ops.object.make_links_data(type='DUPLIGROUP')
+			for obj in selected_objects:
+					obj.dupli_group = group
+					obj.dupli_type = 'GROUP'
+
+
+		if nexus_model_WM.add_location == "CURSOR":
 			bpy.ops.transform.translate(value=context.scene.cursor_location, constraint_axis=(False, False, False), constraint_orientation='GLOBAL', mirror=False, proportional='DISABLED', proportional_edit_falloff='SMOOTH', proportional_size=1)
 
 		return {'FINISHED'}
@@ -285,7 +329,7 @@ class Library_Path(bpy.types.Operator):
 	bl_label = "Library Path"
 	
 	def execute(self, context):
-		filepath = context.window_manager.models_dir
+		filepath = context.window_manager.nexus_model_manager_dir_resource
 		bpy.ops.wm.path_open(filepath=filepath)
 		return {'FINISHED'}
 
@@ -297,19 +341,70 @@ class Asset_Path(bpy.types.Operator):
 
 	bl_idname = "library.asset_path"
 	bl_label = "Library Asset Path"
-	
+
 	def execute(self, context):
-		
-		model_dir = context.window_manager.models_dir
-		library = bpy.data.window_managers["WinMan"].library_list
-		category = bpy.data.window_managers["WinMan"].category_list
-		selected_preview = bpy.data.window_managers["WinMan"].model_previews
+
+		nexus_model_WM = bpy.data.window_managers["WinMan"].nexus_model_manager
+		model_dir = context.window_manager.nexus_model_manager_dir_resource
+		library = nexus_model_WM.library_list
+		category = nexus_model_WM.category_list
+		selected_preview = nexus_model_WM.model_previews
 
 		filepath = os.path.join(model_dir, library, category, selected_preview)
 
 		bpy.ops.wm.path_open(filepath=filepath)
 		return {'FINISHED'}
 
+
+class NexusModelManager_WM_Properties(bpy.types.PropertyGroup):
+
+	scale_preview = FloatProperty(
+		name="Scale preview",
+		default=1.5,
+		min=1.0,
+		max=10.0,
+		soft_min=1.0,
+		soft_max=10.0
+	)
+
+	link_model = BoolProperty(
+		name="Link",
+		description="If True link model else append model",
+		default=False
+	)
+
+	instance_groups = BoolProperty(
+		name="Instance groups",
+		description="Instance groups",
+		default=False
+	)
+
+	model_previews = EnumProperty(
+		items=enum_previews_asset_items,
+	)
+
+	library_list = EnumProperty(
+		items=make_library_list,
+	)
+
+	category_list = EnumProperty(
+		items=make_category_list,
+	)
+
+	add_location = EnumProperty(
+		name="Add location",
+		items=[
+			("CENTER", "Center", "", 0),
+			("CURSOR", "Cursor", "", 1)
+		],
+		default = "CENTER"
+	)
+
+	add_dupligroup = BoolProperty(
+		name="Add dupligroup to selected",
+		description="Add dupligroup to selected objects",
+		default=False
+	)
 
 ######################################################################
 ############################## Register ##############################
@@ -322,50 +417,14 @@ def register():
 	# bpy.utils.register_class(AddModelOperator)
 	bpy.utils.register_module(__name__)
 
+
 	user_preferences = bpy.context.user_preferences
 	addon_prefs = user_preferences.addons[__name__].preferences
-	
-	WindowManager.scale_preview = FloatProperty(
-		name="Scale preview",
-		default=1.5,
-		min=1.0,
-		max=10.0,
-		soft_min=1.0,
-		soft_max=10.0
-	)
 
-
-	WindowManager.models_dir = StringProperty(
+	WindowManager.nexus_model_manager_dir_resource = StringProperty(
 		name="Folder Path",
 		subtype="DIR_PATH",
 		default=addon_prefs.path_to_library
-	)
-
-	WindowManager.link_model = BoolProperty(
-		name="Link",
-		description="If True link model else append model",
-		default=False
-	)
-
-	WindowManager.model_previews = EnumProperty(
-		items=enum_previews_asset_items,
-	)
-
-	WindowManager.library_list = EnumProperty(
-		items=make_library_list,
-	)
-
-	WindowManager.category_list = EnumProperty(
-		items=make_category_list,
-	)
-
-	WindowManager.add_location = EnumProperty(
-		name="Add location",
-		items=[
-			("CENTER", "Center", "", 0),
-			("CURSOR", "Cursor", "", 1)
-		],
-		default = "CENTER"
 	)
 
 	pcoll = bpy.utils.previews.new()
@@ -373,6 +432,8 @@ def register():
 	pcoll.model_previews = ()
 
 	asset_collections["main"] = pcoll
+
+	WindowManager.nexus_model_manager = bpy.props.PointerProperty(type=NexusModelManager_WM_Properties)
 
 
 ######################################################################
@@ -385,20 +446,14 @@ def unregister():
 	bpy.utils.unregister_class(Library_Path)
 	# bpy.utils.unregister_class(AddModelOperator)
 
-	del WindowManager.model_previews
-	del WindowManager.category_list
+	del WindowManager.nexus_model_manager_dir_resource
+	del WindowManager.nexus_model_manager
 
 	for pcoll in asset_collections.values():
 		bpy.utils.previews.remove(pcoll)
 	asset_collections.clear()
 
 	bpy.utils.unregister_module(__name__)
-	del WindowManager.scale_preview
-	del WindowManager.models_dir
-	del WindowManager.library_list
-	del WindowManager.link_model
-	del WindowManager.add_location
-
 
 
 
