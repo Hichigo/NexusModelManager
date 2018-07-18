@@ -288,15 +288,6 @@ class AddModelOperator(bpy.types.Operator):
 				link=True,
 				instance_groups=inst_groups
 			)
-			# with bpy.data.libraries.load(filepath, link=True) as (data_from, data_to):
-			# 	data_to.groups = [filename]#data_from.groups
-
-			# for group in data_to.groups:
-			# 	ob = bpy.data.objects.new(group.name, None)
-			# 	ob.dupli_group = group
-			# 	ob.dupli_type = 'GROUP'
-			# 	scn.objects.link(ob)
-			# 	ob.select = True
 		else:
 			bpy.ops.wm.append(
 				filepath=filepath_group_name,
@@ -308,12 +299,9 @@ class AddModelOperator(bpy.types.Operator):
 
 		if add_dupli_to_sel:
 			group = bpy.data.groups[filename]
-
-			# bpy.ops.object.make_links_data(type='DUPLIGROUP')
 			for obj in selected_objects:
 					obj.dupli_group = group
 					obj.dupli_type = 'GROUP'
-
 
 		if nexus_model_WM.add_location == "CURSOR":
 			bpy.ops.transform.translate(value=context.scene.cursor_location, constraint_axis=(False, False, False), constraint_orientation='GLOBAL', mirror=False, proportional='DISABLED', proportional_edit_falloff='SMOOTH', proportional_size=1)
