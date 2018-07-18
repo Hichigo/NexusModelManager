@@ -255,19 +255,19 @@ class AddModelOperator(bpy.types.Operator):
 
 		bpy.ops.object.select_all(action='DESELECT')
 
-		if is_link:
-			with bpy.data.libraries.load(filepath, link=True) as (data_from, data_to):
-				data_to.groups = [filename]#data_from.groups
+		# if is_link:
+		with bpy.data.libraries.load(filepath, link=is_link) as (data_from, data_to):
+			data_to.groups = [filename]#data_from.groups
 
-			for group in data_to.groups:
-				ob = bpy.data.objects.new(group.name, None)
-				ob.dupli_group = group
-				ob.dupli_type = 'GROUP'
-				scn.objects.link(ob)
-				ob.select = True
-		else:
-			filepath_group_name = filepath_group + filename
-			bpy.ops.wm.append(filepath=filepath_group_name, filename=filename, directory=filepath_group)
+		for group in data_to.groups:
+			ob = bpy.data.objects.new(group.name, None)
+			ob.dupli_group = group
+			ob.dupli_type = 'GROUP'
+			scn.objects.link(ob)
+			ob.select = True
+		# else:
+		# 	filepath_group_name = filepath_group + filename
+		# 	bpy.ops.wm.append(filepath=filepath_group_name, filename=filename, directory=filepath_group)
 
 		if bpy.data.window_managers["WinMan"].add_location == "CURSOR":
 			bpy.ops.transform.translate(value=context.scene.cursor_location, constraint_axis=(False, False, False), constraint_orientation='GLOBAL', mirror=False, proportional='DISABLED', proportional_edit_falloff='SMOOTH', proportional_size=1)
