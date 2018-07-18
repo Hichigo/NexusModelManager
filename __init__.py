@@ -196,6 +196,7 @@ class ManagerPreviewsPanel(bpy.types.Panel):
 ####### instance groups
 		col = box.column()
 		row = col.row()
+		row.enabled = nexus_model_WM.link_model
 		row.prop(nexus_model_WM, "instance_groups")
 ####### Asset folder button
 		col = box.column(align=True)
@@ -243,12 +244,12 @@ class AddModelOperator(bpy.types.Operator):
 		is_link = nexus_model_WM.link_model
 		add_dupli_to_sel = nexus_model_WM.add_dupligroup
 
-		if not is_link and add_dupli_to_sel:
+		if not is_link and add_dupli_to_sel and nexus_model_WM.add_location == "CURSOR":
 			self.report({'INFO'}, 'Set Add location to "Center"')
 			nexus_model_WM.add_location = "CENTER"
 
 
-		if bpy.data.objects.get(filename) is not None:
+		if bpy.data.groups.get(filename) is not None:
 			return context.window_manager.invoke_confirm(self, event)
 		else:
 			self.execute(context)
