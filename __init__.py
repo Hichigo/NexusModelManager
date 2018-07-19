@@ -305,11 +305,16 @@ class AddModelOperator(bpy.types.Operator):
 		if add_dupli_to_sel:
 			group = bpy.data.groups[filename]
 			for obj in selected_objects:
-					obj.dupli_group = group
-					obj.dupli_type = 'GROUP'
+				obj.dupli_group = group
+				obj.dupli_type = 'GROUP'
 
-		if nexus_model_WM.add_location == "CURSOR":
-			bpy.ops.transform.translate(value=context.scene.cursor_location, constraint_axis=(False, False, False), constraint_orientation='GLOBAL', mirror=False, proportional='DISABLED', proportional_edit_falloff='SMOOTH', proportional_size=1)
+		if is_link and not inst_groups:
+			return {'FINISHED'}
+
+		if (nexus_model_WM.add_location == "CURSOR") and (len(bpy.context.selected_objects) > 0):
+			bpy.context.selected_objects[0].location = context.scene.cursor_location
+		elif len(bpy.context.selected_objects) > 0:
+			bpy.context.selected_objects[0].location = (0.0, 0.0, 0.0)
 
 		return {'FINISHED'}
 
