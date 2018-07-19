@@ -229,15 +229,20 @@ class BigPreview(bpy.types.Operator):
 		col.scale_y = 5
 		col.template_icon_view(nexus_model_WM, "model_previews", show_labels=True)
 
-
 ################################################################
 ############################ Append ############################
 ################################################################
 
 class AddModelOperator(bpy.types.Operator):
-	""" The asset is already added. Add more? """
+
 	bl_idname = "add.model"
-	bl_label = "Add Model"
+	bl_label = "Add Model?"
+
+	def draw(self, context):
+		layout = self.layout
+		nexus_model_WM = context.window_manager.nexus_model_manager
+		col = layout.column()
+		col.label("The asset is already added. Add more?")
 
 	def invoke(self, context, event):
 		nexus_model_WM = bpy.data.window_managers["WinMan"].nexus_model_manager
@@ -249,12 +254,12 @@ class AddModelOperator(bpy.types.Operator):
 			self.report({'INFO'}, 'Set Add location to "Center"')
 			nexus_model_WM.add_location = "CENTER"
 
-
 		if bpy.data.groups.get(filename) is not None:
-			return context.window_manager.invoke_confirm(self, event)
+			return context.window_manager.invoke_props_dialog(self)
 		else:
 			self.execute(context)
-			return {'FINISHED'}
+		
+		return {'FINISHED'}
 
 
 	def execute(self, context):
@@ -404,7 +409,7 @@ def register():
 
 	bpy.utils.register_class(Preferences)
 	bpy.utils.register_class(Library_Path)
-	# bpy.utils.register_class(AddModelOperator)
+	# bpy.utils.register_class(AddExistGroup)
 	bpy.utils.register_module(__name__)
 
 
@@ -434,7 +439,7 @@ def unregister():
 
 	bpy.utils.unregister_class(Preferences)
 	bpy.utils.unregister_class(Library_Path)
-	# bpy.utils.unregister_class(AddModelOperator)
+	# bpy.utils.unregister_class(AddExistGroup)
 
 	del WindowManager.nexus_model_manager_dir_resource
 	del WindowManager.nexus_model_manager
