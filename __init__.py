@@ -299,7 +299,7 @@ class AddModelOperator(bpy.types.Operator):
 				filename=filename,
 				directory=filepath_group,
 				link=False,
-				instance_groups=inst_groups
+				instance_groups=False
 			)
 
 		if add_dupli_to_sel:
