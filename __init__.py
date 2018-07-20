@@ -311,10 +311,11 @@ class AddModelOperator(bpy.types.Operator):
 		if is_link and not inst_groups:
 			return {'FINISHED'}
 
-		if (nexus_model_WM.add_location == "CURSOR") and (len(bpy.context.selected_objects) > 0):
-			bpy.context.selected_objects[0].location = context.scene.cursor_location
-		elif len(bpy.context.selected_objects) > 0:
-			bpy.context.selected_objects[0].location = (0.0, 0.0, 0.0)
+		if len(bpy.context.selected_objects) > 0:
+			if nexus_model_WM.add_location == "CURSOR":
+				bpy.context.selected_objects[0].location = context.scene.cursor_location
+			else:
+				bpy.context.selected_objects[0].location = (0.0, 0.0, 0.0)
 
 		return {'FINISHED'}
 
