@@ -219,13 +219,13 @@ class ManagerPreviewsPanel(bpy.types.Panel):
 		row.label(os.path.splitext(asset_prev)[0])
 
 ####### Previews scale
-		col = box.column()
-		col.prop(nexus_model_WM, "scale_preview", slider=True)
+		# col = box.column()
+		# col.prop(nexus_model_WM, "scale_preview", slider=True)
 
 ####### Groups list
 		row = box.row()
 		col = row.column()
-		col.scale_y = nexus_model_WM.scale_preview
+		# col.scale_y = nexus_model_WM.scale_preview
 		col.template_icon_view(nexus_model_WM, "group_asset", show_labels=True)
 		col = row.column()
 		col.operator("preview.big_preview", icon="ZOOM_IN", text="")
@@ -411,14 +411,14 @@ class Asset_Path(bpy.types.Operator):
 
 class NexusModelManager_WM_Properties(bpy.types.PropertyGroup):
 
-	scale_preview = FloatProperty(
-		name="Scale preview",
-		default=1.5,
-		min=1.0,
-		max=10.0,
-		soft_min=1.0,
-		soft_max=10.0
-	)
+	# scale_preview = FloatProperty(
+	# 	name="Scale preview",
+	# 	default=1.5,
+	# 	min=1.0,
+	# 	max=10.0,
+	# 	soft_min=1.0,
+	# 	soft_max=10.0
+	# )
 
 	link_model = BoolProperty(
 		name="Link",
