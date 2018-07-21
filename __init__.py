@@ -50,6 +50,29 @@ def make_library_list(self, context):
 
 	return make_list_folder(path_library)
 
+############################ Material ##########################
+def enum_materials_asset(self, context):
+
+	enum_items = []
+
+	nexus_model_WM = bpy.data.window_managers["WinMan"].nexus_model_manager
+	path_models = bpy.data.window_managers["WinMan"].nexus_model_manager_dir_resource
+	filename = nexus_model_WM.model_previews
+	category = nexus_model_WM.category_list
+	library = nexus_model_WM.library_list
+
+	filepath = os.path.join(path_models, library, category, filename, filename + ".blend")
+
+	with bpy.data.libraries.load(filepath) as (df, dt):
+		list_materials = df.materials
+
+	print(list_materials)
+	for i, mat in enumerate(list_materials):
+		item = (mat, mat, '', i)
+		enum_items.append(item)
+
+	return enum_items
+
 ##################################################################
 ############################ Previews ############################
 ##################################################################
@@ -183,6 +206,9 @@ class ManagerPreviewsPanel(bpy.types.Panel):
 		row.alignment = 'CENTER'
 		row.scale_y = 0.5
 		row.label(os.path.splitext(model_prev)[0])
+####### Materials list
+		row = box.row()
+		row.prop(nexus_model_WM, "material_for_asset", text="Materials")
 ####### Asset folder button
 		col = box.column()
 		col.operator("library.asset_path", icon="FILE_FOLDER", text="Open Asset Folder")
@@ -390,6 +416,10 @@ class NexusModelManager_WM_Properties(bpy.types.PropertyGroup):
 
 	category_list = EnumProperty(
 		items=make_category_list,
+	)
+
+	material_for_asset = EnumProperty(
+		items=enum_materials_asset,
 	)
 
 	add_location = EnumProperty(
