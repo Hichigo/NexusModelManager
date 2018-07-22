@@ -64,26 +64,32 @@ def enum_groups_asset(self, context):
 	filepath = os.path.join(path_models, library, category, filename, filename + ".blend")
 	render_path = os.path.join(path_models, library, category, filename, "render")
 
-	pcoll = asset_collections["main"]
+	if context is None:
+		return enum_items
+
+	pcoll = groups_collection["main"]
+
+
+	if render_path == pcoll.group_previews_dir:
+		return pcoll.group_previews
 
 	with bpy.data.libraries.load(filepath) as (df, dt):
 		list_groups = df.groups
 
-	if render_path and os.path.exists(render_path):
-		images_names = []
-		for fn in os.listdir(render_path):
-			if not os.path.isdir(fn):
-				name = os.path.splitext(fn)[0]
-				images_names.append(name)
+	nexus_model_WM.number_of_groups = len(list_groups)
+	# if render_path and os.path.exists(render_path):
+	# 	images_names = []
+	# 	for fn in list_groups:
+	# 		images_names.append(fn)
 
-		for i, name in enumerate(images_names):
-			filepath = os.path.join(render_path, name + ".png")
+	for i, name in enumerate(list_groups):
+		filepath = os.path.join(render_path, name + ".png")
 
-			if filepath in pcoll:
-				enum_items.append((name, name, "", pcoll[filepath].icon_id, i))
-			else:
-				thumb = pcoll.load(filepath, filepath, 'IMAGE')
-				enum_items.append((name, name, "", thumb.icon_id, i))
+		if filepath in pcoll:
+			enum_items.append((name, name, "", pcoll[filepath].icon_id, i))
+		else:
+			thumb = pcoll.load(filepath, filepath, 'IMAGE')
+			enum_items.append((name, name, "", thumb.icon_id, i))
 
 	enum_items.sort()
 	pcoll.group_previews = enum_items
@@ -181,6 +187,7 @@ class ManagerPreviewsPanel(bpy.types.Panel):
 		layout = self.layout
 		wm = context.window_manager
 		nexus_model_WM = wm.nexus_model_manager
+		num_groups = bpy.data.window_managers["WinMan"].nexus_model_manager.number_of_groups
 
 
 ############## Panel ##############
@@ -223,6 +230,7 @@ class ManagerPreviewsPanel(bpy.types.Panel):
 		# col.prop(nexus_model_WM, "scale_preview", slider=True)
 
 ####### Groups list
+		# if num_groups > 1:
 		row = box.row()
 		col = row.column()
 		# col.scale_y = nexus_model_WM.scale_preview
@@ -445,7 +453,12 @@ class NexusModelManager_WM_Properties(bpy.types.PropertyGroup):
 	)
 
 	group_asset = EnumProperty(
-		items=enum_groups_asset,
+		items=enum_groups_asset
+	)
+
+	number_of_groups = IntProperty(
+		name="Number of groups",
+		default=1
 	)
 
 	add_location = EnumProperty(
