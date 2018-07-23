@@ -61,7 +61,7 @@ def enum_groups_asset(self, context):
 	category = nexus_model_WM.category_list
 	library = nexus_model_WM.library_list
 
-	# filepath = os.path.join(path_models, library, category, filename, filename + ".blend")
+	filepath = os.path.join(path_models, library, category, filename, filename + ".blend")
 	render_path = os.path.join(path_models, library, category, filename, "render")
 
 	if context is None:
@@ -72,15 +72,15 @@ def enum_groups_asset(self, context):
 	if render_path == pcoll.group_previews_dir:
 		return pcoll.group_previews
 
-	# with bpy.data.libraries.load(filepath) as (df, dt):
-	# 	list_groups = df.groups
+	with bpy.data.libraries.load(filepath) as (df, dt):
+		list_groups = df.groups
+	list_groups.sort()
+	# if render_path and os.path.exists(render_path):
+	# 	images_names = []
+	# 	for fn in os.listdir(render_path):
+	# 		images_names.append(os.path.splitext(fn)[0])
 
-	if render_path and os.path.exists(render_path):
-		images_names = []
-		for fn in os.listdir(render_path):
-			images_names.append(os.path.splitext(fn)[0])
-
-	for i, name in enumerate(images_names):
+	for i, name in enumerate(list_groups):
 		filepath = os.path.join(render_path, name + ".png")
 
 		if filepath in pcoll:
@@ -88,7 +88,7 @@ def enum_groups_asset(self, context):
 		else:
 			thumb = pcoll.load(filepath, filepath, 'IMAGE')
 			enum_items.append((name, name, "", thumb.icon_id, i))
-	enum_items.sort()
+	# enum_items.sort()
 
 	pcoll.group_previews = enum_items
 	pcoll.group_previews_dir = render_path
