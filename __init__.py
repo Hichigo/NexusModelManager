@@ -61,7 +61,7 @@ def enum_groups_asset(self, context):
 	category = nexus_model_WM.category_list
 	library = nexus_model_WM.library_list
 
-	filepath = os.path.join(path_models, library, category, filename, filename + ".blend")
+	# filepath = os.path.join(path_models, library, category, filename, filename + ".blend")
 	render_path = os.path.join(path_models, library, category, filename, "render")
 
 	if context is None:
