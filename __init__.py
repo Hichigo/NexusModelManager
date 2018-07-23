@@ -89,7 +89,6 @@ def enum_groups_asset(self, context):
 		else:
 			thumb = pcoll.load(filepath, filepath, 'IMAGE')
 			enum_items.append((name, name, "", thumb.icon_id, i))
-	enum_items.sort()
 
 	pcoll.group_previews = enum_items
 	pcoll.group_previews_dir = render_path
