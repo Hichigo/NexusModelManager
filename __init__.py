@@ -195,8 +195,10 @@ class ManagerPreviewsPanel(bpy.types.Panel):
 
 		# with bpy.data.libraries.load(filepath) as (df, dt):
 		# 	list_groups = df.groups
-
-		num_groups = len(os.listdir(render_path)) > 1
+		if os.path.exists(render_path):
+			num_groups = len(os.listdir(render_path)) > 1
+		else:
+			num_groups = False
 
 ############## Panel ##############
 
