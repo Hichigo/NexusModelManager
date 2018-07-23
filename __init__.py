@@ -305,7 +305,7 @@ class AddModelOperator(bpy.types.Operator):
 
 	def invoke(self, context, event):
 		nexus_model_WM = bpy.data.window_managers["WinMan"].nexus_model_manager
-		filename = nexus_model_WM.asset_previews
+		group_name = nexus_model_WM.group_asset
 		is_link = nexus_model_WM.link_model
 		add_dupli_to_sel = nexus_model_WM.add_dupligroup
 
@@ -313,7 +313,7 @@ class AddModelOperator(bpy.types.Operator):
 			self.report({'INFO'}, 'Set Add location to "Center"')
 			nexus_model_WM.add_location = "CENTER"
 
-		if bpy.data.groups.get(filename) is not None:
+		if bpy.data.groups.get(group_name) is not None:
 			return context.window_manager.invoke_props_dialog(self)
 		else:
 			self.execute(context)
