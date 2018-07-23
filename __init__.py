@@ -72,16 +72,15 @@ def enum_groups_asset(self, context):
 	if render_path == pcoll.group_previews_dir:
 		return pcoll.group_previews
 
-	with bpy.data.libraries.load(filepath) as (df, dt):
-		list_groups = df.groups
+	# with bpy.data.libraries.load(filepath) as (df, dt):
+	# 	list_groups = df.groups
 
-	# if render_path and os.path.exists(render_path):
-	# 	images_names = []
-	# 	for fn in list_groups:
-	# 		images_names.append(fn)
-	list_groups.sort()
+	if render_path and os.path.exists(render_path):
+		images_names = []
+		for fn in os.listdir(render_path):
+			images_names.append(os.path.splitext(fn)[0])
 
-	for i, name in enumerate(list_groups):
+	for i, name in enumerate(images_names):
 		filepath = os.path.join(render_path, name + ".png")
 
 		if filepath in pcoll:
@@ -89,6 +88,7 @@ def enum_groups_asset(self, context):
 		else:
 			thumb = pcoll.load(filepath, filepath, 'IMAGE')
 			enum_items.append((name, name, "", thumb.icon_id, i))
+	enum_items.sort()
 
 	pcoll.group_previews = enum_items
 	pcoll.group_previews_dir = render_path
@@ -187,16 +187,16 @@ class ManagerPreviewsPanel(bpy.types.Panel):
 		nexus_model_WM = wm.nexus_model_manager
 
 		path_models = bpy.data.window_managers["WinMan"].nexus_model_manager_dir_resource
-		asset_prev = nexus_model_WM.asset_previews
+		asset_name = nexus_model_WM.asset_previews
 		category = nexus_model_WM.category_list
 		library = nexus_model_WM.library_list
 
-		filepath = os.path.join(path_models, library, category, asset_prev, asset_prev + ".blend")
+		render_path = os.path.join(path_models, library, category, asset_name, "render")
 
-		with bpy.data.libraries.load(filepath) as (df, dt):
-			list_groups = df.groups
+		# with bpy.data.libraries.load(filepath) as (df, dt):
+		# 	list_groups = df.groups
 
-		num_groups = len(list_groups) > 1
+		num_groups = len(os.listdir(render_path)) > 1
 
 ############## Panel ##############
 
@@ -231,7 +231,7 @@ class ManagerPreviewsPanel(bpy.types.Panel):
 		row = box.row()
 		row.alignment = 'CENTER'
 		row.scale_y = 0.5
-		row.label(os.path.splitext(asset_prev)[0])
+		row.label(os.path.splitext(asset_name)[0])
 
 ####### Previews scale
 		# col = box.column()
