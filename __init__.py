@@ -69,18 +69,17 @@ def enum_groups_asset(self, context):
 
 	pcoll = groups_collection["main"]
 
-
 	if render_path == pcoll.group_previews_dir:
 		return pcoll.group_previews
 
 	with bpy.data.libraries.load(filepath) as (df, dt):
 		list_groups = df.groups
 
-	nexus_model_WM.number_of_groups = len(list_groups)
 	# if render_path and os.path.exists(render_path):
 	# 	images_names = []
 	# 	for fn in list_groups:
 	# 		images_names.append(fn)
+	list_groups.sort()
 
 	for i, name in enumerate(list_groups):
 		filepath = os.path.join(render_path, name + ".png")
@@ -90,11 +89,11 @@ def enum_groups_asset(self, context):
 		else:
 			thumb = pcoll.load(filepath, filepath, 'IMAGE')
 			enum_items.append((name, name, "", thumb.icon_id, i))
-
 	enum_items.sort()
+
 	pcoll.group_previews = enum_items
 	pcoll.group_previews_dir = render_path
-	return enum_items
+	return pcoll.group_previews
 
 groups_collection = {}
 
@@ -183,12 +182,22 @@ class ManagerPreviewsPanel(bpy.types.Panel):
 		return context.mode == 'OBJECT'
 
 	def draw(self, context):
-		asset_prev = bpy.data.window_managers["WinMan"].nexus_model_manager.asset_previews
 		layout = self.layout
 		wm = context.window_manager
+		nexus_model_WM = bpy.data.window_managers["WinMan"].nexus_model_manager
 		nexus_model_WM = wm.nexus_model_manager
-		num_groups = bpy.data.window_managers["WinMan"].nexus_model_manager.number_of_groups
 
+		path_models = bpy.data.window_managers["WinMan"].nexus_model_manager_dir_resource
+		asset_prev = nexus_model_WM.asset_previews
+		category = nexus_model_WM.category_list
+		library = nexus_model_WM.library_list
+
+		filepath = os.path.join(path_models, library, category, asset_prev, asset_prev + ".blend")
+
+		with bpy.data.libraries.load(filepath) as (df, dt):
+			list_groups = df.groups
+
+		num_groups = len(list_groups) > 1
 
 ############## Panel ##############
 
@@ -230,13 +239,13 @@ class ManagerPreviewsPanel(bpy.types.Panel):
 		# col.prop(nexus_model_WM, "scale_preview", slider=True)
 
 ####### Groups list
-		# if num_groups > 1:
-		row = box.row()
-		col = row.column()
-		# col.scale_y = nexus_model_WM.scale_preview
-		col.template_icon_view(nexus_model_WM, "group_asset", show_labels=True)
-		col = row.column()
-		col.operator("preview.big_preview", icon="ZOOM_IN", text="")
+		if num_groups:
+			row = box.row()
+			col = row.column()
+			# col.scale_y = nexus_model_WM.scale_preview
+			col.template_icon_view(nexus_model_WM, "group_asset", show_labels=True)
+			col = row.column()
+			col.operator("preview.big_preview", icon="ZOOM_IN", text="")
 
 ####### Asset folder button
 		col = box.column()
@@ -454,11 +463,6 @@ class NexusModelManager_WM_Properties(bpy.types.PropertyGroup):
 
 	group_asset = EnumProperty(
 		items=enum_groups_asset
-	)
-
-	number_of_groups = IntProperty(
-		name="Number of groups",
-		default=1
 	)
 
 	add_location = EnumProperty(
