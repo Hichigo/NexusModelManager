@@ -250,8 +250,8 @@ class ManagerPreviewsPanel(bpy.types.Panel):
 			col = row.column()
 			# col.scale_y = nexus_model_SCN.scale_preview
 			col.template_icon_view(nexus_model_SCN, "group_asset", show_labels=True)
-			col = row.column()
-			col.operator("preview.big_preview", icon="ZOOM_IN", text="")
+			# col = row.column()
+			# col.operator("preview.big_preview", icon="ZOOM_IN", text="")
 
 
 
@@ -278,28 +278,28 @@ class ManagerPreviewsPanel(bpy.types.Panel):
 		col.operator("add.model", icon="ZOOMIN", text="Add Asset")
 
 
-class BigPreview(bpy.types.Operator):
-	bl_idname = "preview.big_preview"
-	bl_label = "Big Preview"
+# class BigPreview(bpy.types.Operator):
+# 	bl_idname = "preview.big_preview"
+# 	bl_label = "Big Preview"
 
-	def execute(self, context):
-		print("Running big preview")
-		return {'FINISHED'}
+# 	def execute(self, context):
+# 		print("Running big preview")
+# 		return {'FINISHED'}
 
-	def check(self, context):
-		return False
+# 	def check(self, context):
+# 		return False
 
-	def invoke(self, context, event):
-		wm = context.window_manager
-		print("Invoke big preview")
-		return wm.invoke_props_dialog(self, width=800, height=800)
+# 	def invoke(self, context, event):
+# 		wm = context.window_manager
+# 		print("Invoke big preview")
+# 		return wm.invoke_props_dialog(self, width=800, height=800)
 
-	def draw(self, context):
-		layout = self.layout
-		nexus_model_SCN = context.scene.nexus_model_manager
-		col = layout.column()
-		col.scale_y = 5
-		col.template_icon_view(nexus_model_SCN, "group_asset", show_labels=True)
+# 	def draw(self, context):
+# 		layout = self.layout
+# 		nexus_model_SCN = context.scene.nexus_model_manager
+# 		col = layout.column()
+# 		col.scale_y = 5
+# 		col.template_icon_view(nexus_model_SCN, "group_asset", show_labels=True)
 
 ################################################################
 ############################ Append ############################
