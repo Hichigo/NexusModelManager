@@ -224,6 +224,12 @@ class ManagerPreviewsPanel(bpy.types.Panel):
 		row.label(text="Category")
 		row.prop(nexus_model_SCN, "category_list", text="")
 
+####### Asset folder button
+		col = box.column()
+		row = col.row(align=True)
+		row.operator("library.asset_path", icon="FILE_FOLDER", text="Open Asset Folder")
+		row.operator("library.image_path", icon="IMAGE_COL", text="Open Image")
+
 ####### Previews
 		row = box.row()
 		row.template_icon_view(nexus_model_SCN, "asset_previews", show_labels=True)
@@ -247,9 +253,7 @@ class ManagerPreviewsPanel(bpy.types.Panel):
 			col = row.column()
 			col.operator("preview.big_preview", icon="ZOOM_IN", text="")
 
-####### Asset folder button
-		col = box.column()
-		col.operator("library.asset_path", icon="FILE_FOLDER", text="Open Asset Folder")
+
 
 ####### Add location
 		row = box.row()
@@ -424,6 +428,25 @@ class Asset_Path(bpy.types.Operator):
 		bpy.ops.wm.path_open(filepath=filepath)
 		return {'FINISHED'}
 
+class Image_Path(bpy.types.Operator):
+
+	bl_idname = "library.image_path"
+	bl_label = "Library Image Path"
+
+	def execute(self, context):
+
+		nexus_model_SCN = context.scene.nexus_model_manager
+		model_dir = context.window_manager.nexus_model_manager_dir_resource
+		library = nexus_model_SCN.library_list
+		category = nexus_model_SCN.category_list
+		selected_preview = nexus_model_SCN.asset_previews
+		group = nexus_model_SCN.group_asset
+
+		filepath = os.path.join(model_dir, library, category, selected_preview, "render", group + ".png")
+
+		bpy.ops.wm.path_open(filepath=filepath)
+		return {'FINISHED'}
+
 
 class NexusModelManager_WM_Properties(bpy.types.PropertyGroup):
 
@@ -487,6 +510,8 @@ def register():
 
 	bpy.utils.register_class(Preferences)
 	bpy.utils.register_class(Library_Path)
+	bpy.utils.register_class(Asset_Path)
+	bpy.utils.register_class(Image_Path)
 	# bpy.utils.register_class(AddExistGroup)
 	bpy.utils.register_module(__name__)
 
@@ -523,6 +548,8 @@ def unregister():
 
 	bpy.utils.unregister_class(Preferences)
 	bpy.utils.unregister_class(Library_Path)
+	bpy.utils.unregister_class(Asset_Path)
+	bpy.utils.unregister_class(Image_Path)
 	# bpy.utils.unregister_class(AddExistGroup)
 
 	del WindowManager.nexus_model_manager_dir_resource
