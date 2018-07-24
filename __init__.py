@@ -39,7 +39,7 @@ def make_list_folder(path):
 ############################ Category ##########################
 def make_category_list(self, context):
 	path_library = context.window_manager.nexus_model_manager_dir_resource
-	library = context.window_manager.nexus_model_manager.library_list
+	library = context.scene.nexus_model_manager.library_list
 	path_category = os.path.join(path_library, library)
 
 	return make_list_folder(path_category)
@@ -55,7 +55,7 @@ def enum_groups_asset(self, context):
 
 	enum_items = []
 
-	nexus_model_WM = bpy.data.window_managers["WinMan"].nexus_model_manager
+	nexus_model_WM = context.scene.nexus_model_manager
 	path_models = bpy.data.window_managers["WinMan"].nexus_model_manager_dir_resource
 	filename = nexus_model_WM.asset_previews
 	category = nexus_model_WM.category_list
@@ -108,8 +108,8 @@ def enum_previews_asset_items(self, context):
 	enum_items = []
 
 	path_models = bpy.data.window_managers['WinMan'].nexus_model_manager_dir_resource
-	category = bpy.data.window_managers['WinMan'].nexus_model_manager.category_list
-	library = bpy.data.window_managers["WinMan"].nexus_model_manager.library_list
+	category = context.scene.nexus_model_manager.category_list
+	library = context.scene.nexus_model_manager.library_list
 	directory = os.path.join(path_models, library, category)
 
 
@@ -183,8 +183,7 @@ class ManagerPreviewsPanel(bpy.types.Panel):
 	def draw(self, context):
 		layout = self.layout
 		wm = context.window_manager
-		nexus_model_WM = bpy.data.window_managers["WinMan"].nexus_model_manager
-		nexus_model_WM = wm.nexus_model_manager
+		nexus_model_WM = context.scene.nexus_model_manager
 
 		path_models = bpy.data.window_managers["WinMan"].nexus_model_manager_dir_resource
 		asset_name = nexus_model_WM.asset_previews
@@ -293,7 +292,7 @@ class BigPreview(bpy.types.Operator):
 
 	def draw(self, context):
 		layout = self.layout
-		nexus_model_WM = context.window_manager.nexus_model_manager
+		nexus_model_WM = context.scene.nexus_model_manager
 		col = layout.column()
 		col.scale_y = 5
 		col.template_icon_view(nexus_model_WM, "group_asset", show_labels=True)
@@ -309,12 +308,11 @@ class AddModelOperator(bpy.types.Operator):
 
 	def draw(self, context):
 		layout = self.layout
-		nexus_model_WM = context.window_manager.nexus_model_manager
 		col = layout.column()
 		col.label("The asset is already added. Add more?")
 
 	def invoke(self, context, event):
-		nexus_model_WM = bpy.data.window_managers["WinMan"].nexus_model_manager
+		nexus_model_WM = context.scene.nexus_model_manager
 		group_name = nexus_model_WM.group_asset
 		is_link = nexus_model_WM.link_model
 		add_dupli_to_sel = nexus_model_WM.add_dupligroup
@@ -334,7 +332,7 @@ class AddModelOperator(bpy.types.Operator):
 	def execute(self, context):
 		
 		scn = context.scene
-		nexus_model_WM = bpy.data.window_managers["WinMan"].nexus_model_manager
+		nexus_model_WM = context.scene.nexus_model_manager
 		path_models = bpy.data.window_managers["WinMan"].nexus_model_manager_dir_resource
 		filename = nexus_model_WM.asset_previews
 		category = nexus_model_WM.category_list
@@ -415,7 +413,7 @@ class Asset_Path(bpy.types.Operator):
 
 	def execute(self, context):
 
-		nexus_model_WM = bpy.data.window_managers["WinMan"].nexus_model_manager
+		nexus_model_WM = context.nexus_model_manager
 		model_dir = context.window_manager.nexus_model_manager_dir_resource
 		library = nexus_model_WM.library_list
 		category = nexus_model_WM.category_list
@@ -514,7 +512,7 @@ def register():
 
 	groups_collection["main"] = pcoll
 
-	WindowManager.nexus_model_manager = bpy.props.PointerProperty(type=NexusModelManager_WM_Properties)
+	bpy.types.Scene.nexus_model_manager = bpy.props.PointerProperty(type=NexusModelManager_WM_Properties)
 
 
 ######################################################################
@@ -528,11 +526,15 @@ def unregister():
 	# bpy.utils.unregister_class(AddExistGroup)
 
 	del WindowManager.nexus_model_manager_dir_resource
-	del WindowManager.nexus_model_manager
+	del bpy.types.Scene.nexus_model_manager
 
 	for pcoll in asset_collections.values():
 		bpy.utils.previews.remove(pcoll)
 	asset_collections.clear()
+
+	for pcoll in groups_collection.values():
+		bpy.utils.previews.remove(pcoll)
+	groups_collection.clear()
 
 	bpy.utils.unregister_module(__name__)
 
