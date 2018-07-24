@@ -417,7 +417,7 @@ class Asset_Path(bpy.types.Operator):
 
 	def execute(self, context):
 
-		nexus_model_SCN = context.nexus_model_manager
+		nexus_model_SCN = context.scene.nexus_model_manager
 		model_dir = context.window_manager.nexus_model_manager_dir_resource
 		library = nexus_model_SCN.library_list
 		category = nexus_model_SCN.category_list
