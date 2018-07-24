@@ -55,11 +55,11 @@ def enum_groups_asset(self, context):
 
 	enum_items = []
 
-	nexus_model_WM = context.scene.nexus_model_manager
+	nexus_model_SCN = context.scene.nexus_model_manager
 	path_models = bpy.data.window_managers["WinMan"].nexus_model_manager_dir_resource
-	filename = nexus_model_WM.asset_previews
-	category = nexus_model_WM.category_list
-	library = nexus_model_WM.library_list
+	filename = nexus_model_SCN.asset_previews
+	category = nexus_model_SCN.category_list
+	library = nexus_model_SCN.library_list
 
 	filepath = os.path.join(path_models, library, category, filename, filename + ".blend")
 	render_path = os.path.join(path_models, library, category, filename, "render")
@@ -183,12 +183,12 @@ class ManagerPreviewsPanel(bpy.types.Panel):
 	def draw(self, context):
 		layout = self.layout
 		wm = context.window_manager
-		nexus_model_WM = context.scene.nexus_model_manager
+		nexus_model_SCN = context.scene.nexus_model_manager
 
 		path_models = bpy.data.window_managers["WinMan"].nexus_model_manager_dir_resource
-		asset_name = nexus_model_WM.asset_previews
-		category = nexus_model_WM.category_list
-		library = nexus_model_WM.library_list
+		asset_name = nexus_model_SCN.asset_previews
+		category = nexus_model_SCN.category_list
+		library = nexus_model_SCN.library_list
 
 		render_path = os.path.join(path_models, library, category, asset_name, "render")
 
@@ -217,16 +217,16 @@ class ManagerPreviewsPanel(bpy.types.Panel):
 ####### Drop Down Menu library
 		row = box.row()
 		row.label(text="Library")
-		row.prop(nexus_model_WM, "library_list", text="")
+		row.prop(nexus_model_SCN, "library_list", text="")
 
 ####### Drop Down Menu category
 		row = box.row()
 		row.label(text="Category")
-		row.prop(nexus_model_WM, "category_list", text="")
+		row.prop(nexus_model_SCN, "category_list", text="")
 
 ####### Previews
 		row = box.row()
-		row.template_icon_view(nexus_model_WM, "asset_previews", show_labels=True)
+		row.template_icon_view(nexus_model_SCN, "asset_previews", show_labels=True)
 
 ####### Asset Name
 		row = box.row()
@@ -236,14 +236,14 @@ class ManagerPreviewsPanel(bpy.types.Panel):
 
 ####### Previews scale
 		# col = box.column()
-		# col.prop(nexus_model_WM, "scale_preview", slider=True)
+		# col.prop(nexus_model_SCN, "scale_preview", slider=True)
 
 ####### Groups list
 		if num_groups:
 			row = box.row()
 			col = row.column()
-			# col.scale_y = nexus_model_WM.scale_preview
-			col.template_icon_view(nexus_model_WM, "group_asset", show_labels=True)
+			# col.scale_y = nexus_model_SCN.scale_preview
+			col.template_icon_view(nexus_model_SCN, "group_asset", show_labels=True)
 			col = row.column()
 			col.operator("preview.big_preview", icon="ZOOM_IN", text="")
 
@@ -255,19 +255,19 @@ class ManagerPreviewsPanel(bpy.types.Panel):
 		row = box.row()
 		row.label("Add location")
 		row = box.row()
-		row.prop(nexus_model_WM, "add_location", expand=True)
+		row.prop(nexus_model_SCN, "add_location", expand=True)
 
 ####### link and dupli
 		col = box.column()
 		row = col.row()
-		row.prop(nexus_model_WM, "link_model")
-		row.prop(nexus_model_WM, "add_dupligroup")
+		row.prop(nexus_model_SCN, "link_model")
+		row.prop(nexus_model_SCN, "add_dupligroup")
 
 ####### instance groups
 		col = box.column()
 		row = col.row()
-		row.enabled = nexus_model_WM.link_model
-		row.prop(nexus_model_WM, "instance_groups")
+		row.enabled = nexus_model_SCN.link_model
+		row.prop(nexus_model_SCN, "instance_groups")
 
 ####### Add Button
 		col = box.column(align=True)
@@ -292,10 +292,10 @@ class BigPreview(bpy.types.Operator):
 
 	def draw(self, context):
 		layout = self.layout
-		nexus_model_WM = context.scene.nexus_model_manager
+		nexus_model_SCN = context.scene.nexus_model_manager
 		col = layout.column()
 		col.scale_y = 5
-		col.template_icon_view(nexus_model_WM, "group_asset", show_labels=True)
+		col.template_icon_view(nexus_model_SCN, "group_asset", show_labels=True)
 
 ################################################################
 ############################ Append ############################
@@ -312,14 +312,14 @@ class AddModelOperator(bpy.types.Operator):
 		col.label("The asset is already added. Add more?")
 
 	def invoke(self, context, event):
-		nexus_model_WM = context.scene.nexus_model_manager
-		group_name = nexus_model_WM.group_asset
-		is_link = nexus_model_WM.link_model
-		add_dupli_to_sel = nexus_model_WM.add_dupligroup
+		nexus_model_SCN = context.scene.nexus_model_manager
+		group_name = nexus_model_SCN.group_asset
+		is_link = nexus_model_SCN.link_model
+		add_dupli_to_sel = nexus_model_SCN.add_dupligroup
 
-		if not is_link and add_dupli_to_sel and nexus_model_WM.add_location == "CURSOR":
+		if not is_link and add_dupli_to_sel and nexus_model_SCN.add_location == "CURSOR":
 			self.report({'INFO'}, 'Set Add location to "Center"')
-			nexus_model_WM.add_location = "CENTER"
+			nexus_model_SCN.add_location = "CENTER"
 
 		if bpy.data.groups.get(group_name) is not None:
 			return context.window_manager.invoke_props_dialog(self)
@@ -332,15 +332,15 @@ class AddModelOperator(bpy.types.Operator):
 	def execute(self, context):
 		
 		scn = context.scene
-		nexus_model_WM = context.scene.nexus_model_manager
+		nexus_model_SCN = context.scene.nexus_model_manager
 		path_models = bpy.data.window_managers["WinMan"].nexus_model_manager_dir_resource
-		filename = nexus_model_WM.asset_previews
-		category = nexus_model_WM.category_list
-		library = nexus_model_WM.library_list
-		group_name = nexus_model_WM.group_asset
-		is_link = nexus_model_WM.link_model
-		inst_groups = nexus_model_WM.instance_groups
-		add_dupli_to_sel = nexus_model_WM.add_dupligroup
+		filename = nexus_model_SCN.asset_previews
+		category = nexus_model_SCN.category_list
+		library = nexus_model_SCN.library_list
+		group_name = nexus_model_SCN.group_asset
+		is_link = nexus_model_SCN.link_model
+		inst_groups = nexus_model_SCN.instance_groups
+		add_dupli_to_sel = nexus_model_SCN.add_dupligroup
 
 		filepath = os.path.join(path_models, library, category, filename, filename + ".blend")
 		filepath_group = os.path.join(filepath, "Group")
@@ -380,7 +380,7 @@ class AddModelOperator(bpy.types.Operator):
 			return {'FINISHED'}
 
 		if len(bpy.context.selected_objects) > 0:
-			if nexus_model_WM.add_location == "CURSOR":
+			if nexus_model_SCN.add_location == "CURSOR":
 				bpy.context.selected_objects[0].location = context.scene.cursor_location
 			else:
 				bpy.context.selected_objects[0].location = (0.0, 0.0, 0.0)
@@ -413,11 +413,11 @@ class Asset_Path(bpy.types.Operator):
 
 	def execute(self, context):
 
-		nexus_model_WM = context.nexus_model_manager
+		nexus_model_SCN = context.nexus_model_manager
 		model_dir = context.window_manager.nexus_model_manager_dir_resource
-		library = nexus_model_WM.library_list
-		category = nexus_model_WM.category_list
-		selected_preview = nexus_model_WM.asset_previews
+		library = nexus_model_SCN.library_list
+		category = nexus_model_SCN.category_list
+		selected_preview = nexus_model_SCN.asset_previews
 
 		filepath = os.path.join(model_dir, library, category, selected_preview)
 
