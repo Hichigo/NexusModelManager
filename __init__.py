@@ -153,7 +153,7 @@ class Preferences(bpy.types.AddonPreferences):
 		name="Path",
 		default=os.path.join(os.path.dirname(__file__), "LibraryModels"),
 		description="The path to your library",
-		subtype="DIR_PATH",
+		subtype="DIR_PATH"
 	)
 
 	def draw(self, context):
@@ -449,15 +449,15 @@ class NexusModelManager_WM_Properties(bpy.types.PropertyGroup):
 	)
 
 	asset_previews = EnumProperty(
-		items=enum_previews_asset_items,
+		items=enum_previews_asset_items
 	)
 
 	library_list = EnumProperty(
-		items=make_library_list,
+		items=make_library_list
 	)
 
 	category_list = EnumProperty(
-		items=make_category_list,
+		items=make_category_list
 	)
 
 	group_asset = EnumProperty(
