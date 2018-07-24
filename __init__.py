@@ -156,11 +156,28 @@ class Preferences(bpy.types.AddonPreferences):
 		subtype="DIR_PATH"
 	)
 
+	preview_resolution_x = bpy.types.Scene.preview_resolution_x = IntProperty(
+		name="X",
+		default=800,
+		description="Preview resolution X"
+	)
+
+	preview_resolution_y = bpy.types.Scene.preview_resolution_y = IntProperty(
+		name="Y",
+		default=800,
+		description="Preview resolution Y"
+	)
+
 	def draw(self, context):
 		layout = self.layout
 
 		col = layout.column(align=True)
 		col.prop(self, "path_to_library")
+
+		row = layout.row()
+		col = row.column(align=True)
+		col.prop(self, "preview_resolution_x")
+		col.prop(self, "preview_resolution_y")
 
 
 
@@ -209,8 +226,6 @@ class ManagerPreviewsPanel(bpy.types.Panel):
 		col.prop(wm, "nexus_model_manager_dir_resource")
 		col.operator("library.library_path", icon="FILE_FOLDER", text="Open Library Folder")
 
-
-
 		box = layout.box()
 		box.label(text="Model Manager")
 
@@ -223,6 +238,10 @@ class ManagerPreviewsPanel(bpy.types.Panel):
 		row = box.row()
 		row.label(text="Category")
 		row.prop(nexus_model_SCN, "category_list", text="")
+
+####### Asset folder button
+		col = box.column()
+		col.operator("library.asset_path", icon="FILE_FOLDER", text="Open Asset Folder")
 
 ####### Previews
 		row = box.row()
@@ -247,10 +266,6 @@ class ManagerPreviewsPanel(bpy.types.Panel):
 			col = row.column()
 			col.operator("preview.big_preview", icon="ZOOM_IN", text="")
 
-####### Asset folder button
-		col = box.column()
-		col.operator("library.asset_path", icon="FILE_FOLDER", text="Open Asset Folder")
-
 ####### Add location
 		row = box.row()
 		row.label("Add location")
@@ -274,6 +289,32 @@ class ManagerPreviewsPanel(bpy.types.Panel):
 		col.operator("add.model", icon="ZOOMIN", text="Add Asset")
 
 
+def context_tex_datablock(context):
+	idblock = context.material
+	if idblock:
+		return active_node_mat(idblock)
+
+	idblock = context.lamp
+	if idblock:
+		return idblock
+
+	idblock = context.world
+	if idblock:
+		return idblock
+
+	idblock = context.brush
+	if idblock:
+		return idblock
+
+	idblock = context.line_style
+	if idblock:
+		return idblock
+
+	if context.particle_system:
+		idblock = context.particle_system.settings
+
+	return idblock
+
 class BigPreview(bpy.types.Operator):
 	bl_idname = "preview.big_preview"
 	bl_label = "Big Preview"
@@ -287,15 +328,38 @@ class BigPreview(bpy.types.Operator):
 
 	def invoke(self, context, event):
 		wm = context.window_manager
-		print("Invoke big preview")
-		return wm.invoke_props_dialog(self, width=800, height=800)
+		nexus_model_SCN = context.scene.nexus_model_manager
+		path_models = bpy.data.window_managers["WinMan"].nexus_model_manager_dir_resource
+		filename = nexus_model_SCN.asset_previews
+		category = nexus_model_SCN.category_list
+		library = nexus_model_SCN.library_list
+		image_name = nexus_model_SCN.group_asset + ".png"
+
+		render_path = os.path.join(path_models, library, category, filename, "render")
+		image_path = os.path.join(render_path, image_name)
+
+
+		if bpy.data.textures.get("NexusModelManager") is None:
+			bpy.data.textures.new("NexusModelManager", type="IMAGE")
+			bpy.data.images.load(image_path, check_existing=True)
+			bpy.data.textures["NexusModelManager"].image = bpy.data.images[image_name]
+		else:
+			bpy.data.images.load(image_path, check_existing=True)
+			bpy.data.textures["NexusModelManager"].image = bpy.data.images[image_name]
+
+		user_preferences = bpy.context.user_preferences
+		addon_prefs = user_preferences.addons[__name__].preferences
+
+		return wm.invoke_popup(self, width=addon_prefs.preview_resolution_x, height=addon_prefs.preview_resolution_y)
 
 	def draw(self, context):
 		layout = self.layout
 		nexus_model_SCN = context.scene.nexus_model_manager
+
+		tex = bpy.data.textures["NexusModelManager"]
 		col = layout.column()
-		col.scale_y = 5
-		col.template_icon_view(nexus_model_SCN, "group_asset", show_labels=True)
+		col.template_preview(tex)
+
 
 ################################################################
 ############################ Append ############################
