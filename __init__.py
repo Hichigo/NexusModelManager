@@ -189,6 +189,7 @@ class ManagerPreviewsPanel(bpy.types.Panel):
 		asset_name = nexus_model_SCN.asset_previews
 		category = nexus_model_SCN.category_list
 		library = nexus_model_SCN.library_list
+		group_or_meshdata = nexus_model_SCN.group_or_meshdata
 
 		render_path = os.path.join(path_models, library, category, asset_name, "render")
 
@@ -253,25 +254,48 @@ class ManagerPreviewsPanel(bpy.types.Panel):
 			# col = row.column()
 			# col.operator("preview.big_preview", icon="ZOOM_IN", text="")
 
+####### Group or mesh data
+		row = box.row()
+		row.label("What add?")
+		row = box.row()
+		row.prop(nexus_model_SCN, "group_or_meshdata", expand=True)
 
-
+		if group_or_meshdata == "GROUP": ####################################### GROUP
 ####### Add location
-		row = box.row()
-		row.label("Add location")
-		row = box.row()
-		row.prop(nexus_model_SCN, "add_location", expand=True)
+			row = box.row()
+			row.label("Add location")
+			row = box.row()
+			row.prop(nexus_model_SCN, "add_location", expand=True)
 
 ####### link and dupli
-		col = box.column()
-		row = col.row()
-		row.prop(nexus_model_SCN, "link_model")
-		row.prop(nexus_model_SCN, "add_dupligroup")
+			col = box.column()
+			row = col.row()
+			row.prop(nexus_model_SCN, "link_model")
+			row.prop(nexus_model_SCN, "add_dupligroup")
 
 ####### instance groups
-		col = box.column()
-		row = col.row()
-		row.enabled = nexus_model_SCN.link_model
-		row.prop(nexus_model_SCN, "instance_groups")
+			col = box.column()
+			row = col.row()
+			row.enabled = nexus_model_SCN.link_model
+			row.prop(nexus_model_SCN, "instance_groups")
+		elif group_or_meshdata == "MESH": ########################################### MESH
+####### link and dupli
+			col = box.column()
+			col.prop(nexus_model_SCN, "link_model")
+			col.prop(nexus_model_SCN, "set_to_selected_objects")
+
+		elif group_or_meshdata == "OBJECT": ####################################### OBJECT
+####### Add location
+			row = box.row()
+			row.label("Add location")
+			row = box.row()
+			row.prop(nexus_model_SCN, "add_location", expand=True)
+
+
+####### link and dupli
+			col = box.column()
+			row = col.row()
+			row.prop(nexus_model_SCN, "link_model")
 
 ####### Add Button
 		col = box.column(align=True)
@@ -345,10 +369,23 @@ class AddModelOperator(bpy.types.Operator):
 		is_link = nexus_model_SCN.link_model
 		inst_groups = nexus_model_SCN.instance_groups
 		add_dupli_to_sel = nexus_model_SCN.add_dupligroup
+		group_or_meshdata = nexus_model_SCN.group_or_meshdata
+		set_to_selected_objects = nexus_model_SCN.set_to_selected_objects
 
 		filepath = os.path.join(path_models, library, category, filename, filename + ".blend")
-		filepath_group = os.path.join(filepath, "Group")
-		filepath_group_name = filepath_group + group_name
+
+		if group_or_meshdata == "GROUP":
+			directory_inside_file = os.path.join(filepath, "Group")
+		elif group_or_meshdata == "MESH":
+			directory_inside_file = os.path.join(filepath, "Mesh")
+			group_name = "SM_" + group_name
+		elif group_or_meshdata == "OBJECT":
+			directory_inside_file = os.path.join(filepath, "Object")
+			group_name = "SM_" + group_name
+		else:
+			print("----------------- SOMETHING ERROR >>'group_or_meshdata'<< -----------------")
+
+		filepath_group_name = directory_inside_file + group_name
 
 
 		selected_objects = context.selected_objects
@@ -356,12 +393,11 @@ class AddModelOperator(bpy.types.Operator):
 		if not add_dupli_to_sel:
 			bpy.ops.object.select_all(action='DESELECT')
 
-
 		if is_link:
 			bpy.ops.wm.link(
 				filepath=filepath_group_name,
 				filename=group_name,
-				directory=filepath_group,
+				directory=directory_inside_file,
 				link=True,
 				instance_groups=inst_groups
 			)
@@ -369,25 +405,48 @@ class AddModelOperator(bpy.types.Operator):
 			bpy.ops.wm.append(
 				filepath=filepath_group_name,
 				filename=group_name,
-				directory=filepath_group,
+				directory=directory_inside_file,
 				link=False,
 				instance_groups=False
 			)
 
-		if add_dupli_to_sel:
-			group = bpy.data.groups[group_name]
-			for obj in selected_objects:
-				obj.dupli_group = group
-				obj.dupli_type = 'GROUP'
+		if group_or_meshdata == "GROUP":
+			if add_dupli_to_sel:
+				group = bpy.data.groups[group_name]
+				for obj in selected_objects:
+					obj.dupli_group = group
+					obj.dupli_type = 'GROUP'
 
-		if is_link and not inst_groups:
-			return {'FINISHED'}
+			if len(bpy.context.selected_objects) > 0:
+				if nexus_model_SCN.add_location == "CURSOR":
+					bpy.context.selected_objects[0].location = context.scene.cursor_location
+				else:
+					bpy.context.selected_objects[0].location = (0.0, 0.0, 0.0)
 
-		if len(bpy.context.selected_objects) > 0:
-			if nexus_model_SCN.add_location == "CURSOR":
-				bpy.context.selected_objects[0].location = context.scene.cursor_location
-			else:
-				bpy.context.selected_objects[0].location = (0.0, 0.0, 0.0)
+		elif group_or_meshdata == "MESH":
+			if set_to_selected_objects:
+				mesh = bpy.data.meshes[group_name]
+				for obj in selected_objects:
+					if obj.type == "MESH":
+						obj.data = mesh
+
+		elif group_or_meshdata == "OBJECT":
+			if len(bpy.context.selected_objects) > 0:
+				if nexus_model_SCN.add_location == "CURSOR":
+					bpy.context.selected_objects[0].location = context.scene.cursor_location
+				else:
+					bpy.context.selected_objects[0].location = (0.0, 0.0, 0.0)
+
+		# if add_dupli_to_sel:
+		# 	group = bpy.data.groups[group_name]
+		# 	for obj in selected_objects:
+		# 		obj.dupli_group = group
+		# 		obj.dupli_type = 'GROUP'
+
+		# if is_link and not inst_groups:
+		# 	return {'FINISHED'}
+
+
 
 		return {'FINISHED'}
 
@@ -471,6 +530,12 @@ class NexusModelManager_WM_Properties(bpy.types.PropertyGroup):
 		default=False
 	)
 
+	set_to_selected_objects = BoolProperty(
+		name="Set to selected objects",
+		description="Set mesh data to selected objects",
+		default=False
+	)
+
 	asset_previews = EnumProperty(
 		items=enum_previews_asset_items
 	)
@@ -485,6 +550,16 @@ class NexusModelManager_WM_Properties(bpy.types.PropertyGroup):
 
 	group_asset = EnumProperty(
 		items=enum_groups_asset
+	)
+
+	group_or_meshdata = EnumProperty(
+		name="Group or Mesh Data",
+		items=[
+			("GROUP", "Group", "", 0),
+			("MESH", "Mesh Data", "", 1),
+			("OBJECT", "Object", "", 2)
+		],
+		default = "GROUP"
 	)
 
 	add_location = EnumProperty(
