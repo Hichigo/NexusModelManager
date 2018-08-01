@@ -233,6 +233,7 @@ class ManagerPreviewsPanel(bpy.types.Panel):
 
 ####### Previews
 		row = box.row()
+		row.scale_y = 1.5
 		row.template_icon_view(nexus_model_SCN, "asset_previews", show_labels=True)
 
 ####### Asset Name
@@ -250,6 +251,7 @@ class ManagerPreviewsPanel(bpy.types.Panel):
 			row = box.row()
 			col = row.column()
 			# col.scale_y = nexus_model_SCN.scale_preview
+			col.scale_y = 1.5
 			col.template_icon_view(nexus_model_SCN, "group_asset", show_labels=True)
 			# col = row.column()
 			# col.operator("preview.big_preview", icon="ZOOM_IN", text="")
