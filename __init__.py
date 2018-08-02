@@ -60,6 +60,7 @@ def enum_groups_asset(self, context):
 	filename = nexus_model_SCN.asset_previews
 	category = nexus_model_SCN.category_list
 	library = nexus_model_SCN.library_list
+	assets_name = nexus_model_SCN.asset_previews
 
 	filepath = os.path.join(path_models, library, category, filename, filename + ".blend")
 	render_path = os.path.join(path_models, library, category, filename, "render")
@@ -75,6 +76,7 @@ def enum_groups_asset(self, context):
 	with bpy.data.libraries.load(filepath) as (df, dt):
 		list_groups = df.groups
 	list_groups.sort()
+
 	# if render_path and os.path.exists(render_path):
 	# 	images_names = []
 	# 	for fn in os.listdir(render_path):
@@ -83,11 +85,12 @@ def enum_groups_asset(self, context):
 	for i, name in enumerate(list_groups):
 		filepath = os.path.join(render_path, name + ".png")
 
+		icon_name = name.replace(assets_name + "_", "")
 		if filepath in pcoll:
-			enum_items.append((name, name, "", pcoll[filepath].icon_id, i))
+			enum_items.append((name, icon_name, "", pcoll[filepath].icon_id, i))
 		else:
 			thumb = pcoll.load(filepath, filepath, 'IMAGE')
-			enum_items.append((name, name, "", thumb.icon_id, i))
+			enum_items.append((name, icon_name, "", thumb.icon_id, i))
 	# enum_items.sort()
 
 	pcoll.group_previews = enum_items
@@ -186,7 +189,8 @@ class ManagerPreviewsPanel(bpy.types.Panel):
 		nexus_model_SCN = context.scene.nexus_model_manager
 
 		path_models = bpy.data.window_managers["WinMan"].nexus_model_manager_dir_resource
-		asset_name = nexus_model_SCN.asset_previews
+		asset_name = os.path.splitext(nexus_model_SCN.asset_previews)[0]
+		group_asset = os.path.splitext(nexus_model_SCN.group_asset)[0]
 		category = nexus_model_SCN.category_list
 		library = nexus_model_SCN.library_list
 		group_or_meshdata = nexus_model_SCN.group_or_meshdata
@@ -240,7 +244,7 @@ class ManagerPreviewsPanel(bpy.types.Panel):
 		row = box.row()
 		row.alignment = 'CENTER'
 		row.scale_y = 0.5
-		row.label(os.path.splitext(asset_name)[0])
+		row.label(asset_name)
 
 ####### Previews scale
 		# col = box.column()
@@ -255,6 +259,11 @@ class ManagerPreviewsPanel(bpy.types.Panel):
 			col.template_icon_view(nexus_model_SCN, "group_asset", show_labels=True)
 			# col = row.column()
 			# col.operator("preview.big_preview", icon="ZOOM_IN", text="")
+####### Group Name
+			row = box.row()
+			row.alignment = 'CENTER'
+			row.scale_y = 0.5
+			row.label(group_asset.replace(asset_name + "_", ""))
 
 ####### Group or mesh data
 		row = box.row()
