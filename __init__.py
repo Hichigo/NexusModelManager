@@ -85,7 +85,8 @@ def enum_groups_asset(self, context):
 	for i, name in enumerate(list_groups):
 		filepath = os.path.join(render_path, name + ".png")
 
-		icon_name = name.replace(assets_name + "_", "")
+		icon_name = name.replace(category + "_", "") # remove category name
+		icon_name = icon_name.replace(assets_name + "_", "") # remove asset name
 		if filepath in pcoll:
 			enum_items.append((name, icon_name, "", pcoll[filepath].icon_id, i))
 		else:
@@ -190,10 +191,12 @@ class ManagerPreviewsPanel(bpy.types.Panel):
 
 		path_models = bpy.data.window_managers["WinMan"].nexus_model_manager_dir_resource
 		asset_name = os.path.splitext(nexus_model_SCN.asset_previews)[0]
-		group_asset = os.path.splitext(nexus_model_SCN.group_asset)[0]
 		category = nexus_model_SCN.category_list
 		library = nexus_model_SCN.library_list
 		group_or_meshdata = nexus_model_SCN.group_or_meshdata
+		group_asset = os.path.splitext(nexus_model_SCN.group_asset)[0]
+		group_asset = group_asset.replace(category + "_", "")
+		group_asset = group_asset.replace(asset_name + "_", "")
 
 		render_path = os.path.join(path_models, library, category, asset_name, "render")
 
