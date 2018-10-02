@@ -520,7 +520,20 @@ class Image_Path(bpy.types.Operator):
 		selected_preview = nexus_model_SCN.asset_previews
 		group = nexus_model_SCN.group_asset
 
-		filepath = os.path.join(model_dir, library, category, selected_preview, "render", group + ".png")
+		render_path = os.path.join(model_dir, library, category, selected_preview, "render")
+
+		if os.path.exists(render_path):
+			num_groups = len(os.listdir(render_path)) > 1
+		else:
+			num_groups = False
+
+		if num_groups:
+			# group = library + sep_lib + category + sep_cat + group
+			filepath = os.path.join(model_dir, library, category, selected_preview, "render", group + ".png")
+		else:
+			group = group.replace(library + sep_lib, "")
+			group = group.replace(category + sep_cat, "")
+			filepath = os.path.join(model_dir, library, category, selected_preview, "render", group + ".png")
 
 		bpy.ops.wm.path_open(filepath=filepath)
 		return {'FINISHED'}
