@@ -19,7 +19,7 @@ from bpy.types import WindowManager
 # separator symbols
 sep_lib = "_"
 sep_cat = "-"
-sep_name = "_"
+sep_name = "-"
 
 ###########################################################################
 #################### function dinamicaly make category ####################
@@ -88,9 +88,9 @@ def enum_groups_asset(self, context):
 	for i, name in enumerate(list_groups):
 		filepath = os.path.join(render_path, name + ".png")
 
-		icon_name = name.replace(library + sep_lib, "") # remove library name
-		icon_name = icon_name.replace(category + sep_cat, "") # remove category name
-		icon_name = icon_name.replace(assets_name + sep_name, "") # remove asset name
+		# icon_name = name.replace(library + sep_lib, "") # remove library name
+		# icon_name = icon_name.replace(category + sep_cat, "") # remove category name
+		icon_name = name.replace(assets_name + sep_name, "") # remove asset name
 		if filepath in pcoll:
 			enum_items.append((name, icon_name, "", pcoll[filepath].icon_id, i))
 		else:
@@ -199,8 +199,8 @@ class ManagerPreviewsPanel(bpy.types.Panel):
 		library = nexus_model_SCN.library_list
 		group_or_meshdata = nexus_model_SCN.group_or_meshdata
 		group_asset = os.path.splitext(nexus_model_SCN.group_asset)[0]
-		group_asset = group_asset.replace(library + sep_lib, "")
-		group_asset = group_asset.replace(category + sep_cat, "")
+		# group_asset = group_asset.replace(library + sep_lib, "")
+		# group_asset = group_asset.replace(category + sep_cat, "")
 		group_asset = group_asset.replace(asset_name + sep_name, "")
 
 		render_path = os.path.join(path_models, library, category, asset_name, "render")
