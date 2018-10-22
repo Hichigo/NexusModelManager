@@ -353,10 +353,10 @@ class AddModelOperator(bpy.types.Operator):
 	bl_idname = "add.model"
 	bl_label = "Add Model?"
 
-	def draw(self, context):
-		layout = self.layout
-		col = layout.column()
-		col.label("The asset is already added. Add more?")
+	# def draw(self, context):
+	# 	layout = self.layout
+	# 	col = layout.column()
+	# 	col.label("The asset is already added. Add more?")
 
 	def invoke(self, context, event):
 		nexus_model_SCN = context.scene.nexus_model_manager
@@ -369,7 +369,9 @@ class AddModelOperator(bpy.types.Operator):
 			nexus_model_SCN.add_location = "CENTER"
 
 		if bpy.data.groups.get(group_name) is not None:
-			return context.window_manager.invoke_props_dialog(self)
+			bpy.ops.object.group_instance_add(group=group_name)
+			self.report({'INFO'}, 'Added Intance group from scene (allready exist in scene)')
+			# return context.window_manager.invoke_props_dialog(self)
 		else:
 			self.execute(context)
 		
