@@ -157,7 +157,7 @@ asset_collections = {}
 class Preferences(bpy.types.AddonPreferences):
 	bl_idname = __name__
 
-	path_to_library : bpy.types.Scene.path_to_library = StringProperty(
+	path_to_library = bpy.types.Scene.path_to_library = StringProperty(
 		name="Path",
 		default=os.path.join(os.path.dirname(__file__), "LibraryModels"),
 		description="The path to your library",
@@ -180,9 +180,11 @@ class Preferences(bpy.types.AddonPreferences):
 class ManagerPreviewsPanel(bpy.types.Panel):
 
 	bl_label = "Nexus Model Manager"
-	bl_space_type = 'VIEW_3D'
-	bl_region_type = 'TOOLS'
-	bl_category = "Nexus Model Manager"
+	bl_idname = "SCENE_PT_NexusModelManager"
+	bl_space_type = "PROPERTIES"
+	bl_region_type = "WINDOW"
+	# bl_category = "Nexus Model Manager"
+	bl_context = "scene"
 
 	@classmethod
 	def poll(cls, context):
@@ -616,6 +618,7 @@ class NexusModelManager_WM_Properties(bpy.types.PropertyGroup):
 ######################################################################
 
 classes = (
+	ManagerPreviewsPanel,
 	Preferences,
 	Library_Path,
 	Asset_Path,
@@ -639,7 +642,7 @@ def register():
 	user_preferences = bpy.context.user_preferences
 	addon_prefs = user_preferences.addons[__name__].preferences
 
-	WindowManager.nexus_model_manager_dir_resource : StringProperty(
+	WindowManager.nexus_model_manager_dir_resource = StringProperty(
 		name="Folder Path",
 		subtype="DIR_PATH",
 		default=addon_prefs.path_to_library
