@@ -320,7 +320,7 @@ class ManagerPreviewsPanel(bpy.types.Panel):
 
 ####### Add Button
 		col = box.column(align=True)
-		col.operator("add.model", icon="ZOOMIN", text="Add Asset")
+		col.operator("add.model", icon="ADD", text="Add Asset")
 
 
 # class BigPreview(bpy.types.Operator):
