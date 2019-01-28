@@ -639,8 +639,8 @@ def register():
 	# bpy.utils.register_module(__name__)
 
 
-	user_preferences = bpy.context.user_preferences
-	addon_prefs = user_preferences.addons[__name__].preferences
+	preferences = bpy.context.preferences
+	addon_prefs = preferences.addons[__name__].preferences
 
 	WindowManager.nexus_model_manager_dir_resource = StringProperty(
 		name="Folder Path",
