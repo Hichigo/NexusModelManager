@@ -554,41 +554,41 @@ class NexusModelManager_WM_Properties(bpy.types.PropertyGroup):
 	# 	soft_max=10.0
 	# )
 
-	link_model : BoolProperty(
+	link_model = BoolProperty(
 		name="Link",
 		description="If True link model else append model",
 		default=False
 	)
 
-	instance_groups : BoolProperty(
+	instance_groups = BoolProperty(
 		name="Instance groups",
 		description="Instance groups",
 		default=False
 	)
 
-	set_to_selected_objects : BoolProperty(
+	set_to_selected_objects = BoolProperty(
 		name="Set to selected objects",
 		description="Set mesh data to selected objects",
 		default=False
 	)
 
-	asset_previews : EnumProperty(
+	asset_previews = EnumProperty(
 		items=enum_previews_asset_items
 	)
 
-	library_list : EnumProperty(
+	library_list = EnumProperty(
 		items=make_library_list
 	)
 
-	category_list : EnumProperty(
+	category_list = EnumProperty(
 		items=make_category_list
 	)
 
-	group_asset : EnumProperty(
+	group_asset = EnumProperty(
 		items=enum_groups_asset
 	)
 
-	group_or_meshdata : EnumProperty(
+	group_or_meshdata = EnumProperty(
 		name="Group or Mesh Data",
 		items=[
 			("GROUP", "Group", "", 0),
@@ -598,7 +598,7 @@ class NexusModelManager_WM_Properties(bpy.types.PropertyGroup):
 		default = "GROUP"
 	)
 
-	add_location : EnumProperty(
+	add_location = EnumProperty(
 		name="Add location",
 		items=[
 			("CENTER", "Center", "", 0),
@@ -607,7 +607,7 @@ class NexusModelManager_WM_Properties(bpy.types.PropertyGroup):
 		default = "CENTER"
 	)
 
-	add_dupligroup : BoolProperty(
+	add_dupligroup = BoolProperty(
 		name="Add dupligroup to selected",
 		description="Add dupligroup to selected objects",
 		default=False
@@ -661,7 +661,7 @@ def register():
 
 	groups_collection["main"] = pcoll
 
-	bpy.types.Scene.nexus_model_manager : bpy.props.PointerProperty(type=NexusModelManager_WM_Properties)
+	bpy.types.Scene.nexus_model_manager = bpy.props.PointerProperty(type=NexusModelManager_WM_Properties)
 
 
 ######################################################################
