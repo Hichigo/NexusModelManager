@@ -243,7 +243,7 @@ class ManagerPreviewsPanel(bpy.types.Panel):
 		col = box.column()
 		row = col.row(align=True)
 		row.operator("library.asset_path", icon="FILE_FOLDER", text="Open Asset Folder")
-		row.operator("library.image_path", icon="IMAGE_COL", text="Open Image")
+		row.operator("library.image_path", icon="FILE_IMAGE", text="Open Image")
 
 ####### Previews
 		row = box.row()
