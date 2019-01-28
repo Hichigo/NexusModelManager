@@ -98,11 +98,11 @@ def enum_collections_asset(self, context):
 			enum_items.append((name, icon_name, "", thumb.icon_id, i))
 	# enum_items.sort()
 
-	pcoll.group_previews = enum_items
-	pcoll.group_previews_dir = render_path
-	return pcoll.group_previews
+	pcoll.collection_previews = enum_items
+	pcoll.collection_previews_dir = render_path
+	return pcoll.collection_previews
 
-groups_collection = {}
+collections_collection = {}
 
 ##################################################################
 ############################ Previews ############################
