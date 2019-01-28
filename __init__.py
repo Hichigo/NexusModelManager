@@ -623,7 +623,8 @@ classes = (
 	Library_Path,
 	Asset_Path,
 	Image_Path,
-	NexusModelManager_WM_Properties
+	NexusModelManager_WM_Properties,
+	AddModelOperator
 
 	)
 
