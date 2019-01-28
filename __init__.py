@@ -181,10 +181,10 @@ class ManagerPreviewsPanel(bpy.types.Panel):
 
 	bl_label = "Nexus Model Manager"
 	bl_idname = "SCENE_PT_NexusModelManager"
-	bl_space_type = "PROPERTIES"
-	bl_region_type = "WINDOW"
+	bl_space_type = "VIEW_3D"
+	bl_region_type = "TOOLS"
 	# bl_category = "Nexus Model Manager"
-	bl_context = "scene"
+	bl_context = ""#"scene"
 
 	@classmethod
 	def poll(cls, context):
