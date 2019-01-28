@@ -53,8 +53,8 @@ def make_library_list(self, context):
 
 	return make_list_folder(path_library)
 
-############################ Group ##########################
-def enum_groups_asset(self, context):
+############################ Collection ##########################
+def enum_collections_asset(self, context):
 
 	enum_items = []
 
@@ -71,21 +71,21 @@ def enum_groups_asset(self, context):
 	if context is None:
 		return enum_items
 
-	pcoll = groups_collection["main"]
+	pcoll = collections_collection["main"]
 
-	if render_path == pcoll.group_previews_dir:
-		return pcoll.group_previews
+	if render_path == pcoll.collection_previews_dir:
+		return pcoll.collection_previews
 
 	with bpy.data.libraries.load(filepath) as (df, dt):
-		list_groups = df.groups
-	list_groups.sort()
+		list_collections = df.collections
+	list_collections.sort()
 
 	# if render_path and os.path.exists(render_path):
 	# 	images_names = []
 	# 	for fn in os.listdir(render_path):
 	# 		images_names.append(os.path.splitext(fn)[0])
 
-	for i, name in enumerate(list_groups):
+	for i, name in enumerate(list_collections):
 		filepath = os.path.join(render_path, name + ".png")
 
 		# icon_name = name.replace(library + sep_lib, "") # remove library name
@@ -199,20 +199,20 @@ class ManagerPreviewsPanel(bpy.types.Panel):
 		asset_name = os.path.splitext(nexus_model_SCN.asset_previews)[0]
 		category = nexus_model_SCN.category_list
 		library = nexus_model_SCN.library_list
-		group_or_meshdata = nexus_model_SCN.group_or_meshdata
-		group_asset = os.path.splitext(nexus_model_SCN.group_asset)[0]
-		# group_asset = group_asset.replace(library + sep_lib, "")
-		# group_asset = group_asset.replace(category + sep_cat, "")
-		group_asset = group_asset.replace(asset_name + sep_name, "")
+		collection_or_meshdata = nexus_model_SCN.collection_or_meshdata
+		collection_asset = os.path.splitext(nexus_model_SCN.collection_asset)[0]
+		# collection_asset = collection_asset.replace(library + sep_lib, "")
+		# collection_asset = collection_asset.replace(category + sep_cat, "")
+		collection_asset = collection_asset.replace(asset_name + sep_name, "")
 
 		render_path = os.path.join(path_models, library, category, asset_name, "render")
 
 		# with bpy.data.libraries.load(filepath) as (df, dt):
-		# 	list_groups = df.groups
+		# 	list_collections = df.collections
 		if os.path.exists(render_path):
-			num_groups = len(os.listdir(render_path)) > 1
+			num_collections = len(os.listdir(render_path)) > 1
 		else:
-			num_groups = False
+			num_collections = False
 
 ############## Panel ##############
 
@@ -254,37 +254,37 @@ class ManagerPreviewsPanel(bpy.types.Panel):
 		row = box.row()
 		row.alignment = 'CENTER'
 		row.scale_y = 0.5
-		row.label(asset_name)
+		row.label(text=asset_name)
 
 ####### Previews scale
 		# col = box.column()
 		# col.prop(nexus_model_SCN, "scale_preview", slider=True)
 
-####### Groups list
-		if num_groups:
+####### Collections list
+		if num_collections:
 			row = box.row()
 			col = row.column()
 			# col.scale_y = nexus_model_SCN.scale_preview
 			col.scale_y = 1.5
-			col.template_icon_view(nexus_model_SCN, "group_asset", show_labels=True)
+			col.template_icon_view(nexus_model_SCN, "collection_asset", show_labels=True)
 			# col = row.column()
 			# col.operator("preview.big_preview", icon="ZOOM_IN", text="")
-####### Group Name
+####### Collection Name
 			row = box.row()
 			row.alignment = 'CENTER'
 			row.scale_y = 0.5
-			row.label(group_asset.replace(asset_name + "_", ""))
+			row.label(text=collection_asset.replace(asset_name + "_", ""))
 
-####### Group or mesh data
+####### Collection or mesh data
 		row = box.row()
-		row.label("What add?")
+		row.label(text="What add?")
 		row = box.row()
-		row.prop(nexus_model_SCN, "group_or_meshdata", expand=True)
+		row.prop(nexus_model_SCN, "collection_or_meshdata", expand=True)
 
-		if group_or_meshdata == "GROUP": ####################################### GROUP
+		if collection_or_meshdata == "COLLECTION": ####################################### COLLECTION
 ####### Add location
 			row = box.row()
-			row.label("Add location")
+			row.label(text="Add location")
 			row = box.row()
 			row.prop(nexus_model_SCN, "add_location", expand=True)
 
@@ -292,23 +292,23 @@ class ManagerPreviewsPanel(bpy.types.Panel):
 			col = box.column()
 			row = col.row()
 			row.prop(nexus_model_SCN, "link_model")
-			row.prop(nexus_model_SCN, "add_dupligroup")
+			row.prop(nexus_model_SCN, "add_duplicollection")
 
-####### instance groups
+####### instance collections
 			col = box.column()
 			row = col.row()
 			row.enabled = nexus_model_SCN.link_model
-			row.prop(nexus_model_SCN, "instance_groups")
-		elif group_or_meshdata == "MESH": ########################################### MESH
+			row.prop(nexus_model_SCN, "instance_collections")
+		elif collection_or_meshdata == "MESH": ########################################### MESH
 ####### link and dupli
 			col = box.column()
 			col.prop(nexus_model_SCN, "link_model")
 			col.prop(nexus_model_SCN, "set_to_selected_objects")
 
-		elif group_or_meshdata == "OBJECT": ####################################### OBJECT
+		elif collection_or_meshdata == "OBJECT": ####################################### OBJECT
 ####### Add location
 			row = box.row()
-			row.label("Add location")
+			row.label(text="Add location")
 			row = box.row()
 			row.prop(nexus_model_SCN, "add_location", expand=True)
 
@@ -344,7 +344,7 @@ class ManagerPreviewsPanel(bpy.types.Panel):
 # 		nexus_model_SCN = context.scene.nexus_model_manager
 # 		col = layout.column()
 # 		col.scale_y = 5
-# 		col.template_icon_view(nexus_model_SCN, "group_asset", show_labels=True)
+# 		col.template_icon_view(nexus_model_SCN, "collection_asset", show_labels=True)
 
 ################################################################
 ############################ Append ############################
@@ -362,17 +362,17 @@ class AddModelOperator(bpy.types.Operator):
 
 	def invoke(self, context, event):
 		nexus_model_SCN = context.scene.nexus_model_manager
-		group_name = nexus_model_SCN.group_asset
+		collection_name = nexus_model_SCN.collection_asset
 		is_link = nexus_model_SCN.link_model
-		add_dupli_to_sel = nexus_model_SCN.add_dupligroup
+		add_dupli_to_sel = nexus_model_SCN.add_duplicollection
 
 		if not is_link and add_dupli_to_sel and nexus_model_SCN.add_location == "CURSOR":
 			self.report({'INFO'}, 'Set Add location to "Center"')
 			nexus_model_SCN.add_location = "CENTER"
 
-		if bpy.data.groups.get(group_name) is not None:
-			bpy.ops.object.group_instance_add(group=group_name)
-			self.report({'INFO'}, 'Added Intance group from scene (allready exist in scene)')
+		if bpy.data.collections.get(collection_name) is not None:
+			bpy.ops.object.collection_instance_add(collection=collection_name)
+			self.report({'INFO'}, 'Added Intance collection from scene (allready exist in scene)')
 			# return context.window_manager.invoke_props_dialog(self)
 		else:
 			self.execute(context)
@@ -388,27 +388,27 @@ class AddModelOperator(bpy.types.Operator):
 		filename = nexus_model_SCN.asset_previews
 		category = nexus_model_SCN.category_list
 		library = nexus_model_SCN.library_list
-		group_name = nexus_model_SCN.group_asset
+		collection_name = nexus_model_SCN.collection_asset
 		is_link = nexus_model_SCN.link_model
-		inst_groups = nexus_model_SCN.instance_groups
-		add_dupli_to_sel = nexus_model_SCN.add_dupligroup
-		group_or_meshdata = nexus_model_SCN.group_or_meshdata
+		inst_collections = nexus_model_SCN.instance_collections
+		add_dupli_to_sel = nexus_model_SCN.add_duplicollection
+		collection_or_meshdata = nexus_model_SCN.collection_or_meshdata
 		set_to_selected_objects = nexus_model_SCN.set_to_selected_objects
 
 		filepath = os.path.join(path_models, library, category, filename, filename + ".blend")
 
-		if group_or_meshdata == "GROUP":
-			directory_inside_file = os.path.join(filepath, "Group")
-		elif group_or_meshdata == "MESH":
+		if collection_or_meshdata == "COLLECTION":
+			directory_inside_file = os.path.join(filepath, "Collection")
+		elif collection_or_meshdata == "MESH":
 			directory_inside_file = os.path.join(filepath, "Mesh")
-			group_name = "SM_" + group_name
-		elif group_or_meshdata == "OBJECT":
+			collection_name = "SM_" + collection_name
+		elif collection_or_meshdata == "OBJECT":
 			directory_inside_file = os.path.join(filepath, "Object")
-			group_name = "SM_" + group_name
+			collection_name = "SM_" + collection_name
 		else:
-			print("----------------- SOMETHING ERROR >>'group_or_meshdata'<< -----------------")
+			print("----------------- SOMETHING ERROR >>'collection_or_meshdata'<< -----------------")
 
-		filepath_group_name = directory_inside_file + group_name
+		filepath_collection_name = directory_inside_file + collection_name
 
 
 		selected_objects = context.selected_objects
@@ -418,27 +418,27 @@ class AddModelOperator(bpy.types.Operator):
 
 		if is_link:
 			bpy.ops.wm.link(
-				filepath=filepath_group_name,
-				filename=group_name,
+				filepath=filepath_collection_name,
+				filename=collection_name,
 				directory=directory_inside_file,
 				link=True,
-				instance_groups=inst_groups
+				instance_collections=inst_collections
 			)
 		else:
 			bpy.ops.wm.append(
-				filepath=filepath_group_name,
-				filename=group_name,
+				filepath=filepath_collection_name,
+				filename=collection_name,
 				directory=directory_inside_file,
 				link=False,
-				instance_groups=False
+				instance_collections=False
 			)
 
-		if group_or_meshdata == "GROUP":
+		if collection_or_meshdata == "COLLECTION":
 			if add_dupli_to_sel:
-				group = bpy.data.groups[group_name]
+				collection = bpy.data.collections[collection_name]
 				for obj in selected_objects:
-					obj.dupli_group = group
-					obj.dupli_type = 'GROUP'
+					obj.dupli_collection = collection
+					obj.dupli_type = 'COLLECTION'
 
 			if len(bpy.context.selected_objects) > 0:
 				if nexus_model_SCN.add_location == "CURSOR":
@@ -446,14 +446,14 @@ class AddModelOperator(bpy.types.Operator):
 				else:
 					bpy.context.selected_objects[0].location = (0.0, 0.0, 0.0)
 
-		elif group_or_meshdata == "MESH":
+		elif collection_or_meshdata == "MESH":
 			if set_to_selected_objects:
-				mesh = bpy.data.meshes[group_name]
+				mesh = bpy.data.meshes[collection_name]
 				for obj in selected_objects:
 					if obj.type == "MESH":
 						obj.data = mesh
 
-		elif group_or_meshdata == "OBJECT":
+		elif collection_or_meshdata == "OBJECT":
 			if len(bpy.context.selected_objects) > 0:
 				if nexus_model_SCN.add_location == "CURSOR":
 					bpy.context.selected_objects[0].location = context.scene.cursor_location
@@ -461,12 +461,12 @@ class AddModelOperator(bpy.types.Operator):
 					bpy.context.selected_objects[0].location = (0.0, 0.0, 0.0)
 
 		# if add_dupli_to_sel:
-		# 	group = bpy.data.groups[group_name]
+		# 	collection = bpy.data.collections[collection_name]
 		# 	for obj in selected_objects:
-		# 		obj.dupli_group = group
-		# 		obj.dupli_type = 'GROUP'
+		# 		obj.dupli_collection = collection
+		# 		obj.dupli_type = 'COLLECTION'
 
-		# if is_link and not inst_groups:
+		# if is_link and not inst_collections:
 		# 	return {'FINISHED'}
 
 
@@ -522,22 +522,22 @@ class Image_Path(bpy.types.Operator):
 		library = nexus_model_SCN.library_list
 		category = nexus_model_SCN.category_list
 		selected_preview = nexus_model_SCN.asset_previews
-		group = nexus_model_SCN.group_asset
+		collection = nexus_model_SCN.collection_asset
 
 		render_path = os.path.join(model_dir, library, category, selected_preview, "render")
 
 		if os.path.exists(render_path):
-			num_groups = len(os.listdir(render_path)) > 1
+			num_collections = len(os.listdir(render_path)) > 1
 		else:
-			num_groups = False
+			num_collections = False
 
-		if num_groups:
-			# group = library + sep_lib + category + sep_cat + group
-			filepath = os.path.join(model_dir, library, category, selected_preview, "render", group + ".png")
+		if num_collections:
+			# collection = library + sep_lib + category + sep_cat + collection
+			filepath = os.path.join(model_dir, library, category, selected_preview, "render", collection + ".png")
 		else:
-			group = group.replace(library + sep_lib, "")
-			group = group.replace(category + sep_cat, "")
-			filepath = os.path.join(model_dir, library, category, selected_preview, "render", group + ".png")
+			collection = collection.replace(library + sep_lib, "")
+			collection = collection.replace(category + sep_cat, "")
+			filepath = os.path.join(model_dir, library, category, selected_preview, "render", collection + ".png")
 
 		bpy.ops.wm.path_open(filepath=filepath)
 		return {'FINISHED'}
@@ -560,9 +560,9 @@ class NexusModelManager_WM_Properties(bpy.types.PropertyGroup):
 		default=False
 	)
 
-	instance_groups = BoolProperty(
-		name="Instance groups",
-		description="Instance groups",
+	instance_collections = BoolProperty(
+		name="Instance collections",
+		description="Instance collections",
 		default=False
 	)
 
@@ -584,18 +584,18 @@ class NexusModelManager_WM_Properties(bpy.types.PropertyGroup):
 		items=make_category_list
 	)
 
-	group_asset = EnumProperty(
-		items=enum_groups_asset
+	collection_asset = EnumProperty(
+		items=enum_collections_asset
 	)
 
-	group_or_meshdata = EnumProperty(
-		name="Group or Mesh Data",
+	collection_or_meshdata = EnumProperty(
+		name="Collection or Mesh Data",
 		items=[
-			("GROUP", "Group", "", 0),
+			("COLLECTION", "Collection", "", 0),
 			("MESH", "Mesh Data", "", 1),
 			("OBJECT", "Object", "", 2)
 		],
-		default = "GROUP"
+		default = "COLLECTION"
 	)
 
 	add_location = EnumProperty(
@@ -607,9 +607,9 @@ class NexusModelManager_WM_Properties(bpy.types.PropertyGroup):
 		default = "CENTER"
 	)
 
-	add_dupligroup = BoolProperty(
-		name="Add dupligroup to selected",
-		description="Add dupligroup to selected objects",
+	add_duplicollection = BoolProperty(
+		name="Add duplicollection to selected",
+		description="Add duplicollection to selected objects",
 		default=False
 	)
 
@@ -636,7 +636,7 @@ def register():
 	# bpy.utils.register_class(Library_Path)
 	# bpy.utils.register_class(Asset_Path)
 	# bpy.utils.register_class(Image_Path)
-	# # bpy.utils.register_class(AddExistGroup)
+	# # bpy.utils.register_class(AddExistCollection)
 	# bpy.utils.register_module(__name__)
 
 
@@ -656,10 +656,10 @@ def register():
 	asset_collections["main"] = pcoll
 
 	pcoll = bpy.utils.previews.new()
-	pcoll.group_previews_dir = ""
-	pcoll.group_previews = ()
+	pcoll.collection_previews_dir = ""
+	pcoll.collection_previews = ()
 
-	groups_collection["main"] = pcoll
+	collections_collection["main"] = pcoll
 
 	bpy.types.Scene.nexus_model_manager = bpy.props.PointerProperty(type=NexusModelManager_WM_Properties)
 
@@ -677,7 +677,7 @@ def unregister():
 	# bpy.utils.unregister_class(Library_Path)
 	# bpy.utils.unregister_class(Asset_Path)
 	# bpy.utils.unregister_class(Image_Path)
-	# bpy.utils.unregister_class(AddExistGroup)
+	# bpy.utils.unregister_class(AddExistCollection)
 
 	# del WindowManager.nexus_model_manager_dir_resource
 	# del bpy.types.Scene.nexus_model_manager
@@ -686,9 +686,9 @@ def unregister():
 		bpy.utils.previews.remove(pcoll)
 	asset_collections.clear()
 
-	for pcoll in groups_collection.values():
+	for pcoll in collections_collection.values():
 		bpy.utils.previews.remove(pcoll)
-	groups_collection.clear()
+	collections_collection.clear()
 
 	# bpy.utils.unregister_module(__name__)
 
