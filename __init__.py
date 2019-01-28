@@ -422,7 +422,8 @@ class AddModelOperator(bpy.types.Operator):
 				filename=collection_name,
 				directory=directory_inside_file,
 				link=True,
-				instance_collections=inst_collections
+				instance_collections=inst_collections,
+				autoselect=True
 			)
 		else:
 			bpy.ops.wm.append(
@@ -430,7 +431,8 @@ class AddModelOperator(bpy.types.Operator):
 				filename=collection_name,
 				directory=directory_inside_file,
 				link=False,
-				instance_collections=False
+				instance_collections=False,
+				autoselect=True
 			)
 
 		if collection_or_meshdata == "COLLECTION":
