@@ -7,7 +7,7 @@ bl_info = {
 	"description": "Tools",
 	"warning": "",
 	"wiki_url": "https://github.com/Hichigo/NexusModelManager",
-	"category": "Add Mesh"
+	"category": "Object"
 	}
 
 import bpy
