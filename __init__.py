@@ -622,7 +622,8 @@ classes = (
 	Preferences,
 	Library_Path,
 	Asset_Path,
-	Image_Path
+	Image_Path,
+	NexusModelManager_WM_Properties
 
 	)
 
