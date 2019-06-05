@@ -444,7 +444,7 @@ class AddModelOperator(bpy.types.Operator):
 
 			if len(bpy.context.selected_objects) > 0:
 				if nexus_model_SCN.add_location == "CURSOR":
-					bpy.context.selected_objects[0].location = context.scene.cursor_location
+					bpy.context.selected_objects[0].location = context.scene.cursor.location
 				else:
 					bpy.context.selected_objects[0].location = (0.0, 0.0, 0.0)
 
@@ -458,7 +458,7 @@ class AddModelOperator(bpy.types.Operator):
 		elif collection_or_meshdata == "OBJECT":
 			if len(bpy.context.selected_objects) > 0:
 				if nexus_model_SCN.add_location == "CURSOR":
-					bpy.context.selected_objects[0].location = context.scene.cursor_location
+					bpy.context.selected_objects[0].location = context.scene.cursor.location
 				else:
 					bpy.context.selected_objects[0].location = (0.0, 0.0, 0.0)
 
