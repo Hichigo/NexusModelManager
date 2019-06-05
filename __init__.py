@@ -180,11 +180,11 @@ class Preferences(bpy.types.AddonPreferences):
 class ManagerPreviewsPanel(bpy.types.Panel):
 
 	bl_label = "Nexus Model Manager"
-	bl_idname = "SCENE_PT_NexusModelManager"
+	#bl_idname = "SCENE_PT_NexusModelManager"
 	bl_space_type = "VIEW_3D"
-	bl_region_type = "TOOLS" # UI #???
-	# bl_category = "Nexus"
-	bl_context = ""#"scene"
+	bl_region_type = "UI" # UI #???
+	bl_category = "Nexus"
+	#bl_context = ""#"scene"
 
 	@classmethod
 	def poll(cls, context):
