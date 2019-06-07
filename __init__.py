@@ -16,6 +16,8 @@ from bpy.props import *
 import bpy.utils.previews
 from bpy.types import WindowManager
 
+from .mesh_paint_op import *
+
 # separator symbols
 sep_lib = "_"
 sep_cat = "-"
@@ -177,7 +179,7 @@ class Preferences(bpy.types.AddonPreferences):
 #################################################################
 
 
-class ManagerPreviewsPanel(bpy.types.Panel):
+class ManagerPreviews_PT_Panel(bpy.types.Panel):
 
 	bl_label = "Nexus Model Manager"
 	#bl_idname = "SCENE_PT_NexusModelManager"
@@ -620,7 +622,7 @@ class NexusModelManager_WM_Properties(bpy.types.PropertyGroup):
 ######################################################################
 
 classes = (
-	ManagerPreviewsPanel,
+	ManagerPreviews_PT_Panel,
 	Preferences,
 	Library_Path,
 	Asset_Path,
