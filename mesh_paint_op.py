@@ -8,11 +8,12 @@ import blf
 import gpu
 from gpu_extras.batch import batch_for_shader
 
-# import mathutils
-# import math
+import mathutils
+import math
 
-from mathutils import Vector
+from mathutils import Vector, Matrix, Euler, Quaternion
 
+import bpy_extras
 from bpy_extras.view3d_utils import (
 	region_2d_to_vector_3d,
 	region_2d_to_origin_3d
@@ -26,7 +27,41 @@ def draw_callback_px(self, context):
 	blf.size(font_id, 20, 72)
 	blf.draw(font_id, "LMB - Add Mesh | RMB / ESC - Exit")
 
-	# 50% alpha, 2 pixel width line
+	#draw_circle(self.mouse_path[0], 5, 16, self.normal) #draw circle under cursor
+	
+	### draw brush circle
+	steps = 16
+	angle = (2 * math.pi) / steps
+	radius = 1
+	
+	### calc smooth visual normal interpolation
+	
+	rot_mat = self.normal.rotation_difference(Vector((0,0,1))).to_matrix().to_3x3()
+	
+	cirlce_points = []
+
+	for i in range(steps):
+		x = self.mouse_path[0].x + radius*math.cos(angle*i)
+		y = self.mouse_path[0].y + radius*math.sin(angle*i)
+		z = self.mouse_path[0].z
+		
+		p = Vector((x,y,z))
+		
+		### rotate circle to match the ground normal
+		p -= self.mouse_path[0] + ( self.normal * (-0.3) )
+		p = p @ rot_mat
+		p += self.mouse_path[0]
+		cirlce_points.append(p)
+
+	shader = gpu.shader.from_builtin('3D_UNIFORM_COLOR')
+	bgl.glEnable(bgl.GL_BLEND)
+	bgl.glLineWidth(3)
+	batch = batch_for_shader(shader, 'LINE_LOOP', {"pos": cirlce_points})
+	shader.bind()
+	shader.uniform_float("color", (1.0, 0.0, 0.0, 1.0))
+	batch.draw(shader)
+		
+
 	shader = gpu.shader.from_builtin('3D_UNIFORM_COLOR')
 	bgl.glEnable(bgl.GL_BLEND)
 	bgl.glLineWidth(3)
@@ -38,7 +73,6 @@ def draw_callback_px(self, context):
 	# restore opengl defaults
 	bgl.glLineWidth(1)
 	bgl.glDisable(bgl.GL_BLEND)
-
 
 class MeshPaint_OT_Operator(Operator):
 	bl_idname = "viev3d.mesh_paint"
@@ -59,6 +93,7 @@ class MeshPaint_OT_Operator(Operator):
 			self._handle = bpy.types.SpaceView3D.draw_handler_add(draw_callback_px, args, 'WINDOW', 'POST_VIEW')
 
 			self.mouse_path = [(), ()]
+			self.normal = []
 
 			context.window_manager.modal_handler_add(self)
 			return {'RUNNING_MODAL'}
@@ -91,6 +126,7 @@ class MeshPaint_OT_Operator(Operator):
 			)
 			
 			if bHit:
+				self.normal = normal_hit
 				self.mouse_path[0] = pos_hit
 				self.mouse_path[1] = pos_hit + (normal_hit * 2.0)
 
