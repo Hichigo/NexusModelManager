@@ -628,6 +628,7 @@ classes = (
 	Asset_Path,
 	Image_Path,
 	NexusModelManager_WM_Properties,
+	MeshPaint_OT_Operator,
 	AddModelOperator
 
 	)
