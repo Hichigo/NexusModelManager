@@ -19,13 +19,15 @@ from bpy_extras.view3d_utils import (
 	region_2d_to_origin_3d
 )
 
+from .functions import *
+
 def draw_callback_px(self, context):
 	font_id = 0  # XXX, need to find out how best to get this.
 
 	# draw some text
 	blf.position(font_id, 15, 30, 0)
 	blf.size(font_id, 20, 72)
-	blf.draw(font_id, "LMB - Add Mesh | RMB / ESC - Cancel")
+	blf.draw(font_id, "LMB - Add Model | RMB / ESC - Cancel")
 	
 	### draw brush circle
 	steps = 16
@@ -128,13 +130,13 @@ class MeshPaint_OT_Operator(Operator):
 				self.mouse_path[0] = pos_hit
 				self.mouse_path[1] = pos_hit + (normal_hit * 2.0)
 
+		if event.value == "PRESS":
+			if event.type == 'LEFTMOUSE':
+				add_model(context, self.mouse_path[0], self.mouse_path[1])
+				return {'RUNNING_MODAL'}
 
-		elif event.type == 'LEFTMOUSE':
-			bpy.types.SpaceView3D.draw_handler_remove(self._handle, 'WINDOW')
-			return {'FINISHED'}
-
-		elif event.type in {'RIGHTMOUSE', 'ESC'}:
-			bpy.types.SpaceView3D.draw_handler_remove(self._handle, 'WINDOW')
-			return {'CANCELLED'}
+			elif event.type in {'RIGHTMOUSE', 'ESC'}:
+				bpy.types.SpaceView3D.draw_handler_remove(self._handle, 'WINDOW')
+				return {'CANCELLED'}
 
 		return {'RUNNING_MODAL'}
