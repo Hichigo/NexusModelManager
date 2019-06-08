@@ -383,8 +383,6 @@ class AddModelOperator(bpy.types.Operator):
 
 
 	def execute(self, context):
-		
-		scn = context.scene
 		nexus_model_SCN = context.scene.nexus_model_manager
 		path_models = bpy.data.window_managers["WinMan"].nexus_model_manager_dir_resource
 		filename = nexus_model_SCN.asset_previews
@@ -408,7 +406,7 @@ class AddModelOperator(bpy.types.Operator):
 			directory_inside_file = os.path.join(filepath, "Object")
 			collection_name = "SM_" + collection_name
 		else:
-			print("----------------- SOMETHING ERROR >>'collection_or_meshdata'<< -----------------")
+			print("----------------- SOMETHING ERROR >> collection_or_meshdata << -----------------")
 
 		filepath_collection_name = directory_inside_file + collection_name
 
