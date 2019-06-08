@@ -1,7 +1,8 @@
 import bpy
 import os
+import math
 
-from mathutils import Vector, Matrix
+from mathutils import Vector, Matrix, Euler
 
 
 def add_model(context, location, normal):
@@ -57,7 +58,35 @@ def add_model(context, location, normal):
             autoselect=True
         )
     
-    context.selected_objects[0].location = location
+    # context.selected_objects[0].location = location
+    mat_trans = Matrix.Translation(location)
+    
+
+    #euler_rotation = Euler(normal, 'XYZ').to_matrix().to_4x4()
+
+    #rot = normal.to_track_quat("X", "Z").to_euler().to_matrix().to_4x4()
+    rot = normal.rotation_difference(Vector((0,0,1))).to_matrix().to_4x4()
+
+    context.selected_objects[0].matrix_world = mat_trans @ rot#euler_rotation
+    print(normal)
+    print(rot)
+
+
+    # // Find yaw. z
+	# R.Yaw = FMath::Atan2(Y,X) * (180.f / PI);
+    # yaw = math.atan2(normal.y, normal.x) * (180.0 / math.pi)
+
+	# // Find pitch. y
+	# R.Pitch = FMath::Atan2(Z,FMath::Sqrt(X*X+Y*Y)) * (180.f / PI);
+    # pitch = math.atan2(normal.z, math.sqrt(normal.x*normal.x+normal.y*normal.y)) * (180.0 / math.pi)
+
+	# // Find roll.
+	# R.Roll = 0; x
+    # roll = 0
+
+    # context.selected_objects[0].rotation_euler.x = roll # = normal.to_track_quat('X', 'Z').to_euler()
+    # context.selected_objects[0].rotation_euler.y = pitch
+    # context.selected_objects[0].rotation_euler.z = yaw
 
     # mw = context.selected_objects[0].matrix_world.copy()
 

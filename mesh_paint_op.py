@@ -126,13 +126,13 @@ class MeshPaint_OT_Operator(Operator):
 			)
 			
 			if bHit:
-				self.normal = normal_hit
+				self.normal = normal_hit.normalized()
 				self.mouse_path[0] = pos_hit
-				self.mouse_path[1] = pos_hit + (normal_hit * 2.0)
+				self.mouse_path[1] = pos_hit + (self.normal * 2.0)
 
 		if event.value == "PRESS":
 			if event.type == 'LEFTMOUSE':
-				add_model(context, self.mouse_path[0], self.mouse_path[1])
+				add_model(context, self.mouse_path[0], self.normal)
 				return {'RUNNING_MODAL'}
 
 			elif event.type in {'RIGHTMOUSE', 'ESC'}:
