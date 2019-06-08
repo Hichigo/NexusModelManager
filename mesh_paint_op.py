@@ -25,9 +25,7 @@ def draw_callback_px(self, context):
 	# draw some text
 	blf.position(font_id, 15, 30, 0)
 	blf.size(font_id, 20, 72)
-	blf.draw(font_id, "LMB - Add Mesh | RMB / ESC - Exit")
-
-	#draw_circle(self.mouse_path[0], 5, 16, self.normal) #draw circle under cursor
+	blf.draw(font_id, "LMB - Add Mesh | RMB / ESC - Cancel")
 	
 	### draw brush circle
 	steps = 16
@@ -48,22 +46,22 @@ def draw_callback_px(self, context):
 		p = Vector((x,y,z))
 		
 		### rotate circle to match the ground normal
-		p -= self.mouse_path[0] + ( self.normal * (-0.3) )
+		p -= self.mouse_path[0]
 		p = p @ rot_mat
-		p += self.mouse_path[0]
+		p += self.mouse_path[0] + ( self.normal * (0.3) ) # some translate point in side normal
 		cirlce_points.append(p)
 
 	shader = gpu.shader.from_builtin('3D_UNIFORM_COLOR')
 	bgl.glEnable(bgl.GL_BLEND)
-	bgl.glLineWidth(3)
+	bgl.glLineWidth(2)
 	batch = batch_for_shader(shader, 'LINE_LOOP', {"pos": cirlce_points})
 	shader.bind()
 	shader.uniform_float("color", (1.0, 0.0, 0.0, 1.0))
 	batch.draw(shader)
 		
 
-	shader = gpu.shader.from_builtin('3D_UNIFORM_COLOR')
-	bgl.glEnable(bgl.GL_BLEND)
+	# shader = gpu.shader.from_builtin('3D_UNIFORM_COLOR')
+	# bgl.glEnable(bgl.GL_BLEND)
 	bgl.glLineWidth(3)
 	batch = batch_for_shader(shader, 'LINE_STRIP', {"pos": self.mouse_path})
 	shader.bind()
