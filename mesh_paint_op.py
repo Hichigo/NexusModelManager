@@ -21,14 +21,7 @@ from bpy_extras.view3d_utils import (
 
 from .functions import *
 
-def draw_callback_px(self, context):
-	font_id = 0  # XXX, need to find out how best to get this.
-
-	# draw some text
-	blf.position(font_id, 15, 30, 0)
-	blf.size(font_id, 20, 72)
-	blf.draw(font_id, "LMB - Add Model | RMB / ESC - Cancel")
-	
+def draw_callback_3d(self, context):
 	### draw brush circle
 	steps = 16
 	angle = (2 * math.pi) / steps
@@ -74,6 +67,25 @@ def draw_callback_px(self, context):
 	bgl.glLineWidth(1)
 	bgl.glDisable(bgl.GL_BLEND)
 
+def draw_callback_2d(self, context):
+        
+	font_id = 0  # XXX, need to find out how best to get this.
+
+	# Draw text to indicate that draw mode is active
+	region = context.region
+	text = "- Mesh Paint Mode -"
+	subtext = "LMB - Add Model | RMB / ESC - Cancel"
+
+	xt = int(region.width / 2.0)
+	
+	blf.size(font_id, 24, 72)
+	blf.position(0, xt - blf.dimensions(0, text)[0] / 2, 60 , 0)
+	blf.draw(0, text) 
+
+	blf.size(1, 20, 72)
+	blf.position(1, xt - blf.dimensions(0, subtext)[0] / 2, 30 , 1)
+	blf.draw(1, subtext)
+
 class MeshPaint_OT_Operator(Operator):
 	bl_idname = "viev3d.mesh_paint"
 	bl_label = "Mesh Paint"
@@ -90,7 +102,8 @@ class MeshPaint_OT_Operator(Operator):
 			args = (self, context)
 			# Add the region OpenGL drawing callback
 			# draw in view space with 'POST_VIEW' and 'PRE_VIEW'
-			self._handle = bpy.types.SpaceView3D.draw_handler_add(draw_callback_px, args, 'WINDOW', 'POST_VIEW')
+			self._handle = bpy.types.SpaceView3D.draw_handler_add(draw_callback_3d, args, 'WINDOW', 'POST_VIEW')
+			self._handle = bpy.types.SpaceView3D.draw_handler_add(draw_callback_2d, args, 'WINDOW', 'POST_PIXEL')
 
 			self.mouse_path = [(), ()]
 			self.normal = []
