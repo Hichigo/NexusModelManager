@@ -177,15 +177,27 @@ class Preferences(bpy.types.AddonPreferences):
 #################################################################
 ############################ Toolbar ############################
 #################################################################
+class Main_PT_Panel(bpy.types.Panel):
+	bl_label = "Nexus Model Manager"
+	# bl_idname = "Main_PT_Panel"
+	bl_space_type = "VIEW_3D"
+	bl_region_type = "UI"
+	bl_category = "Nexus"
+
+	def draw(self, context):
+		pass
+	
 
 
 class ManagerPreviews_PT_Panel(bpy.types.Panel):
 
-	bl_label = "Nexus Model Manager"
-	#bl_idname = "SCENE_PT_NexusModelManager"
+	bl_label = "Model Manager"
+	bl_idname = "PT_NexusModelManager"
 	bl_space_type = "VIEW_3D"
 	bl_region_type = "UI" # UI #???
 	bl_category = "Nexus"
+	bl_parent_id = "Main_PT_Panel"
+	bl_options = {'DEFAULT_CLOSED'}
 	#bl_context = ""#"scene"
 
 	@classmethod
@@ -324,6 +336,24 @@ class ManagerPreviews_PT_Panel(bpy.types.Panel):
 		col = box.column(align=True)
 		col.operator("add.model", icon="ADD", text="Add Asset")
 
+class MeshPaint_PT_Panel(bpy.types.Panel):
+	bl_label = "Mesh Paint Settings"
+	bl_space_type = "VIEW_3D"
+	bl_region_type = "UI"
+	bl_category = "Nexus Model Manager"
+	bl_parent_id = "Main_PT_Panel"
+	bl_options = {'DEFAULT_CLOSED'}
+
+	@classmethod
+	def poll(cls, context):
+		return context.mode == 'OBJECT'
+	
+	def draw(self, context):
+		layout = self.layout
+
+		layout.operator(MeshPaint_OT_Operator.bl_idname, text="Mesh Paint", icon="STYLUS_PRESSURE")
+
+	
 
 # class BigPreview(bpy.types.Operator):
 # 	bl_idname = "preview.big_preview"
@@ -620,7 +650,9 @@ class NexusModelManager_WM_Properties(bpy.types.PropertyGroup):
 ######################################################################
 
 classes = (
+	Main_PT_Panel,
 	ManagerPreviews_PT_Panel,
+	MeshPaint_PT_Panel,
 	Preferences,
 	Library_Path,
 	Asset_Path,
