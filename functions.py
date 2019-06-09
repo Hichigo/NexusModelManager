@@ -61,3 +61,4 @@ def add_model(context, location, normal):
     mat_trans = Matrix.Translation(location) # location matrix
     mat_rot = normal.to_track_quat('Z','Y').to_matrix().to_4x4() # rotation matrix
     context.selected_objects[0].matrix_world = mat_trans @ mat_rot # apply both matrix
+    return context.selected_objects[0]
