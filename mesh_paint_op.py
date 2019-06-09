@@ -102,11 +102,13 @@ class MeshPaint_OT_Operator(Operator):
 			args = (self, context)
 			# Add the region OpenGL drawing callback
 			# draw in view space with 'POST_VIEW' and 'PRE_VIEW'
-			self._handle = bpy.types.SpaceView3D.draw_handler_add(draw_callback_3d, args, 'WINDOW', 'POST_VIEW')
-			self._handle = bpy.types.SpaceView3D.draw_handler_add(draw_callback_2d, args, 'WINDOW', 'POST_PIXEL')
+			self._handle_3d = bpy.types.SpaceView3D.draw_handler_add(draw_callback_3d, args, 'WINDOW', 'POST_VIEW')
+			self._handle_2d = bpy.types.SpaceView3D.draw_handler_add(draw_callback_2d, args, 'WINDOW', 'POST_PIXEL')
 
-			self.mouse_path = [(), ()]
-			self.normal = []
+			self.mouse_path = [Vector((0,0,0)), Vector((0,0,1))]
+			self.normal = Vector((0,0,1))
+
+			self.new_model = add_model(context, self.mouse_path[0], self.normal)
 
 			context.window_manager.modal_handler_add(self)
 			return {'RUNNING_MODAL'}
@@ -131,17 +133,22 @@ class MeshPaint_OT_Operator(Operator):
 		if event.type == 'MOUSEMOVE':
 			# new origin and normal
 			origin, direction = self.get_origin_and_direction(event, context)
-
+			self.new_model.hide_set(True)
 			bHit, pos_hit, normal_hit, face_index_hit, obj_hit, matrix_world = context.scene.ray_cast(
 				view_layer=context.view_layer,
 				origin=origin,
 				direction=direction
 			)
+			self.new_model.hide_set(False)
 			
 			if bHit:
 				self.normal = normal_hit.normalized()
 				self.mouse_path[0] = pos_hit
 				self.mouse_path[1] = pos_hit + (self.normal * 2.0)
+
+				mat_trans = Matrix.Translation(self.mouse_path[0]) # location matrix
+				mat_rot = self.normal.to_track_quat('Z','Y').to_matrix().to_4x4() # rotation matrix
+				self.new_model.matrix_world = mat_trans @ mat_rot # apply both matrix
 
 		if event.value == "PRESS":
 			if event.type == 'LEFTMOUSE':
@@ -149,7 +156,13 @@ class MeshPaint_OT_Operator(Operator):
 				return {'RUNNING_MODAL'}
 
 			elif event.type in {'RIGHTMOUSE', 'ESC'}:
-				bpy.types.SpaceView3D.draw_handler_remove(self._handle, 'WINDOW')
+				
+				bpy.ops.object.select_all(action='DESELECT')
+				self.new_model.select_set(True)
+				bpy.ops.object.delete()
+
+				bpy.types.SpaceView3D.draw_handler_remove(self._handle_3d, 'WINDOW')
+				bpy.types.SpaceView3D.draw_handler_remove(self._handle_2d, 'WINDOW')
 				return {'CANCELLED'}
 
 		return {'RUNNING_MODAL'}
