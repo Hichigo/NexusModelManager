@@ -105,6 +105,8 @@ class MeshPaint_OT_Operator(Operator):
 			self._handle_3d = bpy.types.SpaceView3D.draw_handler_add(draw_callback_3d, args, "WINDOW", "POST_VIEW")
 			self._handle_2d = bpy.types.SpaceView3D.draw_handler_add(draw_callback_2d, args, "WINDOW", "POST_PIXEL")
 
+			self.state = "MOVE"
+
 			self.mouse_path = [Vector((0,0,0)), Vector((0,0,1))]
 			self.normal = Vector((0,0,1))
 			self.new_scale = 1.0
@@ -132,32 +134,37 @@ class MeshPaint_OT_Operator(Operator):
 		context.area.tag_redraw()
 
 		if event.type == "MOUSEMOVE":
-			# new origin and normal
-			origin, direction = self.get_origin_and_direction(event, context)
+			if self.state == "MOVE":
+				# new origin and normal
+				origin, direction = self.get_origin_and_direction(event, context)
 
-			# hide mesh
-			self.new_model.hide_set(True)
-			# trace
-			bHit, pos_hit, normal_hit, face_index_hit, obj_hit, matrix_world = context.scene.ray_cast(
-				view_layer=context.view_layer,
-				origin=origin,
-				direction=direction
-			)
-			#how mesh
-			self.new_model.hide_set(False)
-			
-			if bHit:
-				self.normal = normal_hit.normalized()
-				self.mouse_path[0] = pos_hit
-				self.mouse_path[1] = pos_hit + (self.normal * 2.0)
+				# hide mesh
+				self.new_model.hide_set(True)
+				# trace
+				bHit, pos_hit, normal_hit, face_index_hit, obj_hit, matrix_world = context.scene.ray_cast(
+					view_layer=context.view_layer,
+					origin=origin,
+					direction=direction
+				)
+				#how mesh
+				self.new_model.hide_set(False)
+				
+				if bHit:
+					self.normal = normal_hit.normalized()
+					self.mouse_path[0] = pos_hit
+					self.mouse_path[1] = pos_hit + (self.normal * 2.0)
 
-				#mat_trans = Matrix.Translation(self.mouse_path[0]) # location matrix
-				rot = self.normal.to_track_quat("Z","Y").to_euler()#.to_matrix().to_4x4() # rotation matrix
-				self.new_model.location = self.mouse_path[0]
-				self.new_model.rotation_euler = rot
-				self.new_model.scale = Vector((self.new_scale, self.new_scale, self.new_scale))
+					#mat_trans = Matrix.Translation(self.mouse_path[0]) # location matrix
+					rot = self.normal.to_track_quat("Z","Y").to_euler()#.to_matrix().to_4x4() # rotation matrix
+					self.new_model.location = self.mouse_path[0]
+					self.new_model.rotation_euler = rot
+					self.new_model.scale = Vector((self.new_scale, self.new_scale, self.new_scale))
 
-				#self.new_model.matrix_world = mat_trans @ mat_rot # apply both matrix
+					#self.new_model.matrix_world = mat_trans @ mat_rot # apply both matrix
+			elif self.state == "ROTATE":
+				pass
+			elif self.state == "SCALE":
+				pass
 
 		if event.type == "WHEELUPMOUSE":
 			self.new_scale += 0.1
@@ -171,9 +178,17 @@ class MeshPaint_OT_Operator(Operator):
 
 		if event.value == "PRESS":
 			if event.type == "R":
-				print("rotation")
-
+				self.state = "ROTATE"
 				return {"RUNNING_MODAL"}
+
+			elif event.type == "G":
+				self.state = "MOVE"
+				return {"RUNNING_MODAL"}
+
+			elif event.type == "S":
+				self.state = "SCALE"
+				return {"RUNNING_MODAL"}
+
 			elif event.type == "LEFTMOUSE":
 				self.new_model = add_model(context, self.mouse_path[0], self.normal)
 				return {"RUNNING_MODAL"}

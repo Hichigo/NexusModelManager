@@ -399,7 +399,7 @@ class AddModelOperator(bpy.types.Operator):
 		add_dupli_to_sel = nexus_model_SCN.add_duplicollection
 
 		if not is_link and add_dupli_to_sel and nexus_model_SCN.add_location == "CURSOR":
-			self.report({"INFO"}, "Set Add location to "Center"")
+			self.report({"INFO"}, "Set Add location to Center")
 			nexus_model_SCN.add_location = "CENTER"
 
 		if bpy.data.collections.get(collection_name) is not None:
