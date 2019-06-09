@@ -60,8 +60,24 @@ def draw_callback_3d(self, context):
 	bgl.glLineWidth(3)
 	batch = batch_for_shader(shader, "LINE_STRIP", {"pos": self.mouse_path})
 	shader.bind()
-	shader.uniform_float("color", (0.0, 0.0, 1.0, 1.0))
+	shader.uniform_float("color", (0.0, 1.0, 1.0, 1.0))
 	batch.draw(shader)
+
+	if self.state == "ROTATE":
+		arrow_rot_path = []
+		arrow_rot_path.append(self.new_model.location + ( self.normal * (0.3) ))
+		arrow_rot_path.append(arrow_rot_path[0] + (self.rot_dir_arrow * 2))
+		euler_rot = arrow_rot_path[1].to_track_quat("Z","Y").to_euler()
+		arrow_rot_path[1].x = euler_rot.x
+		arrow_rot_path[1].y = euler_rot.y
+		arrow_rot_path[1].z = euler_rot.z
+		
+		batch = batch_for_shader(shader, "LINE_STRIP", {"pos": arrow_rot_path})
+		shader.bind()
+		shader.uniform_float("color", (0.0, 0.0, 1.0, 1.0))
+		batch.draw(shader)
+		print(arrow_rot_path)
+
 
 	# restore opengl defaults
 	bgl.glLineWidth(1)
@@ -74,7 +90,7 @@ def draw_callback_2d(self, context):
 	# Draw text to indicate that draw mode is active
 	region = context.region
 	text = "- Mesh Paint Mode -"
-	subtext = "LMB - Add Model | RMB / ESC - Cancel"
+	subtext = "LMB - Add Model | G - Move, R - Rotate, S - Scale | RMB / ESC - Cancel"
 
 	xt = int(region.width / 2.0)
 	
@@ -107,8 +123,10 @@ class MeshPaint_OT_Operator(Operator):
 
 			self.state = "MOVE"
 
-			self.mouse_path = [Vector((0,0,0)), Vector((0,0,1))]
-			self.normal = Vector((0,0,1))
+			self.mouse_path = [Vector((0, 0, 0)), Vector((0, 0, 1))]
+			self.normal = Vector((0, 0, 1))
+
+			self.rot_dir_arrow = Vector((1, 0, 0))
 			self.new_scale = 1.0
 
 			self.new_model = add_model(context, self.mouse_path[0], self.normal)
@@ -146,7 +164,7 @@ class MeshPaint_OT_Operator(Operator):
 					origin=origin,
 					direction=direction
 				)
-				#how mesh
+				# show mesh
 				self.new_model.hide_set(False)
 				
 				if bHit:
@@ -162,7 +180,24 @@ class MeshPaint_OT_Operator(Operator):
 
 					#self.new_model.matrix_world = mat_trans @ mat_rot # apply both matrix
 			elif self.state == "ROTATE":
-				pass
+				# new origin and normal
+				origin, direction = self.get_origin_and_direction(event, context)
+				# hide mesh
+				self.new_model.hide_set(True)
+				# trace
+				bHit, pos_hit, normal_hit, face_index_hit, obj_hit, matrix_world = context.scene.ray_cast(
+					view_layer=context.view_layer,
+					origin=origin,
+					direction=direction
+				)
+				# show mesh
+				self.new_model.hide_set(False)
+				
+				if bHit:
+					rot_dir = (pos_hit - self.new_model.location).normalized()
+					self.rot_dir_arrow = rot_dir
+					
+				
 			elif self.state == "SCALE":
 				pass
 
