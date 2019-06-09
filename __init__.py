@@ -35,7 +35,7 @@ def make_list_folder(path):
 
 	for dir in dirs:
 		if os.path.isdir(os.path.join(path, dir)):
-			item = (dir, dir, '', i)
+			item = (dir, dir, "", i)
 			mode_options.append(item)
 			i += 1
 
@@ -96,7 +96,7 @@ def enum_collections_asset(self, context):
 		if filepath in pcoll:
 			enum_items.append((name, icon_name, "", pcoll[filepath].icon_id, i))
 		else:
-			thumb = pcoll.load(filepath, filepath, 'IMAGE')
+			thumb = pcoll.load(filepath, filepath, "IMAGE")
 			enum_items.append((name, icon_name, "", thumb.icon_id, i))
 	# enum_items.sort()
 
@@ -117,7 +117,7 @@ def enum_previews_asset_items(self, context):
 	""" create assets items prewiews """
 	enum_items = []
 
-	path_models = bpy.data.window_managers['WinMan'].nexus_model_manager_dir_resource
+	path_models = bpy.data.window_managers["WinMan"].nexus_model_manager_dir_resource
 	category = context.scene.nexus_model_manager.category_list
 	library = context.scene.nexus_model_manager.library_list
 	directory = os.path.join(path_models, library, category)
@@ -142,7 +142,7 @@ def enum_previews_asset_items(self, context):
 			if filepath in pcoll:
 				enum_items.append((name, name, "", pcoll[filepath].icon_id, i))
 			else:
-				thumb = pcoll.load(filepath, filepath, 'IMAGE')
+				thumb = pcoll.load(filepath, filepath, "IMAGE")
 				enum_items.append((name, name, "", thumb.icon_id, i))
 	enum_items.sort()
 
@@ -197,12 +197,12 @@ class ManagerPreviews_PT_Panel(bpy.types.Panel):
 	bl_region_type = "UI" # UI #???
 	bl_category = "Nexus"
 	bl_parent_id = "Main_PT_Panel"
-	bl_options = {'DEFAULT_CLOSED'}
+	bl_options = {"DEFAULT_CLOSED"}
 	#bl_context = ""#"scene"
 
 	@classmethod
 	def poll(cls, context):
-		return context.mode == 'OBJECT'
+		return context.mode == "OBJECT"
 
 	def draw(self, context):
 		layout = self.layout
@@ -266,7 +266,7 @@ class ManagerPreviews_PT_Panel(bpy.types.Panel):
 
 ####### Asset Name
 		row = box.row()
-		row.alignment = 'CENTER'
+		row.alignment = "CENTER"
 		row.scale_y = 0.5
 		row.label(text=asset_name)
 
@@ -285,7 +285,7 @@ class ManagerPreviews_PT_Panel(bpy.types.Panel):
 			# col.operator("preview.big_preview", icon="ZOOM_IN", text="")
 ####### Collection Name
 			row = box.row()
-			row.alignment = 'CENTER'
+			row.alignment = "CENTER"
 			row.scale_y = 0.5
 			row.label(text=collection_asset.replace(asset_name + "_", ""))
 
@@ -342,11 +342,11 @@ class MeshPaint_PT_Panel(bpy.types.Panel):
 	bl_region_type = "UI"
 	bl_category = "Nexus Model Manager"
 	bl_parent_id = "Main_PT_Panel"
-	bl_options = {'DEFAULT_CLOSED'}
+	bl_options = {"DEFAULT_CLOSED"}
 
 	@classmethod
 	def poll(cls, context):
-		return context.mode == 'OBJECT'
+		return context.mode == "OBJECT"
 	
 	def draw(self, context):
 		layout = self.layout
@@ -361,7 +361,7 @@ class MeshPaint_PT_Panel(bpy.types.Panel):
 
 # 	def execute(self, context):
 # 		print("Running big preview")
-# 		return {'FINISHED'}
+# 		return {"FINISHED"}
 
 # 	def check(self, context):
 # 		return False
@@ -399,17 +399,17 @@ class AddModelOperator(bpy.types.Operator):
 		add_dupli_to_sel = nexus_model_SCN.add_duplicollection
 
 		if not is_link and add_dupli_to_sel and nexus_model_SCN.add_location == "CURSOR":
-			self.report({'INFO'}, 'Set Add location to "Center"')
+			self.report({"INFO"}, "Set Add location to "Center"")
 			nexus_model_SCN.add_location = "CENTER"
 
 		if bpy.data.collections.get(collection_name) is not None:
 			bpy.ops.object.collection_instance_add(collection=collection_name)
-			self.report({'INFO'}, 'Added Intance collection from scene (allready exist in scene)')
+			self.report({"INFO"}, "Added Intance collection from scene (allready exist in scene)")
 			# return context.window_manager.invoke_props_dialog(self)
 		else:
 			self.execute(context)
 		
-		return {'FINISHED'}
+		return {"FINISHED"}
 
 
 	def execute(self, context):
@@ -444,7 +444,7 @@ class AddModelOperator(bpy.types.Operator):
 		selected_objects = context.selected_objects
 
 		if not add_dupli_to_sel:
-			bpy.ops.object.select_all(action='DESELECT')
+			bpy.ops.object.select_all(action="DESELECT")
 
 		if is_link:
 			bpy.ops.wm.link(
@@ -470,7 +470,7 @@ class AddModelOperator(bpy.types.Operator):
 				collection = bpy.data.collections[collection_name]
 				for obj in selected_objects:
 					obj.dupli_collection = collection
-					obj.dupli_type = 'COLLECTION'
+					obj.dupli_type = "COLLECTION"
 
 			if len(bpy.context.selected_objects) > 0:
 				if nexus_model_SCN.add_location == "CURSOR":
@@ -496,14 +496,14 @@ class AddModelOperator(bpy.types.Operator):
 		# 	collection = bpy.data.collections[collection_name]
 		# 	for obj in selected_objects:
 		# 		obj.dupli_collection = collection
-		# 		obj.dupli_type = 'COLLECTION'
+		# 		obj.dupli_type = "COLLECTION"
 
 		# if is_link and not inst_collections:
-		# 	return {'FINISHED'}
+		# 	return {"FINISHED"}
 
 
 
-		return {'FINISHED'}
+		return {"FINISHED"}
 
 
 ######################################################################
@@ -518,7 +518,7 @@ class Library_Path(bpy.types.Operator):
 	def execute(self, context):
 		filepath = context.window_manager.nexus_model_manager_dir_resource
 		bpy.ops.wm.path_open(filepath=filepath)
-		return {'FINISHED'}
+		return {"FINISHED"}
 
 ######################################################################
 ############################ Asset path ############################
@@ -540,7 +540,7 @@ class Asset_Path(bpy.types.Operator):
 		filepath = os.path.join(model_dir, library, category, selected_preview)
 
 		bpy.ops.wm.path_open(filepath=filepath)
-		return {'FINISHED'}
+		return {"FINISHED"}
 
 class Image_Path(bpy.types.Operator):
 
@@ -572,7 +572,7 @@ class Image_Path(bpy.types.Operator):
 			filepath = os.path.join(model_dir, library, category, selected_preview, "render", collection + ".png")
 
 		bpy.ops.wm.path_open(filepath=filepath)
-		return {'FINISHED'}
+		return {"FINISHED"}
 
 
 class NexusModelManager_WM_Properties(bpy.types.PropertyGroup):

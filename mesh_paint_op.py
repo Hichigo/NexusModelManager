@@ -46,19 +46,19 @@ def draw_callback_3d(self, context):
 		p += self.mouse_path[0] + ( self.normal * (0.3) ) # some translate point in side normal
 		cirlce_points.append(p)
 
-	shader = gpu.shader.from_builtin('3D_UNIFORM_COLOR')
+	shader = gpu.shader.from_builtin("3D_UNIFORM_COLOR")
 	bgl.glEnable(bgl.GL_BLEND)
 	bgl.glLineWidth(2)
-	batch = batch_for_shader(shader, 'LINE_LOOP', {"pos": cirlce_points})
+	batch = batch_for_shader(shader, "LINE_LOOP", {"pos": cirlce_points})
 	shader.bind()
 	shader.uniform_float("color", (1.0, 0.0, 0.0, 1.0))
 	batch.draw(shader)
 		
 
-	# shader = gpu.shader.from_builtin('3D_UNIFORM_COLOR')
+	# shader = gpu.shader.from_builtin("3D_UNIFORM_COLOR")
 	# bgl.glEnable(bgl.GL_BLEND)
 	bgl.glLineWidth(3)
-	batch = batch_for_shader(shader, 'LINE_STRIP', {"pos": self.mouse_path})
+	batch = batch_for_shader(shader, "LINE_STRIP", {"pos": self.mouse_path})
 	shader.bind()
 	shader.uniform_float("color", (0.0, 0.0, 1.0, 1.0))
 	batch.draw(shader)
@@ -97,13 +97,13 @@ class MeshPaint_OT_Operator(Operator):
 
 
 	def invoke(self, context, event):
-		if context.area.type == 'VIEW_3D':
+		if context.area.type == "VIEW_3D":
 			# the arguments we pass the the callback
 			args = (self, context)
 			# Add the region OpenGL drawing callback
-			# draw in view space with 'POST_VIEW' and 'PRE_VIEW'
-			self._handle_3d = bpy.types.SpaceView3D.draw_handler_add(draw_callback_3d, args, 'WINDOW', 'POST_VIEW')
-			self._handle_2d = bpy.types.SpaceView3D.draw_handler_add(draw_callback_2d, args, 'WINDOW', 'POST_PIXEL')
+			# draw in view space with "POST_VIEW" and "PRE_VIEW"
+			self._handle_3d = bpy.types.SpaceView3D.draw_handler_add(draw_callback_3d, args, "WINDOW", "POST_VIEW")
+			self._handle_2d = bpy.types.SpaceView3D.draw_handler_add(draw_callback_2d, args, "WINDOW", "POST_PIXEL")
 
 			self.mouse_path = [Vector((0,0,0)), Vector((0,0,1))]
 			self.normal = Vector((0,0,1))
@@ -112,10 +112,10 @@ class MeshPaint_OT_Operator(Operator):
 			self.new_model = add_model(context, self.mouse_path[0], self.normal)
 
 			context.window_manager.modal_handler_add(self)
-			return {'RUNNING_MODAL'}
+			return {"RUNNING_MODAL"}
 		else:
-			self.report({'WARNING'}, "View3D not found, cannot run operator")
-			return {'CANCELLED'}
+			self.report({"WARNING"}, "View3D not found, cannot run operator")
+			return {"CANCELLED"}
 
 	def get_origin_and_direction(self, event, context):
 		region = context.region
@@ -131,7 +131,7 @@ class MeshPaint_OT_Operator(Operator):
 	def modal(self, context, event):
 		context.area.tag_redraw()
 
-		if event.type == 'MOUSEMOVE':
+		if event.type == "MOUSEMOVE":
 			# new origin and normal
 			origin, direction = self.get_origin_and_direction(event, context)
 
@@ -152,36 +152,40 @@ class MeshPaint_OT_Operator(Operator):
 				self.mouse_path[1] = pos_hit + (self.normal * 2.0)
 
 				#mat_trans = Matrix.Translation(self.mouse_path[0]) # location matrix
-				rot = self.normal.to_track_quat('Z','Y').to_euler()#.to_matrix().to_4x4() # rotation matrix
+				rot = self.normal.to_track_quat("Z","Y").to_euler()#.to_matrix().to_4x4() # rotation matrix
 				self.new_model.location = self.mouse_path[0]
 				self.new_model.rotation_euler = rot
 				self.new_model.scale = Vector((self.new_scale, self.new_scale, self.new_scale))
 
 				#self.new_model.matrix_world = mat_trans @ mat_rot # apply both matrix
 
-		if event.type == 'WHEELUPMOUSE':
+		if event.type == "WHEELUPMOUSE":
 			self.new_scale += 0.1
 			self.new_model.scale = Vector((self.new_scale, self.new_scale, self.new_scale))
 			print("scale up +0.1")
-		elif event.type == 'WHEELDOWNMOUSE':
+		elif event.type == "WHEELDOWNMOUSE":
 			self.new_scale -= 0.1
 			self.new_model.scale = Vector((self.new_scale, self.new_scale, self.new_scale))
 			print("scale down -0.1")
 
 
 		if event.value == "PRESS":
-			if event.type == 'LEFTMOUSE':
-				self.new_model = add_model(context, self.mouse_path[0], self.normal)
-				return {'RUNNING_MODAL'}
+			if event.type == "R":
+				print("rotation")
 
-			elif event.type in {'RIGHTMOUSE', 'ESC'}:
+				return {"RUNNING_MODAL"}
+			elif event.type == "LEFTMOUSE":
+				self.new_model = add_model(context, self.mouse_path[0], self.normal)
+				return {"RUNNING_MODAL"}
+
+			elif event.type in {"RIGHTMOUSE", "ESC"}:
 				
-				bpy.ops.object.select_all(action='DESELECT')
+				bpy.ops.object.select_all(action="DESELECT")
 				self.new_model.select_set(True)
 				bpy.ops.object.delete()
 
-				bpy.types.SpaceView3D.draw_handler_remove(self._handle_3d, 'WINDOW')
-				bpy.types.SpaceView3D.draw_handler_remove(self._handle_2d, 'WINDOW')
-				return {'CANCELLED'}
+				bpy.types.SpaceView3D.draw_handler_remove(self._handle_3d, "WINDOW")
+				bpy.types.SpaceView3D.draw_handler_remove(self._handle_2d, "WINDOW")
+				return {"CANCELLED"}
 
-		return {'RUNNING_MODAL'}
+		return {"RUNNING_MODAL"}
