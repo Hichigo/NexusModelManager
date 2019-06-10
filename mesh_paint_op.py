@@ -153,6 +153,7 @@ class MeshPaint_OT_Operator(Operator):
 			self.rot_dir_arrow = Vector((1, 0, 0))
 			self.new_scale = 1.0
 			self.test_angle = 0
+			self.test_angle_old = 0
 
 			self.new_model = add_model(context, self.mouse_path[0], self.normal)
 
@@ -230,9 +231,10 @@ class MeshPaint_OT_Operator(Operator):
 				if self.test_angle < 0:
 					self.test_angle += 360
 
-
-
-				self.new_model.rotation_euler.rotate_axis("Z", math.radians(self.test_angle))# = Matrix.Rotation(math.radians(self.test_angle), 4, self.normal).to_euler()
+				
+				delta_angle = self.test_angle - self.test_angle_old
+				self.new_model.rotation_euler.rotate_axis("Z", math.radians(delta_angle))# = Matrix.Rotation(math.radians(self.test_angle), 4, self.normal).to_euler()
+				self.test_angle_old = self.test_angle
 				
 				# if bHit:
 				# 	rot_dir = (pos_hit - self.new_model.location).normalized()
