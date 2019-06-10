@@ -16,19 +16,19 @@ from mathutils import Vector, Matrix, Euler, Quaternion
 import bpy_extras
 from bpy_extras.view3d_utils import (
 	region_2d_to_vector_3d,
-	region_2d_to_origin_3d
+	region_2d_to_origin_3d,
+	location_3d_to_region_2d
 )
 
 from .functions import *
 
 def draw_callback_3d(self, context):
-	### draw brush circle
+	# draw brush circle
 	steps = 16
 	angle = (2 * math.pi) / steps
 	radius = 1
 	
-	### calc smooth visual normal interpolation
-	
+	# calculate circle points
 	rot_mat = self.normal.rotation_difference(Vector((0,0,1))).to_matrix().to_3x3()
 	
 	cirlce_points = []
@@ -40,7 +40,7 @@ def draw_callback_3d(self, context):
 		
 		p = Vector((x,y,z))
 		
-		### rotate circle to match the ground normal
+		# rotate circle to match the ground normal
 		p -= self.mouse_path[0]
 		p = p @ rot_mat
 		p += self.mouse_path[0] + ( self.normal * (0.3) ) # some translate point in side normal
@@ -63,20 +63,25 @@ def draw_callback_3d(self, context):
 	shader.uniform_float("color", (0.0, 1.0, 1.0, 1.0))
 	batch.draw(shader)
 
-	if self.state == "ROTATE":
-		arrow_rot_path = []
-		arrow_rot_path.append(self.new_model.location + ( self.normal * (0.3) ))
-		arrow_rot_path.append(arrow_rot_path[0] + (self.rot_dir_arrow * 2))
-		euler_rot = arrow_rot_path[1].to_track_quat("Z","Y").to_euler()
-		arrow_rot_path[1].x = euler_rot.x
-		arrow_rot_path[1].y = euler_rot.y
-		arrow_rot_path[1].z = euler_rot.z
+	# if self.state == "ROTATE":
+	# 	arrow_rot_path = []
+	# 	arrow_rot_path.append(self.new_model.location + ( self.normal * (0.3) ))
+	# 	# arrow_rot_path.append(arrow_rot_path[0] + (self.rot_dir_arrow * 2))
+	# 	arrow_rot_path.append(self.rot_dir_arrow)
+	# 	# euler_rot = arrow_rot_path[1].to_track_quat("-Y","Z").to_euler() # -Y Z - Look At?
+	# 	# arrow_rot_path[1].x = euler_rot.x
+	# 	# arrow_rot_path[1].y = euler_rot.y
+	# 	# arrow_rot_path[1].z = euler_rot.z
+
+	# 	# arrow_rot_path[1].x = arrow_rot_path[0].x + radius*math.cos(math.radians(self.test_angle))
+	# 	# arrow_rot_path[1].y = arrow_rot_path[0].y + radius*math.sin(math.radians(self.test_angle))
+	# 	# arrow_rot_path[1].z = arrow_rot_path[0].z
+	# 	# arrow_rot_path[1] = arrow_rot_path[1] @ rot_mat
 		
-		batch = batch_for_shader(shader, "LINE_STRIP", {"pos": arrow_rot_path})
-		shader.bind()
-		shader.uniform_float("color", (0.0, 0.0, 1.0, 1.0))
-		batch.draw(shader)
-		print(arrow_rot_path)
+	# 	batch = batch_for_shader(shader, "LINE_STRIP", {"pos": arrow_rot_path})
+	# 	shader.bind()
+	# 	shader.uniform_float("color", (0.0, 0.0, 1.0, 1.0))
+	# 	batch.draw(shader)
 
 
 	# restore opengl defaults
@@ -101,6 +106,25 @@ def draw_callback_2d(self, context):
 	blf.size(1, 20, 72)
 	blf.position(1, xt - blf.dimensions(0, subtext)[0] / 2, 30 , 1)
 	blf.draw(1, subtext)
+
+	if self.state == "ROTATE":
+		line = []
+		line.append((self.model_2d_point.x, self.model_2d_point.y))
+		line.append((self.mouse_coord.x, self.mouse_coord.y))
+
+		shader = gpu.shader.from_builtin("2D_UNIFORM_COLOR")
+		bgl.glEnable(bgl.GL_BLEND)
+		bgl.glLineWidth(2)
+		batch = batch_for_shader(shader, "LINE_STRIP", {"pos": line})
+		shader.bind()
+		shader.uniform_float("color", (1.0, 1.0, 0.0, 1.0))
+		batch.draw(shader)
+
+		# restore opengl defaults
+		bgl.glLineWidth(1)
+		bgl.glDisable(bgl.GL_BLEND)
+		
+
 
 class MeshPaint_OT_Operator(Operator):
 	bl_idname = "viev3d.mesh_paint"
@@ -128,6 +152,7 @@ class MeshPaint_OT_Operator(Operator):
 
 			self.rot_dir_arrow = Vector((1, 0, 0))
 			self.new_scale = 1.0
+			self.test_angle = 0
 
 			self.new_model = add_model(context, self.mouse_path[0], self.normal)
 
@@ -147,6 +172,14 @@ class MeshPaint_OT_Operator(Operator):
 		direction = region_2d_to_vector_3d(region, region_3d, mouse_coord)
 
 		return origin, direction
+
+	def get_2d_point_from_3d(self, event, context):
+		region = context.region
+		region_3d = context.space_data.region_3d
+
+		result = location_3d_to_region_2d(region, region_3d, self.new_model.location)
+
+		return result
 
 	def modal(self, context, event):
 		context.area.tag_redraw()
@@ -180,22 +213,30 @@ class MeshPaint_OT_Operator(Operator):
 
 					#self.new_model.matrix_world = mat_trans @ mat_rot # apply both matrix
 			elif self.state == "ROTATE":
-				# new origin and normal
-				origin, direction = self.get_origin_and_direction(event, context)
-				# hide mesh
-				self.new_model.hide_set(True)
-				# trace
-				bHit, pos_hit, normal_hit, face_index_hit, obj_hit, matrix_world = context.scene.ray_cast(
-					view_layer=context.view_layer,
-					origin=origin,
-					direction=direction
-				)
-				# show mesh
-				self.new_model.hide_set(False)
+				self.model_2d_point = self.get_2d_point_from_3d(event, context)
+				# self.model_2d_point = Vector((self.model_2d_point.x, self.model_2d_point.y, 0))
+				self.mouse_coord = Vector((event.mouse_region_x, event.mouse_region_y))
 				
-				if bHit:
-					rot_dir = (pos_hit - self.new_model.location).normalized()
-					self.rot_dir_arrow = rot_dir
+				dir = self.mouse_coord - self.model_2d_point
+				dir.normalize()
+
+				self.mouse_coord = self.model_2d_point + dir * 100
+
+				# dir = dir * 3
+				# self.mouse_coord = dir
+
+				self.test_angle = math.degrees(math.atan2(self.mouse_coord.y - self.model_2d_point.y, self.mouse_coord.x - self.model_2d_point.x))
+
+				if self.test_angle < 0:
+					self.test_angle += 360
+
+
+
+				self.new_model.rotation_euler.rotate_axis("Z", math.radians(self.test_angle))# = Matrix.Rotation(math.radians(self.test_angle), 4, self.normal).to_euler()
+				
+				# if bHit:
+				# 	rot_dir = (pos_hit - self.new_model.location).normalized()
+				# 	self.rot_dir_arrow = pos_hit#rot_dir
 					
 				
 			elif self.state == "SCALE":
@@ -204,11 +245,11 @@ class MeshPaint_OT_Operator(Operator):
 		if event.type == "WHEELUPMOUSE":
 			self.new_scale += 0.1
 			self.new_model.scale = Vector((self.new_scale, self.new_scale, self.new_scale))
-			print("scale up +0.1")
+			self.test_angle += 10
 		elif event.type == "WHEELDOWNMOUSE":
 			self.new_scale -= 0.1
 			self.new_model.scale = Vector((self.new_scale, self.new_scale, self.new_scale))
-			print("scale down -0.1")
+			self.test_angle -= 10
 
 
 		if event.value == "PRESS":
