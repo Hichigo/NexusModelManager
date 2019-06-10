@@ -268,6 +268,7 @@ class MeshPaint_OT_Operator(Operator):
 				return {"RUNNING_MODAL"}
 
 			elif event.type == "LEFTMOUSE":
+				self.state = "MOVE"
 				self.new_model = add_model(context, self.mouse_path[0], self.normal)
 				return {"RUNNING_MODAL"}
 
