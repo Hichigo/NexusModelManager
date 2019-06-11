@@ -186,7 +186,31 @@ class Main_PT_Panel(bpy.types.Panel):
 
 	def draw(self, context):
 		pass
-	
+
+class CreateAsset_PT_Panel(bpy.types.Panel):
+
+	bl_label = "Create Asset"
+	bl_idname = "PT_CreateAsset"
+	bl_space_type = "VIEW_3D"
+	bl_region_type = "UI"
+	bl_category = "Nexus"
+	bl_parent_id = "Main_PT_Panel"
+	bl_options = {"DEFAULT_CLOSED"}
+
+	@classmethod
+	def poll(cls, context):
+		return context.mode == "OBJECT"
+
+	def draw(self, context):
+		layout = self.layout
+		nexus_model_SCN = context.scene.nexus_model_manager
+
+		
+		layout.prop(nexus_model_SCN, "create_asset_dir")
+		layout.prop(nexus_model_SCN, "new_category_name")
+		layout.prop(nexus_model_SCN, "new_collection_name")
+		layout.operator("library.create_asset_path", text="Create Asset", icon="NEWFOLDER")
+
 
 
 class ManagerPreviews_PT_Panel(bpy.types.Panel):
@@ -194,11 +218,10 @@ class ManagerPreviews_PT_Panel(bpy.types.Panel):
 	bl_label = "Model Manager"
 	bl_idname = "PT_NexusModelManager"
 	bl_space_type = "VIEW_3D"
-	bl_region_type = "UI" # UI #???
+	bl_region_type = "UI"
 	bl_category = "Nexus"
 	bl_parent_id = "Main_PT_Panel"
 	bl_options = {"DEFAULT_CLOSED"}
-	#bl_context = ""#"scene"
 
 	@classmethod
 	def poll(cls, context):
@@ -542,6 +565,15 @@ class Asset_Path(bpy.types.Operator):
 		bpy.ops.wm.path_open(filepath=filepath)
 		return {"FINISHED"}
 
+class CreateAsset(bpy.types.Operator):
+
+	bl_idname = "library.create_asset_path"
+	bl_label = "Create Asset Path"
+	
+	def execute(self, context):
+		print("asset has been created")
+		return {"FINISHED"}
+
 class Image_Path(bpy.types.Operator):
 
 	bl_idname = "library.image_path"
@@ -586,41 +618,59 @@ class NexusModelManager_WM_Properties(bpy.types.PropertyGroup):
 	# 	soft_max=10.0
 	# )
 
-	link_model = BoolProperty(
+	new_category_name: StringProperty(
+		name="Category",
+		description="Name of New Category, if it does not exist",
+		default="Awesome_Category"
+	)
+
+	new_collection_name: StringProperty(
+		name="Collection",
+		description="Name of New Collection",
+		default="Awesome_Collection"
+	)
+
+	create_asset_dir: StringProperty(
+		name="Library Dir",
+		subtype="DIR_PATH",
+		default=""
+	)
+
+	link_model: BoolProperty(
 		name="Link",
 		description="If True link model else append model",
 		default=False
 	)
 
-	instance_collections = BoolProperty(
+	instance_collections: BoolProperty(
 		name="Instance collections",
 		description="Instance collections",
 		default=False
 	)
 
-	set_to_selected_objects = BoolProperty(
+	set_to_selected_objects: BoolProperty(
 		name="Set to selected objects",
 		description="Set mesh data to selected objects",
 		default=False
 	)
 
-	asset_previews = EnumProperty(
+	asset_previews: EnumProperty(
 		items=enum_previews_asset_items
 	)
 
-	library_list = EnumProperty(
+	library_list: EnumProperty(
 		items=make_library_list
 	)
 
-	category_list = EnumProperty(
+	category_list: EnumProperty(
 		items=make_category_list
 	)
 
-	collection_asset = EnumProperty(
+	collection_asset: EnumProperty(
 		items=enum_collections_asset
 	)
 
-	collection_or_meshdata = EnumProperty(
+	collection_or_meshdata: EnumProperty(
 		name="Collection or Mesh Data",
 		items=[
 			("COLLECTION", "Collection", "", 0),
@@ -630,7 +680,7 @@ class NexusModelManager_WM_Properties(bpy.types.PropertyGroup):
 		default = "COLLECTION"
 	)
 
-	add_location = EnumProperty(
+	add_location: EnumProperty(
 		name="Add location",
 		items=[
 			("CENTER", "Center", "", 0),
@@ -639,7 +689,7 @@ class NexusModelManager_WM_Properties(bpy.types.PropertyGroup):
 		default = "CENTER"
 	)
 
-	add_duplicollection = BoolProperty(
+	add_duplicollection: BoolProperty(
 		name="Add duplicollection to selected",
 		description="Add duplicollection to selected objects",
 		default=False
@@ -651,11 +701,13 @@ class NexusModelManager_WM_Properties(bpy.types.PropertyGroup):
 
 classes = (
 	Main_PT_Panel,
+	CreateAsset_PT_Panel,
 	ManagerPreviews_PT_Panel,
 	MeshPaint_PT_Panel,
 	Preferences,
 	Library_Path,
 	Asset_Path,
+	CreateAsset,
 	Image_Path,
 	NexusModelManager_WM_Properties,
 	MeshPaint_OT_Operator,
