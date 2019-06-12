@@ -12,6 +12,7 @@ bl_info = {
 
 import bpy
 import os
+import subprocess
 from bpy.props import *
 import bpy.utils.previews
 from bpy.types import WindowManager
@@ -207,6 +208,7 @@ class VIEW3D_PT_CreateAsset(bpy.types.Panel):
 
 		
 		layout.prop(nexus_model_SCN, "create_asset_dir")
+		layout.prop(nexus_model_SCN, "new_library_name")
 		layout.prop(nexus_model_SCN, "new_category_name")
 		layout.prop(nexus_model_SCN, "new_collection_name")
 		layout.operator("library.create_asset_path", text="Create Asset", icon="NEWFOLDER")
@@ -571,8 +573,64 @@ class CreateAsset(bpy.types.Operator):
 	bl_label = "Create Asset Path"
 	
 	def execute(self, context):
+		nexus_model_SCN = context.scene.nexus_model_manager
+		
+		asset_dir = nexus_model_SCN.create_asset_dir
+		library_name = nexus_model_SCN.new_library_name
+		category_name = nexus_model_SCN.new_category_name
+		collection_name = nexus_model_SCN.new_collection_name
+
+		asset_dir_path = os.path.join(asset_dir, library_name, category_name, collection_name)
+
+		if not os.path.exists(asset_dir_path):
+			os.makedirs(asset_dir_path)
+			print("dirs created: ", asset_dir_path)
+		else:
+			print("dirs already exist", asset_dir_path)
+
+		collection = bpy.data.collections.new(collection_name)
+		bpy.context.scene.collection.children.link(collection)
+
+		# join all selected objects
+		bpy.ops.object.join()
+
+		# move active object to root collection
+		bpy.ops.object.move_to_collection(collection_index=0)
+		
+		# link active object to new collection
+		collection.objects.link(context.active_object)
+
+		# unlink active object from root collection
+		context.scene.collection.objects.unlink(context.active_object)
+		context.active_object.name = collection_name
+
+		# save file
+		bpy.ops.wm.save_as_mainfile(filepath=bpy.data.filepath)
+
+		
+
+
 		addon_path = get_file_dir(__file__)
 		empty_blend = os.path.join(addon_path, "resources", "empty.blend")
+		append_from_blendfile = bpy.data.filepath
+
+		tools = os.path.join(addon_path, "tools", "create_asset.py")
+
+
+		sub = subprocess.Popen([
+			bpy.app.binary_path,   # path to blender.exe
+			empty_blend,           # open file
+			"-b",                  # open background blender
+			"--python",
+			tools,                 # path to python script
+			append_from_blendfile, # from blendfile append collection
+			"Collection",
+			collection.name,       # append collection name
+			asset_dir_path]        # path save this file
+		)
+
+		# asset_dir_path
+		print(tools)
 		print(bpy.data.filepath)
 		print(empty_blend)
 		return {"FINISHED"}
@@ -620,6 +678,12 @@ class NexusModelManager_WM_Properties(bpy.types.PropertyGroup):
 	# 	soft_min=1.0,
 	# 	soft_max=10.0
 	# )
+
+	new_library_name: StringProperty(
+		name="Library",
+		description="Name of New Library, if it does not exist",
+		default="Awesome_Library"
+	)
 
 	new_category_name: StringProperty(
 		name="Category",
