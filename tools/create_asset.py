@@ -13,8 +13,10 @@ if __name__ == '__main__':
     filepath = os.path.join(append_from_blendfile, directory_folder, collection_name)
     directory = os.path.join(append_from_blendfile, directory_folder)
 
-    bpy.ops.wm.append(filepath=filepath, directory=directory, filename=collection_name)
+    bpy.ops.wm.append(filepath=filepath, directory=directory, filename=collection_name, autoselect=True)
 
+    # save file
     bpy.ops.wm.save_as_mainfile(filepath=save_file)
 
+    # quit blender
     bpy.ops.wm.quit_blender()
