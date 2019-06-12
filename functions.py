@@ -9,7 +9,6 @@ def get_file_dir(file):
     path = os.path.dirname(path)
     return path
 
-
 def add_model(context, location, normal):
     nexus_model_SCN = context.scene.nexus_model_manager
     path_models = bpy.data.window_managers["WinMan"].nexus_model_manager_dir_resource
