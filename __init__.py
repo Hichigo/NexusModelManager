@@ -177,9 +177,9 @@ class Preferences(bpy.types.AddonPreferences):
 #################################################################
 ############################ Toolbar ############################
 #################################################################
-class Main_PT_Panel(bpy.types.Panel):
+class VIEW3D_PT_MainPanel(bpy.types.Panel):
 	bl_label = "Nexus Model Manager"
-	# bl_idname = "Main_PT_Panel"
+	bl_idname = "VIEW3D_PT_MainPanel"
 	bl_space_type = "VIEW_3D"
 	bl_region_type = "UI"
 	bl_category = "Nexus"
@@ -187,14 +187,14 @@ class Main_PT_Panel(bpy.types.Panel):
 	def draw(self, context):
 		pass
 
-class CreateAsset_PT_Panel(bpy.types.Panel):
+class VIEW3D_PT_CreateAsset(bpy.types.Panel):
 
 	bl_label = "Create Asset"
-	bl_idname = "PT_CreateAsset"
+	bl_idname = "VIEW3D_PT_CreateAsset"
 	bl_space_type = "VIEW_3D"
 	bl_region_type = "UI"
 	bl_category = "Nexus"
-	bl_parent_id = "Main_PT_Panel"
+	bl_parent_id = "VIEW3D_PT_MainPanel"
 	bl_options = {"DEFAULT_CLOSED"}
 
 	@classmethod
@@ -213,14 +213,14 @@ class CreateAsset_PT_Panel(bpy.types.Panel):
 
 
 
-class ManagerPreviews_PT_Panel(bpy.types.Panel):
+class VIEW3D_PT_ManagerPreviews(bpy.types.Panel):
 
 	bl_label = "Model Manager"
-	bl_idname = "PT_NexusModelManager"
+	bl_idname = "VIEW3D_PT_ManagerPreviews"
 	bl_space_type = "VIEW_3D"
 	bl_region_type = "UI"
 	bl_category = "Nexus"
-	bl_parent_id = "Main_PT_Panel"
+	bl_parent_id = "VIEW3D_PT_MainPanel"
 	bl_options = {"DEFAULT_CLOSED"}
 
 	@classmethod
@@ -359,12 +359,12 @@ class ManagerPreviews_PT_Panel(bpy.types.Panel):
 		col = box.column(align=True)
 		col.operator("add.model", icon="ADD", text="Add Asset")
 
-class MeshPaint_PT_Panel(bpy.types.Panel):
+class VIEW3D_PT_MeshPaint(bpy.types.Panel):
 	bl_label = "Mesh Paint Settings"
 	bl_space_type = "VIEW_3D"
 	bl_region_type = "UI"
 	bl_category = "Nexus Model Manager"
-	bl_parent_id = "Main_PT_Panel"
+	bl_parent_id = "VIEW3D_PT_MainPanel"
 	bl_options = {"DEFAULT_CLOSED"}
 
 	@classmethod
@@ -571,7 +571,10 @@ class CreateAsset(bpy.types.Operator):
 	bl_label = "Create Asset Path"
 	
 	def execute(self, context):
-		print("asset has been created")
+		addon_path = get_file_dir(__file__)
+		empty_blend = os.path.join(addon_path, "resources", "empty.blend")
+		print(bpy.data.filepath)
+		print(empty_blend)
 		return {"FINISHED"}
 
 class Image_Path(bpy.types.Operator):
@@ -700,10 +703,10 @@ class NexusModelManager_WM_Properties(bpy.types.PropertyGroup):
 ######################################################################
 
 classes = (
-	Main_PT_Panel,
-	CreateAsset_PT_Panel,
-	ManagerPreviews_PT_Panel,
-	MeshPaint_PT_Panel,
+	VIEW3D_PT_MainPanel,
+	VIEW3D_PT_CreateAsset,
+	VIEW3D_PT_ManagerPreviews,
+	VIEW3D_PT_MeshPaint,
 	Preferences,
 	Library_Path,
 	Asset_Path,
