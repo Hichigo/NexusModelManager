@@ -4,6 +4,11 @@ import math
 
 from mathutils import Vector, Matrix, Euler
 
+def get_file_dir(file):
+    path = os.path.realpath(file)
+    path = os.path.dirname(path)
+    return path
+
 
 def add_model(context, location, normal):
     nexus_model_SCN = context.scene.nexus_model_manager
