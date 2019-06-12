@@ -584,6 +584,8 @@ class CreateAsset(bpy.types.Operator):
 
 		if not os.path.exists(asset_dir_path):
 			os.makedirs(asset_dir_path)
+			render_path = os.path.join(asset_dir_path, "render")
+			os.mkdir(render_path)
 			print("dirs created: ", asset_dir_path)
 		else:
 			print("dirs already exist", asset_dir_path)
@@ -607,15 +609,11 @@ class CreateAsset(bpy.types.Operator):
 		# save file
 		bpy.ops.wm.save_as_mainfile(filepath=bpy.data.filepath)
 
-		
-
-
 		addon_path = get_file_dir(__file__)
 		empty_blend = os.path.join(addon_path, "resources", "empty.blend")
 		append_from_blendfile = bpy.data.filepath
 
 		tools = os.path.join(addon_path, "tools", "create_asset.py")
-
 
 		sub = subprocess.Popen([
 			bpy.app.binary_path,   # path to blender.exe
@@ -629,11 +627,24 @@ class CreateAsset(bpy.types.Operator):
 			asset_dir_path]        # path save this file
 		)
 
-		# asset_dir_path
-		print(tools)
-		print(bpy.data.filepath)
-		print(empty_blend)
 		return {"FINISHED"}
+
+    # bpy.context.window.view_layer.objects.active = bpy.data.objects["Camera"]
+    # bpy.data.objects["Camera"].select_set(True)
+    # # camera look at appended object
+    # #bpy.ops.view3d.camera_to_view_selected()
+    
+
+    # # save image to render directory
+    # render_path = os.path.join(save_dir, "render", collection_name + ".png")
+    # # bpy.ops.image.save_as(save_as_render=True, copy=True, filepath=render_path, relative_path=True, show_multiview=False, use_multiview=False)
+    # bpy.context.scene.render.filepath = render_path
+    # bpy.ops.render.render(write_still=True)
+
+    # # remove camera and light
+    # # bpy.data.objects.remove(bpy.data.objects["Camera"])
+    # # bpy.data.objects.remove(bpy.data.objects["Sun"])
+
 
 class Image_Path(bpy.types.Operator):
 
@@ -700,7 +711,7 @@ class NexusModelManager_WM_Properties(bpy.types.PropertyGroup):
 	create_asset_dir: StringProperty(
 		name="Library Dir",
 		subtype="DIR_PATH",
-		default=""
+		default=os.path.join(get_file_dir(__file__), "LibraryModels")
 	)
 
 	link_model: BoolProperty(
