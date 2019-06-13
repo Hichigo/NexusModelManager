@@ -126,7 +126,7 @@ def draw_callback_2d(self, context):
 		
 
 
-class MeshPaint_OT_Operator(Operator):
+class VIEW3D_OT_MeshPaint(Operator):
 	bl_idname = "viev3d.mesh_paint"
 	bl_label = "Mesh Paint"
 
