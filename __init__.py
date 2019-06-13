@@ -622,19 +622,18 @@ class CreateAsset(bpy.types.Operator):
 		else:
 			collection = bpy.data.collections[collection_name]
 
-
-		# join all selected objects
-		bpy.ops.object.join()
-
 		# move active object to root collection
 		bpy.ops.object.move_to_collection(collection_index=0)
 		
-		# link active object to new collection
-		collection.objects.link(context.active_object)
+		# link selected objects to new collection
+		selected_objects = context.selected_objects
+		for obj in selected_objects:
+			collection.objects.link(obj)
+			# unlink active object from root collection
+			context.scene.collection.objects.unlink(obj)
 
-		# unlink active object from root collection
-		context.scene.collection.objects.unlink(context.active_object)
-		context.active_object.name = collection_name
+		#context.scene.collection.objects.unlink(context.active_object)
+		#context.active_object.name = collection_name
 
 		# save file
 		bpy.ops.wm.save_as_mainfile(filepath=bpy.data.filepath)
