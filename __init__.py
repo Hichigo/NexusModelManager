@@ -185,8 +185,20 @@ class VIEW3D_PT_MainPanel(bpy.types.Panel):
 	bl_region_type = "UI"
 	bl_category = "Nexus"
 
+	@classmethod
+	def poll(cls, context):
+		return context.mode == "OBJECT"
+
 	def draw(self, context):
-		pass
+		layout = self.layout
+		wm = context.window_manager
+
+		############## Library folder button ##############
+		box = layout.box()
+		box.label(text="Library Folder:")
+		col = box.column(align=True)
+		col.prop(wm, "nexus_model_manager_dir_resource")
+		col.operator("library.library_path", icon="FILE_FOLDER", text="Open Library Folder")
 
 class VIEW3D_PT_CreateAsset(bpy.types.Panel):
 
@@ -205,11 +217,20 @@ class VIEW3D_PT_CreateAsset(bpy.types.Panel):
 	def draw(self, context):
 		layout = self.layout
 		nexus_model_SCN = context.scene.nexus_model_manager
+		create_new = nexus_model_SCN.create_new
 		
-		layout.prop(nexus_model_SCN, "create_asset_dir")
-		layout.prop(nexus_model_SCN, "new_library_name")
-		layout.prop(nexus_model_SCN, "new_category_name")
+		layout.prop(nexus_model_SCN, "create_new")
+		# layout.prop(nexus_model_SCN, "create_asset_dir")
+		if create_new:
+			layout.prop(nexus_model_SCN, "new_library_name")
+			layout.prop(nexus_model_SCN, "new_category_name")			
+		else:
+			layout.prop(nexus_model_SCN, "library_list", text="Library")
+			layout.prop(nexus_model_SCN, "category_list", text="Category")
+
+
 		layout.prop(nexus_model_SCN, "new_collection_name")
+
 		layout.operator("library.create_asset_path", text="Create Asset", icon="NEWFOLDER")
 		layout.operator("library.render_icon_image", text="Render Icon", icon="RESTRICT_RENDER_OFF")
 
@@ -254,16 +275,6 @@ class VIEW3D_PT_ManagerPreviews(bpy.types.Panel):
 			num_collections = False
 
 ############## Panel ##############
-
-############## Library folder button ##############
-
-		box = layout.box()
-		box.label(text="Library Folder:")
-		col = box.column(align=True)
-		col.prop(wm, "nexus_model_manager_dir_resource")
-		col.operator("library.library_path", icon="FILE_FOLDER", text="Open Library Folder")
-
-
 
 		box = layout.box()
 		box.label(text="Model Manager")
@@ -575,25 +586,33 @@ class CreateAsset(bpy.types.Operator):
 	def execute(self, context):
 		nexus_model_SCN = context.scene.nexus_model_manager
 		
-		asset_dir = nexus_model_SCN.create_asset_dir
-		library_name = nexus_model_SCN.new_library_name
-		category_name = nexus_model_SCN.new_category_name
+		library_dir = context.window_manager.nexus_model_manager_dir_resource #nexus_model_SCN.create_asset_dir
+		library_name = ""
+		category_name = ""
 		collection_name = nexus_model_SCN.new_collection_name
+		create_new = nexus_model_SCN.create_new
 
-		asset_dir_path = os.path.join(asset_dir, library_name, category_name, collection_name)
+		if create_new:
+			library_name = nexus_model_SCN.new_library_name
+			category_name = nexus_model_SCN.new_category_name
+		else:
+			library_name = nexus_model_SCN.library_list
+			category_name = nexus_model_SCN.category_list
+
+		asset_dir_path = os.path.join(library_dir, library_name, category_name, collection_name)
 
 		if not os.path.exists(asset_dir_path):
 			os.makedirs(asset_dir_path)
 			render_path = os.path.join(asset_dir_path, "render")
 			os.mkdir(render_path)
-			print("dirs created: ", asset_dir_path)
+			self.report({"INFO"}, "Dirs created: " + asset_dir_path)
 		else:
 			check_file = os.path.join(asset_dir_path, collection_name + ".blend")
 			if os.path.isfile(check_file):
 				self.report({"INFO"}, "File exist! Interupt script!")
 				return {"FINISHED"}
 
-			print("dirs already exist", asset_dir_path)
+			self.report({"INFO"}, "Dirs already exist" + asset_dir_path)
 
 		collection = ""
 
@@ -646,14 +665,21 @@ class LIBRARY_OT_RenderIconImage(bpy.types.Operator):
 
 	def execute(self, context):
 		nexus_model_SCN = context.scene.nexus_model_manager
-
-		asset_dir = nexus_model_SCN.create_asset_dir
-		library_name = nexus_model_SCN.new_library_name
-		category_name = nexus_model_SCN.new_category_name
+		
+		library_dir = context.window_manager.nexus_model_manager_dir_resource #nexus_model_SCN.create_asset_dir
+		library_name = ""
+		category_name = ""
 		collection_name = nexus_model_SCN.new_collection_name
+		create_new = nexus_model_SCN.create_new
 
-		# create path to asset
-		asset_dir_path = os.path.join(asset_dir, library_name, category_name, collection_name)
+		if create_new:
+			library_name = nexus_model_SCN.new_library_name
+			category_name = nexus_model_SCN.new_category_name
+		else:
+			library_name = nexus_model_SCN.library_list
+			category_name = nexus_model_SCN.category_list
+
+		asset_dir_path = os.path.join(library_dir, library_name, category_name, collection_name)
 
 		# create render path
 		render_path = os.path.join(asset_dir_path, "render", collection_name + ".png")
@@ -712,6 +738,12 @@ class NexusModelManager_WM_Properties(bpy.types.PropertyGroup):
 	# 	soft_max=10.0
 	# )
 
+	create_new: BoolProperty(
+		name="Create new",
+		description="Change behavior create asset and change UI",
+		default=False
+	)
+
 	new_library_name: StringProperty(
 		name="Library",
 		description="Name of New Library, if it does not exist",
@@ -730,11 +762,11 @@ class NexusModelManager_WM_Properties(bpy.types.PropertyGroup):
 		default="Awesome_Collection"
 	)
 
-	create_asset_dir: StringProperty(
-		name="Library Dir",
-		subtype="DIR_PATH",
-		default=os.path.join(get_file_dir(__file__), "LibraryModels")
-	)
+	# create_asset_dir: StringProperty(
+	# 	name="Library Dir",
+	# 	subtype="DIR_PATH",
+	# 	default=os.path.join(get_file_dir(__file__), "LibraryModels")
+	# )
 
 	link_model: BoolProperty(
 		name="Link",
