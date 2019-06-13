@@ -588,10 +588,21 @@ class CreateAsset(bpy.types.Operator):
 			os.mkdir(render_path)
 			print("dirs created: ", asset_dir_path)
 		else:
+			check_file = os.path.join(asset_dir_path, collection_name + ".blend")
+			if os.path.isfile(check_file):
+				self.report({"INFO"}, "File exist! Interupt script!")
+				return {"FINISHED"}
+
 			print("dirs already exist", asset_dir_path)
 
-		collection = bpy.data.collections.new(collection_name)
-		bpy.context.scene.collection.children.link(collection)
+		collection = ""
+
+		if not collection_name in bpy.data.collections:
+			collection = bpy.data.collections.new(collection_name)
+			bpy.context.scene.collection.children.link(collection)
+		else:
+			collection = bpy.data.collections[collection_name]
+
 
 		# join all selected objects
 		bpy.ops.object.join()
