@@ -205,13 +205,13 @@ class VIEW3D_PT_CreateAsset(bpy.types.Panel):
 	def draw(self, context):
 		layout = self.layout
 		nexus_model_SCN = context.scene.nexus_model_manager
-
 		
 		layout.prop(nexus_model_SCN, "create_asset_dir")
 		layout.prop(nexus_model_SCN, "new_library_name")
 		layout.prop(nexus_model_SCN, "new_category_name")
 		layout.prop(nexus_model_SCN, "new_collection_name")
 		layout.operator("library.create_asset_path", text="Create Asset", icon="NEWFOLDER")
+		layout.operator("library.render_icon_image", text="Render Icon", icon="RESTRICT_RENDER_OFF")
 
 
 
@@ -376,7 +376,7 @@ class VIEW3D_PT_MeshPaint(bpy.types.Panel):
 	def draw(self, context):
 		layout = self.layout
 
-		layout.operator(MeshPaint_OT_Operator.bl_idname, text="Mesh Paint", icon="STYLUS_PRESSURE")
+		layout.operator(VIEW3D_OT_MeshPaint.bl_idname, text="Mesh Paint", icon="STYLUS_PRESSURE")
 
 	
 
@@ -629,21 +629,32 @@ class CreateAsset(bpy.types.Operator):
 
 		return {"FINISHED"}
 
-    # bpy.context.window.view_layer.objects.active = bpy.data.objects["Camera"]
-    # bpy.data.objects["Camera"].select_set(True)
-    # # camera look at appended object
-    # #bpy.ops.view3d.camera_to_view_selected()
-    
+class LIBRARY_OT_RenderIconImage(bpy.types.Operator):
+	bl_idname = "library.render_icon_image"
+	bl_label = "Render Icon Image"
 
-    # # save image to render directory
-    # render_path = os.path.join(save_dir, "render", collection_name + ".png")
-    # # bpy.ops.image.save_as(save_as_render=True, copy=True, filepath=render_path, relative_path=True, show_multiview=False, use_multiview=False)
-    # bpy.context.scene.render.filepath = render_path
-    # bpy.ops.render.render(write_still=True)
+	def execute(self, context):
+		nexus_model_SCN = context.scene.nexus_model_manager
 
-    # # remove camera and light
-    # # bpy.data.objects.remove(bpy.data.objects["Camera"])
-    # # bpy.data.objects.remove(bpy.data.objects["Sun"])
+		asset_dir = nexus_model_SCN.create_asset_dir
+		library_name = nexus_model_SCN.new_library_name
+		category_name = nexus_model_SCN.new_category_name
+		collection_name = nexus_model_SCN.new_collection_name
+
+		# create path to asset
+		asset_dir_path = os.path.join(asset_dir, library_name, category_name, collection_name)
+
+		# create render path
+		render_path = os.path.join(asset_dir_path, "render", collection_name + ".png")
+		bpy.context.scene.render.filepath = render_path
+		
+		# settings resolution
+		bpy.context.scene.render.resolution_percentage = 100
+		bpy.context.scene.render.resolution_x = 1000
+		bpy.context.scene.render.resolution_y = 1000
+		bpy.ops.render.render(write_still=True)
+
+		return {'FINISHED'}
 
 
 class Image_Path(bpy.types.Operator):
@@ -788,7 +799,8 @@ classes = (
 	CreateAsset,
 	Image_Path,
 	NexusModelManager_WM_Properties,
-	MeshPaint_OT_Operator,
+	VIEW3D_OT_MeshPaint,
+	LIBRARY_OT_RenderIconImage,
 	AddModelOperator
 
 	)
