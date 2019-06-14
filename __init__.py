@@ -198,7 +198,7 @@ class VIEW3D_PT_MainPanel(bpy.types.Panel):
 		box.label(text="Library Folder:")
 		col = box.column(align=True)
 		col.prop(wm, "nexus_model_manager_dir_resource")
-		col.operator("library.library_path", icon="FILE_FOLDER", text="Open Library Folder")
+		col.operator("view3d.library_path", icon="FILE_FOLDER", text="Open Library Folder")
 
 class VIEW3D_PT_CreateAsset(bpy.types.Panel):
 
@@ -231,7 +231,7 @@ class VIEW3D_PT_CreateAsset(bpy.types.Panel):
 
 		layout.prop(nexus_model_SCN, "new_collection_name")
 
-		layout.operator("library.create_asset_path", text="Create Asset", icon="NEWFOLDER")
+		layout.operator("view3d.create_asset_path", text="Create Asset", icon="NEWFOLDER")
 
 
 
@@ -291,8 +291,8 @@ class VIEW3D_PT_ManagerPreviews(bpy.types.Panel):
 ####### Asset folder button
 		col = box.column()
 		row = col.row(align=True)
-		row.operator("library.asset_path", icon="FILE_FOLDER", text="Open Asset Folder")
-		row.operator("library.image_path", icon="FILE_IMAGE", text="Open Image")
+		row.operator("view3d.asset_path", icon="FILE_FOLDER", text="Open Asset Folder")
+		row.operator("view3d.image_path", icon="FILE_IMAGE", text="Open Image")
 
 ####### Previews
 		row = box.row()
@@ -369,7 +369,7 @@ class VIEW3D_PT_ManagerPreviews(bpy.types.Panel):
 
 ####### Add Button
 		col = box.column(align=True)
-		col.operator("add.model", icon="ADD", text="Add Asset")
+		col.operator("view3d.model", icon="ADD", text="Add Asset")
 
 class VIEW3D_PT_MeshPaint(bpy.types.Panel):
 	bl_label = "Mesh Paint Settings"
@@ -417,9 +417,9 @@ class VIEW3D_PT_MeshPaint(bpy.types.Panel):
 ############################ Append ############################
 ################################################################
 
-class AddModelOperator(bpy.types.Operator):
+class VIEW3D_OT_AddModel(bpy.types.Operator):
 
-	bl_idname = "add.model"
+	bl_idname = "view3d.model"
 	bl_label = "Add Model?"
 
 	# def draw(self, context):
@@ -545,9 +545,9 @@ class AddModelOperator(bpy.types.Operator):
 ############################ Library path ############################
 ######################################################################
 
-class Library_Path(bpy.types.Operator):
+class VIEW3D_OT_LibraryPath(bpy.types.Operator):
 
-	bl_idname = "library.library_path"
+	bl_idname = "view3d.library_path"
 	bl_label = "Library Path"
 	
 	def execute(self, context):
@@ -559,9 +559,9 @@ class Library_Path(bpy.types.Operator):
 ############################ Asset path ############################
 ######################################################################
 
-class Asset_Path(bpy.types.Operator):
+class VIEW3D_OT_AssetPath(bpy.types.Operator):
 
-	bl_idname = "library.asset_path"
+	bl_idname = "view3d.asset_path"
 	bl_label = "Library Asset Path"
 
 	def execute(self, context):
@@ -577,9 +577,9 @@ class Asset_Path(bpy.types.Operator):
 		bpy.ops.wm.path_open(filepath=filepath)
 		return {"FINISHED"}
 
-class CreateAsset(bpy.types.Operator):
+class VIEW3D_OT_CreateAsset(bpy.types.Operator):
 
-	bl_idname = "library.create_asset_path"
+	bl_idname = "view3d.create_asset_path"
 	bl_label = "Create Asset Path"
 	
 	def execute(self, context):
@@ -657,9 +657,9 @@ class CreateAsset(bpy.types.Operator):
 
 		return {"FINISHED"}
 
-class Image_Path(bpy.types.Operator):
+class VIEW3D_OT_ImagePath(bpy.types.Operator):
 
-	bl_idname = "library.image_path"
+	bl_idname = "view3d.image_path"
 	bl_label = "Library Image Path"
 
 	def execute(self, context):
@@ -800,13 +800,13 @@ classes = (
 	VIEW3D_PT_ManagerPreviews,
 	VIEW3D_PT_MeshPaint,
 	Preferences,
-	Library_Path,
-	Asset_Path,
-	CreateAsset,
-	Image_Path,
+	VIEW3D_OT_LibraryPath,
+	VIEW3D_OT_AssetPath,
+	VIEW3D_OT_CreateAsset,
+	VIEW3D_OT_ImagePath,
 	NexusModelManager_WM_Properties,
 	VIEW3D_OT_MeshPaint,
-	AddModelOperator
+	VIEW3D_OT_AddModel
 )
 
 def register():
