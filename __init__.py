@@ -622,14 +622,14 @@ class VIEW3D_OT_CreateAsset(bpy.types.Operator):
 			collection = bpy.data.collections[collection_name]
 
 		# move active object to root collection
-		bpy.ops.object.move_to_collection(collection_index=0)
+		#bpy.ops.object.move_to_collection(collection_index=0)
 		
 		# link selected objects to new collection
 		selected_objects = context.selected_objects
 		for obj in selected_objects:
 			collection.objects.link(obj)
 			# unlink active object from root collection
-			context.scene.collection.objects.unlink(obj)
+			#context.scene.collection.objects.unlink(obj)
 
 		#context.scene.collection.objects.unlink(context.active_object)
 		#context.active_object.name = collection_name
@@ -642,18 +642,28 @@ class VIEW3D_OT_CreateAsset(bpy.types.Operator):
 		append_from_blendfile = bpy.data.filepath
 
 		tools = os.path.join(addon_path, "tools", "create_asset.py")
+		
+		# get cursor location
+		cursor_location = bpy.context.scene.cursor.location.copy()
 
-		sub = subprocess.Popen([
-			bpy.app.binary_path,   # path to blender.exe
-			empty_blend,           # open file
-			"-b",                  # open background blender
-			"--python",
-			tools,                 # path to python script
-			append_from_blendfile, # from blendfile append collection
-			"Collection",
-			collection.name,       # append collection name
-			asset_dir_path]        # path save this file
+		cursor_location = "{}|{}|{}".format(cursor_location.x, cursor_location.y, cursor_location.z)
+
+		sub = subprocess.Popen(
+			[
+				bpy.app.binary_path,   # path to blender.exe
+				empty_blend,           # open file
+				"-b",                  # open background blender
+				"--python",
+				tools,                 # path to python script
+				append_from_blendfile, # from blendfile append collection
+				"Collection",
+				collection.name,       # append collection name
+				asset_dir_path,        # path save this file
+				cursor_location        # cursor location it is pivot point new asset
+			]
 		)
+
+		bpy.data.collections.remove(bpy.data.collections[collection_name])
 
 		return {"FINISHED"}
 
