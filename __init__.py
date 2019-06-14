@@ -232,7 +232,6 @@ class VIEW3D_PT_CreateAsset(bpy.types.Panel):
 		layout.prop(nexus_model_SCN, "new_collection_name")
 
 		layout.operator("library.create_asset_path", text="Create Asset", icon="NEWFOLDER")
-		layout.operator("library.render_icon_image", text="Render Icon", icon="RESTRICT_RENDER_OFF")
 
 
 
@@ -658,41 +657,6 @@ class CreateAsset(bpy.types.Operator):
 
 		return {"FINISHED"}
 
-class LIBRARY_OT_RenderIconImage(bpy.types.Operator):
-	bl_idname = "library.render_icon_image"
-	bl_label = "Render Icon Image"
-
-	def execute(self, context):
-		nexus_model_SCN = context.scene.nexus_model_manager
-		
-		library_dir = context.window_manager.nexus_model_manager_dir_resource #nexus_model_SCN.create_asset_dir
-		library_name = ""
-		category_name = ""
-		collection_name = nexus_model_SCN.new_collection_name
-		create_new = nexus_model_SCN.create_new
-
-		if create_new:
-			library_name = nexus_model_SCN.new_library_name
-			category_name = nexus_model_SCN.new_category_name
-		else:
-			library_name = nexus_model_SCN.library_list
-			category_name = nexus_model_SCN.category_list
-
-		asset_dir_path = os.path.join(library_dir, library_name, category_name, collection_name)
-
-		# create render path
-		render_path = os.path.join(asset_dir_path, "render", collection_name + ".png")
-		bpy.context.scene.render.filepath = render_path
-		
-		# settings resolution
-		bpy.context.scene.render.resolution_percentage = 100
-		bpy.context.scene.render.resolution_x = 1000
-		bpy.context.scene.render.resolution_y = 1000
-		bpy.ops.render.render(write_still=True)
-
-		return {'FINISHED'}
-
-
 class Image_Path(bpy.types.Operator):
 
 	bl_idname = "library.image_path"
@@ -842,10 +806,8 @@ classes = (
 	Image_Path,
 	NexusModelManager_WM_Properties,
 	VIEW3D_OT_MeshPaint,
-	LIBRARY_OT_RenderIconImage,
 	AddModelOperator
-
-	)
+)
 
 def register():
 	from bpy.utils import register_class
