@@ -34,6 +34,19 @@ if __name__ == '__main__':
     # set parent all selected object to empty object
     bpy.ops.object.parent_set(type='OBJECT', keep_transform=False)
 
+    # set view camera to selected objects
+    bpy.ops.view3d.camera_to_view_selected()
+
+    # create path icon
+    render_path = os.path.join(save_dir, "render", collection_name + ".png")
+    bpy.context.scene.render.filepath = render_path
+
+    # render icon
+    bpy.ops.render.render(write_still=True)
+
+    # remove camera
+    bpy.data.objects.remove(bpy.data.objects['Camera'])
+
     # save file
     bpy.ops.wm.save_as_mainfile(filepath=save_file)
 
