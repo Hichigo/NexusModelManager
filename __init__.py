@@ -385,7 +385,9 @@ class VIEW3D_PT_MeshPaint(bpy.types.Panel):
 	
 	def draw(self, context):
 		layout = self.layout
-
+		nexus_model_SCN = context.scene.nexus_model_manager
+		
+		layout.prop(nexus_model_SCN, "align_by_normal")
 		layout.operator(VIEW3D_OT_MeshPaint.bl_idname, text="Mesh Paint", icon="STYLUS_PRESSURE")
 
 	
@@ -733,6 +735,12 @@ class NexusModelManager_WM_Properties(bpy.types.PropertyGroup):
 		name="Collection",
 		description="Name of New Collection",
 		default="Awesome_Collection"
+	)
+
+	align_by_normal: BoolProperty(
+		name="Align by Normal",
+		description="Align asset by normal",
+		default=True
 	)
 
 	# create_asset_dir: StringProperty(

@@ -23,6 +23,7 @@ from bpy_extras.view3d_utils import (
 from .functions import *
 
 def draw_callback_3d(self, context):
+	align_by_normal = context.scene.nexus_model_manager.align_by_normal
 	# draw brush circle
 	steps = 16
 	angle = (2 * math.pi) / steps
@@ -41,9 +42,11 @@ def draw_callback_3d(self, context):
 		p = Vector((x,y,z))
 		
 		# rotate circle to match the ground normal
-		p -= self.mouse_path[0]
-		p = p @ rot_mat
-		p += self.mouse_path[0] + ( self.normal * (0.3) ) # some translate point in side normal
+		if align_by_normal:
+			p -= self.mouse_path[0]
+			p = p @ rot_mat
+			p += self.mouse_path[0] + ( self.normal * (0.3) ) # some translate point in side normal
+
 		cirlce_points.append(p)
 
 	shader = gpu.shader.from_builtin("3D_UNIFORM_COLOR")
@@ -184,6 +187,7 @@ class VIEW3D_OT_MeshPaint(Operator):
 
 	def modal(self, context, event):
 		context.area.tag_redraw()
+		nexus_model_SCN = context.scene.nexus_model_manager
 
 		if event.type == "MOUSEMOVE":
 			if self.state == "MOVE":
@@ -207,9 +211,15 @@ class VIEW3D_OT_MeshPaint(Operator):
 					self.mouse_path[1] = pos_hit + (self.normal * 2.0)
 
 					#mat_trans = Matrix.Translation(self.mouse_path[0]) # location matrix
-					rot = self.normal.to_track_quat("Z","Y").to_euler()#.to_matrix().to_4x4() # rotation matrix
-					self.new_model.location = self.mouse_path[0]
+					rot = None
+					# apply rotation by normal if checket "align_by_normal"
+					if nexus_model_SCN.align_by_normal:
+						rot = self.normal.to_track_quat("Z","Y").to_euler()#.to_matrix().to_4x4() # rotation matrix
+					else:
+						rot = Euler((0,0,0))
+
 					self.new_model.rotation_euler = rot
+					self.new_model.location = self.mouse_path[0]
 					self.new_model.scale = Vector((self.new_scale, self.new_scale, self.new_scale))
 
 					#self.new_model.matrix_world = mat_trans @ mat_rot # apply both matrix
@@ -255,7 +265,11 @@ class VIEW3D_OT_MeshPaint(Operator):
 
 
 		if event.value == "PRESS":
-			if event.type == "R":
+			if event.type == "LEFTMOUSE":
+				self.state = "MOVE"
+				self.new_model = add_model(context, self.mouse_path[0], self.normal)
+				return {"RUNNING_MODAL"}
+			elif event.type == "R":
 				self.state = "ROTATE"
 				return {"RUNNING_MODAL"}
 
@@ -266,11 +280,11 @@ class VIEW3D_OT_MeshPaint(Operator):
 			elif event.type == "S":
 				self.state = "SCALE"
 				return {"RUNNING_MODAL"}
-
-			elif event.type == "LEFTMOUSE":
-				self.state = "MOVE"
-				self.new_model = add_model(context, self.mouse_path[0], self.normal)
+			elif event.type == "N":
+				nexus_model_SCN.align_by_normal = not nexus_model_SCN.align_by_normal
 				return {"RUNNING_MODAL"}
+
+			
 
 			elif event.type in {"RIGHTMOUSE", "ESC"}:
 				
