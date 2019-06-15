@@ -158,6 +158,8 @@ class VIEW3D_OT_MeshPaint(Operator):
 			self.test_angle = 0
 			self.test_angle_old = 0
 
+			self.model_2d_point = None
+
 			self.new_model = add_model(context, self.mouse_path[0], self.normal)
 
 			context.window_manager.modal_handler_add(self)
@@ -184,6 +186,20 @@ class VIEW3D_OT_MeshPaint(Operator):
 		result = location_3d_to_region_2d(region, region_3d, self.new_model.location)
 
 		return result
+	
+	def calculate_angle(self, event, context):
+		self.model_2d_point = self.get_2d_point_from_3d(event, context)
+		self.mouse_coord = Vector((event.mouse_region_x, event.mouse_region_y))
+
+		dir = self.mouse_coord - self.model_2d_point
+		dir.normalize()
+
+		self.mouse_coord = self.model_2d_point + dir * 100
+
+		self.test_angle = math.degrees(math.atan2(self.mouse_coord.y - self.model_2d_point.y, self.mouse_coord.x - self.model_2d_point.x))
+
+		if self.test_angle < 0:
+			self.test_angle += 360
 
 	def modal(self, context, event):
 		context.area.tag_redraw()
@@ -219,29 +235,18 @@ class VIEW3D_OT_MeshPaint(Operator):
 						rot = Euler((0,0,0))
 
 					self.new_model.rotation_euler = rot
+
+					# self.calculate_angle(event, context) # calculate "self.test_angle" and "self.test_angle_old"
+					# delta_angle = self.test_angle - self.test_angle_old
+					# self.new_model.rotation_euler.rotate_axis("Z", math.radians(delta_angle))
+
 					self.new_model.location = self.mouse_path[0]
 					self.new_model.scale = Vector((self.new_scale, self.new_scale, self.new_scale))
 
 					#self.new_model.matrix_world = mat_trans @ mat_rot # apply both matrix
 			elif self.state == "ROTATE":
-				self.model_2d_point = self.get_2d_point_from_3d(event, context)
-				# self.model_2d_point = Vector((self.model_2d_point.x, self.model_2d_point.y, 0))
-				self.mouse_coord = Vector((event.mouse_region_x, event.mouse_region_y))
-				
-				dir = self.mouse_coord - self.model_2d_point
-				dir.normalize()
+				self.calculate_angle(event, context)
 
-				self.mouse_coord = self.model_2d_point + dir * 100
-
-				# dir = dir * 3
-				# self.mouse_coord = dir
-
-				self.test_angle = math.degrees(math.atan2(self.mouse_coord.y - self.model_2d_point.y, self.mouse_coord.x - self.model_2d_point.x))
-
-				if self.test_angle < 0:
-					self.test_angle += 360
-
-				
 				delta_angle = self.test_angle - self.test_angle_old
 				self.new_model.rotation_euler.rotate_axis("Z", math.radians(delta_angle))# = Matrix.Rotation(math.radians(self.test_angle), 4, self.normal).to_euler()
 				self.test_angle_old = self.test_angle
@@ -272,20 +277,15 @@ class VIEW3D_OT_MeshPaint(Operator):
 			elif event.type == "R":
 				self.state = "ROTATE"
 				return {"RUNNING_MODAL"}
-
 			elif event.type == "G":
 				self.state = "MOVE"
 				return {"RUNNING_MODAL"}
-
 			elif event.type == "S":
 				self.state = "SCALE"
 				return {"RUNNING_MODAL"}
 			elif event.type == "N":
 				nexus_model_SCN.align_by_normal = not nexus_model_SCN.align_by_normal
 				return {"RUNNING_MODAL"}
-
-			
-
 			elif event.type in {"RIGHTMOUSE", "ESC"}:
 				
 				bpy.ops.object.select_all(action="DESELECT")
