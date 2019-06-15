@@ -585,16 +585,47 @@ class VIEW3D_OT_AssetPath(bpy.types.Operator):
 		return {"FINISHED"}
 
 class VIEW3D_OT_CreateAsset(bpy.types.Operator):
-
+	""" Create Asset """
 	bl_idname = "view3d.create_asset_path"
-	bl_label = "Create Asset Path"
-	
+	bl_label = "Overwrite file?"
+
+	def draw(self, context):
+		layout = self.layout
+		layout.label(text="Really?")
+
+	def invoke(self, context, event):
+
+		if not os.path.isfile(bpy.data.filepath):
+			self.report({"ERROR"}, "Please save the file!")
+			return {"FINISHED"}
+
+		nexus_model_SCN = context.scene.nexus_model_manager
+		
+		library_dir = context.window_manager.nexus_model_manager_dir_resource #nexus_model_SCN.create_asset_dir
+		library_name = None
+		category_name = None
+		collection_name = nexus_model_SCN.new_collection_name
+		create_new = nexus_model_SCN.create_new
+
+		if create_new:
+			library_name = nexus_model_SCN.new_library_name
+			category_name = nexus_model_SCN.new_category_name
+		else:
+			library_name = nexus_model_SCN.library_list
+			category_name = nexus_model_SCN.category_list
+
+		file_check = os.path.join(library_dir, library_name, category_name, collection_name, collection_name + ".blend")
+		if os.path.isfile(file_check):
+			return context.window_manager.invoke_confirm(self, event)
+		
+		return self.execute(context)
+
 	def execute(self, context):
 		nexus_model_SCN = context.scene.nexus_model_manager
 		
 		library_dir = context.window_manager.nexus_model_manager_dir_resource #nexus_model_SCN.create_asset_dir
-		library_name = ""
-		category_name = ""
+		library_name = None
+		category_name = None
 		collection_name = nexus_model_SCN.new_collection_name
 		create_new = nexus_model_SCN.create_new
 
