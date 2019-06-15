@@ -613,33 +613,20 @@ class VIEW3D_OT_CreateAsset(bpy.types.Operator):
 			os.mkdir(render_path)
 			self.report({"INFO"}, "Dirs created: " + asset_dir_path)
 		else:
-			check_file = os.path.join(asset_dir_path, collection_name + ".blend")
-			if os.path.isfile(check_file):
-				self.report({"INFO"}, "File exist! Interupt script!")
-				return {"FINISHED"}
-
 			self.report({"INFO"}, "Dirs already exist" + asset_dir_path)
 
-		collection = ""
+		collection = None
 
 		if not collection_name in bpy.data.collections:
 			collection = bpy.data.collections.new(collection_name)
 			bpy.context.scene.collection.children.link(collection)
 		else:
 			collection = bpy.data.collections[collection_name]
-
-		# move active object to root collection
-		#bpy.ops.object.move_to_collection(collection_index=0)
 		
 		# link selected objects to new collection
 		selected_objects = context.selected_objects
 		for obj in selected_objects:
 			collection.objects.link(obj)
-			# unlink active object from root collection
-			#context.scene.collection.objects.unlink(obj)
-
-		#context.scene.collection.objects.unlink(context.active_object)
-		#context.active_object.name = collection_name
 
 		# save file
 		bpy.ops.wm.save_as_mainfile(filepath=bpy.data.filepath)
