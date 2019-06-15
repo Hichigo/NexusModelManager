@@ -233,6 +233,11 @@ class VIEW3D_PT_CreateAsset(bpy.types.Panel):
 
 		layout.operator("view3d.create_asset_path", text="Create Asset", icon="NEWFOLDER")
 
+		box = layout.box()
+
+		box.label(text="Settings")
+		box.prop(nexus_model_SCN, "apply_cursor_rotation")
+
 
 
 class VIEW3D_PT_ManagerPreviews(bpy.types.Panel):
@@ -645,10 +650,12 @@ class VIEW3D_OT_CreateAsset(bpy.types.Operator):
 
 		tools = os.path.join(addon_path, "tools", "create_asset.py")
 		
-		# get cursor location
+		# get cursor location and roration
 		cursor_location = bpy.context.scene.cursor.location.copy()
+		cursor_rotation = bpy.context.scene.cursor.rotation_euler.copy()
 
 		cursor_location = "{}|{}|{}".format(cursor_location.x, cursor_location.y, cursor_location.z)
+		cursor_rotation = "{}|{}|{}|{}".format(nexus_model_SCN.apply_cursor_rotation, cursor_rotation.x, cursor_rotation.y, cursor_rotation.z)
 
 		sub = subprocess.Popen(
 			[
@@ -661,7 +668,8 @@ class VIEW3D_OT_CreateAsset(bpy.types.Operator):
 				"Collection",
 				collection.name,       # append collection name
 				asset_dir_path,        # path save this file
-				cursor_location        # cursor location it is pivot point new asset
+				cursor_location,       # cursor location it is pivot point new asset
+				cursor_rotation        # cursor rotation to new asset
 			]
 		)
 
@@ -740,6 +748,12 @@ class NexusModelManager_WM_Properties(bpy.types.PropertyGroup):
 	align_by_normal: BoolProperty(
 		name="Align by Normal",
 		description="Align asset by normal",
+		default=True
+	)
+
+	apply_cursor_rotation: BoolProperty(
+		name="Apply 3D Cursor Rotation",
+		description="Apply 3D Cursor Rotation to New Asset",
 		default=True
 	)
 

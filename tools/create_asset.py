@@ -11,6 +11,9 @@ if __name__ == "__main__":
     offset_location = sys.argv[9].split("|") # split string by "|" symbol
     offset_location = Vector( (float(offset_location[0]), float(offset_location[1]), float(offset_location[2])) ) # make vector
 
+    cursor_rotation = sys.argv[10].split("|") # 0 - use or not; 1,2,3 - x,y,z
+    use_rotation = bool(cursor_rotation[0])
+
     save_file = os.path.join(save_dir, collection_name + ".blend")
 
     filepath = os.path.join(append_from_blendfile, directory_folder, collection_name)
@@ -42,8 +45,20 @@ if __name__ == "__main__":
     # set parent all selected object to empty object
     bpy.ops.object.parent_set(type="OBJECT", keep_transform=False)
 
+    # "offset" rotation
+    if use_rotation:
+        empty_object.rotation_euler.x -= float(cursor_rotation[1])
+        empty_object.rotation_euler.y -= float(cursor_rotation[2])
+        empty_object.rotation_euler.z -= float(cursor_rotation[3])
+
+    # increase size asset for border on render icon
+    empty_object.scale = Vector((1.2, 1.2, 1.2))
+
     # set view camera to selected objects
     bpy.ops.view3d.camera_to_view_selected()
+
+    # return asset size to normal
+    empty_object.scale = Vector((1, 1 ,1))
 
     # create path icon
     render_path = os.path.join(save_dir, "render", collection_name + ".png")
