@@ -19,6 +19,9 @@ if __name__ == "__main__":
     filepath = os.path.join(append_from_blendfile, directory_folder, collection_name)
     directory = os.path.join(append_from_blendfile, directory_folder)
 
+    # set 3D cursor to center scene
+    bpy.context.scene.cursor.location = Vector((0,0,0))
+
     # create empty object
     bpy.ops.object.empty_add(type="PLAIN_AXES")
     empty_object = bpy.data.objects["Empty"]
