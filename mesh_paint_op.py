@@ -204,6 +204,14 @@ class VIEW3D_OT_MeshPaint(Operator):
 	def modal(self, context, event):
 		context.area.tag_redraw()
 		nexus_model_SCN = context.scene.nexus_model_manager
+		# mod = []
+        # if event.shift:
+        #     mod.append("Shift")
+        # if event.alt:
+        #     mod.append("Alt")
+        # if event.ctrl:
+        #     mod.append("Ctrl")
+		# context.area.header_text_set("%s %s - %s" % (mod, event.type, event.value))
 
 		if event.type == "MOUSEMOVE":
 			if self.state == "MOVE":
