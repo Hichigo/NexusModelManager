@@ -258,12 +258,6 @@ class VIEW3D_PT_ManagerPreviews(bpy.types.Panel):
 		row.prop(nexus_model_SCN, "link_model")
 		row.prop(nexus_model_SCN, "add_duplicollection")
 
-####### instance collections
-		col = box.column()
-		row = col.row()
-		row.enabled = nexus_model_SCN.link_model
-		row.prop(nexus_model_SCN, "instance_collections")
-
 ####### Add Button
 		col = box.column(align=True)
 		col.operator("view3d.model", icon="ADD", text="Add Asset")
@@ -328,7 +322,6 @@ class VIEW3D_OT_AddModel(bpy.types.Operator):
 		category = nexus_model_SCN.category_list
 		library = nexus_model_SCN.library_list
 		is_link = nexus_model_SCN.link_model
-		inst_collections = nexus_model_SCN.instance_collections
 		add_dupli_to_sel = nexus_model_SCN.add_duplicollection
 		collection_or_meshdata = nexus_model_SCN.collection_or_meshdata
 		set_to_selected_objects = nexus_model_SCN.set_to_selected_objects
@@ -351,7 +344,7 @@ class VIEW3D_OT_AddModel(bpy.types.Operator):
 				filename=asset_name,
 				directory=directory_inside_file,
 				link=True,
-				instance_collections=inst_collections,
+				instance_collections=True,
 				autoselect=True
 			)
 		else:
@@ -370,11 +363,12 @@ class VIEW3D_OT_AddModel(bpy.types.Operator):
 				obj.instance_type = "COLLECTION"
 				obj.instance_collection = collection
 
-		if len(bpy.context.selected_objects) > 0:
-			if nexus_model_SCN.add_location == "CURSOR":
-				bpy.context.selected_objects[0].parent.location = context.scene.cursor.location
-			else:
-				bpy.context.selected_objects[0].parent.location = (0.0, 0.0, 0.0)
+		if not is_link:
+			if len(bpy.context.selected_objects) > 0:
+				if nexus_model_SCN.add_location == "CURSOR":
+					bpy.context.selected_objects[0].location = context.scene.cursor.location
+				else:
+					bpy.context.selected_objects[0].location = (0.0, 0.0, 0.0)
 
 		return {"FINISHED"}
 
@@ -597,22 +591,10 @@ class NexusModelManager_WM_Properties(bpy.types.PropertyGroup):
 		default=True
 	)
 
-	# create_asset_dir: StringProperty(
-	# 	name="Library Dir",
-	# 	subtype="DIR_PATH",
-	# 	default=os.path.join(get_file_dir(__file__), "LibraryModels")
-	# )
-
 	link_model: BoolProperty(
 		name="Link",
 		description="If True link model else append model",
-		default=False
-	)
-
-	instance_collections: BoolProperty(
-		name="Instance collections",
-		description="Instance collections",
-		default=False
+		default=True
 	)
 
 	set_to_selected_objects: BoolProperty(
