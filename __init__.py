@@ -301,24 +301,24 @@ class VIEW3D_OT_AddModel(bpy.types.Operator):
 	# 	col = layout.column()
 	# 	col.label("The asset is already added. Add more?")
 
-	def invoke(self, context, event):
-		nexus_model_SCN = context.scene.nexus_model_manager
-		collection_name = nexus_model_SCN.asset_previews
-		is_link = nexus_model_SCN.link_model
-		add_dupli_to_sel = nexus_model_SCN.add_duplicollection
+	# def invoke(self, context, event):
+	# 	nexus_model_SCN = context.scene.nexus_model_manager
+	# 	collection_name = nexus_model_SCN.asset_previews
+	# 	is_link = nexus_model_SCN.link_model
+	# 	add_dupli_to_sel = nexus_model_SCN.add_duplicollection
 
-		if not is_link and add_dupli_to_sel and nexus_model_SCN.add_location == "CURSOR":
-			self.report({"INFO"}, "Set Add location to Center")
-			nexus_model_SCN.add_location = "CENTER"
+	# 	if not is_link and add_dupli_to_sel and nexus_model_SCN.add_location == "CURSOR":
+	# 		self.report({"INFO"}, "Set Add location to Center")
+	# 		nexus_model_SCN.add_location = "CENTER"
 
-		if bpy.data.collections.get(collection_name) is not None:
-			bpy.ops.object.collection_instance_add(collection=collection_name)
-			self.report({"INFO"}, "Added Intance collection from scene (allready exist in scene)")
-			# return context.window_manager.invoke_props_dialog(self)
-		else:
-			self.execute(context)
+	# 	if bpy.data.collections.get(collection_name) is not None:
+	# 		bpy.ops.object.collection_instance_add(collection=collection_name)
+	# 		self.report({"INFO"}, "Added Intance collection from scene (allready exist in scene)")
+	# 		# return context.window_manager.invoke_props_dialog(self)
+	# 	else:
+	# 		self.execute(context)
 		
-		return {"FINISHED"}
+	# 	return {"FINISHED"}
 
 
 	def execute(self, context):
@@ -367,14 +367,14 @@ class VIEW3D_OT_AddModel(bpy.types.Operator):
 		if add_dupli_to_sel:
 			collection = bpy.data.collections[asset_name]
 			for obj in selected_objects:
-				obj.dupli_collection = collection
-				obj.dupli_type = "COLLECTION"
+				obj.instance_type = "COLLECTION"
+				obj.instance_collection = collection
 
 		if len(bpy.context.selected_objects) > 0:
 			if nexus_model_SCN.add_location == "CURSOR":
-				bpy.context.selected_objects[0].location = context.scene.cursor.location
+				bpy.context.selected_objects[0].parent.location = context.scene.cursor.location
 			else:
-				bpy.context.selected_objects[0].location = (0.0, 0.0, 0.0)
+				bpy.context.selected_objects[0].parent.location = (0.0, 0.0, 0.0)
 
 		return {"FINISHED"}
 
@@ -716,11 +716,6 @@ def unregister():
 	for pcoll in asset_collections.values():
 		bpy.utils.previews.remove(pcoll)
 	asset_collections.clear()
-
-	for pcoll in collections_collection.values():
-		bpy.utils.previews.remove(pcoll)
-	collections_collection.clear()
-
 
 if __name__ == "__main__":
 	register()
