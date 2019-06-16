@@ -12,32 +12,21 @@ def get_file_dir(file):
 def add_model(context, location, normal):
     nexus_model_SCN = context.scene.nexus_model_manager
     path_models = bpy.data.window_managers["WinMan"].nexus_model_manager_dir_resource
-    filename = nexus_model_SCN.asset_previews
+    asset_name = nexus_model_SCN.asset_previews
     category = nexus_model_SCN.category_list
     library = nexus_model_SCN.library_list
-    collection_name = nexus_model_SCN.collection_asset
-    collection_or_meshdata = nexus_model_SCN.collection_or_meshdata
 
-    filepath = os.path.join(path_models, library, category, filename, filename + ".blend")
+    filepath = os.path.join(path_models, library, category, asset_name, asset_name + ".blend")
 
-    if collection_or_meshdata == "COLLECTION":
-        directory_inside_file = os.path.join(filepath, "Collection")
-    elif collection_or_meshdata == "MESH":
-        directory_inside_file = os.path.join(filepath, "Mesh")
-        collection_name = "SM_" + collection_name
-    elif collection_or_meshdata == "OBJECT":
-        directory_inside_file = os.path.join(filepath, "Object")
-        collection_name = "SM_" + collection_name
-    else:
-        print("----------------- SOMETHING ERROR >> collection_or_meshdata << -----------------")
+    directory_inside_file = os.path.join(filepath, "Collection")
 
-    filepath_collection_name = directory_inside_file + collection_name
+    filepath_collection_name = directory_inside_file + asset_name
 
     bpy.ops.object.select_all(action="DESELECT")
 
     bpy.ops.wm.link(
         filepath=filepath_collection_name,
-        filename=collection_name,
+        filename=asset_name, # collection name
         directory=directory_inside_file,
         link=True,
         instance_collections=True,

@@ -56,57 +56,6 @@ def make_library_list(self, context):
 
 	return make_list_folder(path_library)
 
-############################ Collection ##########################
-def enum_collections_asset(self, context):
-
-	enum_items = []
-
-	nexus_model_SCN = context.scene.nexus_model_manager
-	path_models = bpy.data.window_managers["WinMan"].nexus_model_manager_dir_resource
-	filename = nexus_model_SCN.asset_previews
-	category = nexus_model_SCN.category_list
-	library = nexus_model_SCN.library_list
-	assets_name = nexus_model_SCN.asset_previews
-
-	filepath = os.path.join(path_models, library, category, filename, filename + ".blend")
-	render_path = os.path.join(path_models, library, category, filename, "render")
-
-	if context is None:
-		return enum_items
-
-	pcoll = collections_collection["main"]
-
-	if render_path == pcoll.collection_previews_dir:
-		return pcoll.collection_previews
-
-	with bpy.data.libraries.load(filepath) as (df, dt):
-		list_collections = df.collections
-	list_collections.sort()
-
-	# if render_path and os.path.exists(render_path):
-	# 	images_names = []
-	# 	for fn in os.listdir(render_path):
-	# 		images_names.append(os.path.splitext(fn)[0])
-
-	for i, name in enumerate(list_collections):
-		filepath = os.path.join(render_path, name + ".png")
-
-		# icon_name = name.replace(library + sep_lib, "") # remove library name
-		# icon_name = icon_name.replace(category + sep_cat, "") # remove category name
-		icon_name = name.replace(assets_name + sep_name, "") # remove asset name
-		if filepath in pcoll:
-			enum_items.append((name, icon_name, "", pcoll[filepath].icon_id, i))
-		else:
-			thumb = pcoll.load(filepath, filepath, "IMAGE")
-			enum_items.append((name, icon_name, "", thumb.icon_id, i))
-	# enum_items.sort()
-
-	pcoll.collection_previews = enum_items
-	pcoll.collection_previews_dir = render_path
-	return pcoll.collection_previews
-
-collections_collection = {}
-
 ##################################################################
 ############################ Previews ############################
 ##################################################################
@@ -238,8 +187,6 @@ class VIEW3D_PT_CreateAsset(bpy.types.Panel):
 		box.label(text="Settings")
 		box.prop(nexus_model_SCN, "apply_cursor_rotation")
 
-
-
 class VIEW3D_PT_ManagerPreviews(bpy.types.Panel):
 
 	bl_label = "Model Manager"
@@ -263,20 +210,9 @@ class VIEW3D_PT_ManagerPreviews(bpy.types.Panel):
 		asset_name = os.path.splitext(nexus_model_SCN.asset_previews)[0]
 		category = nexus_model_SCN.category_list
 		library = nexus_model_SCN.library_list
-		collection_or_meshdata = nexus_model_SCN.collection_or_meshdata
-		collection_asset = os.path.splitext(nexus_model_SCN.collection_asset)[0]
-		# collection_asset = collection_asset.replace(library + sep_lib, "")
-		# collection_asset = collection_asset.replace(category + sep_cat, "")
-		collection_asset = collection_asset.replace(asset_name + sep_name, "")
 
 		render_path = os.path.join(path_models, library, category, asset_name, "render")
 
-		# with bpy.data.libraries.load(filepath) as (df, dt):
-		# 	list_collections = df.collections
-		if os.path.exists(render_path):
-			num_collections = len(os.listdir(render_path)) > 1
-		else:
-			num_collections = False
 
 ############## Panel ##############
 
@@ -302,7 +238,7 @@ class VIEW3D_PT_ManagerPreviews(bpy.types.Panel):
 ####### Previews
 		row = box.row()
 		row.scale_y = 1.5
-		row.template_icon_view(nexus_model_SCN, "asset_previews", show_labels=True)
+		row.template_icon_view(nexus_model_SCN, "asset_previews", show_labels=True, scale_popup=10)
 
 ####### Asset Name
 		row = box.row()
@@ -310,67 +246,23 @@ class VIEW3D_PT_ManagerPreviews(bpy.types.Panel):
 		row.scale_y = 0.5
 		row.label(text=asset_name)
 
-####### Previews scale
-		# col = box.column()
-		# col.prop(nexus_model_SCN, "scale_preview", slider=True)
-
-####### Collections list
-		if num_collections:
-			row = box.row()
-			col = row.column()
-			# col.scale_y = nexus_model_SCN.scale_preview
-			col.scale_y = 1.5
-			col.template_icon_view(nexus_model_SCN, "collection_asset", show_labels=True)
-			# col = row.column()
-			# col.operator("preview.big_preview", icon="ZOOM_IN", text="")
-####### Collection Name
-			row = box.row()
-			row.alignment = "CENTER"
-			row.scale_y = 0.5
-			row.label(text=collection_asset.replace(asset_name + "_", ""))
-
-####### Collection or mesh data
+# ####### Add location
 		row = box.row()
-		row.label(text="What add?")
+		row.label(text="Add location")
 		row = box.row()
-		row.prop(nexus_model_SCN, "collection_or_meshdata", expand=True)
-
-		if collection_or_meshdata == "COLLECTION": ####################################### COLLECTION
-####### Add location
-			row = box.row()
-			row.label(text="Add location")
-			row = box.row()
-			row.prop(nexus_model_SCN, "add_location", expand=True)
+		row.prop(nexus_model_SCN, "add_location", expand=True)
 
 ####### link and dupli
-			col = box.column()
-			row = col.row()
-			row.prop(nexus_model_SCN, "link_model")
-			row.prop(nexus_model_SCN, "add_duplicollection")
+		col = box.column()
+		row = col.row()
+		row.prop(nexus_model_SCN, "link_model")
+		row.prop(nexus_model_SCN, "add_duplicollection")
 
 ####### instance collections
-			col = box.column()
-			row = col.row()
-			row.enabled = nexus_model_SCN.link_model
-			row.prop(nexus_model_SCN, "instance_collections")
-		elif collection_or_meshdata == "MESH": ########################################### MESH
-####### link and dupli
-			col = box.column()
-			col.prop(nexus_model_SCN, "link_model")
-			col.prop(nexus_model_SCN, "set_to_selected_objects")
-
-		elif collection_or_meshdata == "OBJECT": ####################################### OBJECT
-####### Add location
-			row = box.row()
-			row.label(text="Add location")
-			row = box.row()
-			row.prop(nexus_model_SCN, "add_location", expand=True)
-
-
-####### link and dupli
-			col = box.column()
-			row = col.row()
-			row.prop(nexus_model_SCN, "link_model")
+		col = box.column()
+		row = col.row()
+		row.enabled = nexus_model_SCN.link_model
+		row.prop(nexus_model_SCN, "instance_collections")
 
 ####### Add Button
 		col = box.column(align=True)
@@ -380,7 +272,7 @@ class VIEW3D_PT_MeshPaint(bpy.types.Panel):
 	bl_label = "Mesh Paint Settings"
 	bl_space_type = "VIEW_3D"
 	bl_region_type = "UI"
-	bl_category = "Nexus Model Manager"
+	bl_category = "Nexus"
 	bl_parent_id = "VIEW3D_PT_MainPanel"
 	bl_options = {"DEFAULT_CLOSED"}
 
@@ -394,31 +286,6 @@ class VIEW3D_PT_MeshPaint(bpy.types.Panel):
 		
 		layout.prop(nexus_model_SCN, "align_by_normal")
 		layout.operator(VIEW3D_OT_MeshPaint.bl_idname, text="Mesh Paint", icon="STYLUS_PRESSURE")
-
-	
-
-# class BigPreview(bpy.types.Operator):
-# 	bl_idname = "preview.big_preview"
-# 	bl_label = "Big Preview"
-
-# 	def execute(self, context):
-# 		print("Running big preview")
-# 		return {"FINISHED"}
-
-# 	def check(self, context):
-# 		return False
-
-# 	def invoke(self, context, event):
-# 		wm = context.window_manager
-# 		print("Invoke big preview")
-# 		return wm.invoke_props_dialog(self, width=800, height=800)
-
-# 	def draw(self, context):
-# 		layout = self.layout
-# 		nexus_model_SCN = context.scene.nexus_model_manager
-# 		col = layout.column()
-# 		col.scale_y = 5
-# 		col.template_icon_view(nexus_model_SCN, "collection_asset", show_labels=True)
 
 ################################################################
 ############################ Append ############################
@@ -436,7 +303,7 @@ class VIEW3D_OT_AddModel(bpy.types.Operator):
 
 	def invoke(self, context, event):
 		nexus_model_SCN = context.scene.nexus_model_manager
-		collection_name = nexus_model_SCN.collection_asset
+		collection_name = nexus_model_SCN.asset_previews
 		is_link = nexus_model_SCN.link_model
 		add_dupli_to_sel = nexus_model_SCN.add_duplicollection
 
@@ -457,30 +324,20 @@ class VIEW3D_OT_AddModel(bpy.types.Operator):
 	def execute(self, context):
 		nexus_model_SCN = context.scene.nexus_model_manager
 		path_models = bpy.data.window_managers["WinMan"].nexus_model_manager_dir_resource
-		filename = nexus_model_SCN.asset_previews
+		asset_name = nexus_model_SCN.asset_previews
 		category = nexus_model_SCN.category_list
 		library = nexus_model_SCN.library_list
-		collection_name = nexus_model_SCN.collection_asset
 		is_link = nexus_model_SCN.link_model
 		inst_collections = nexus_model_SCN.instance_collections
 		add_dupli_to_sel = nexus_model_SCN.add_duplicollection
 		collection_or_meshdata = nexus_model_SCN.collection_or_meshdata
 		set_to_selected_objects = nexus_model_SCN.set_to_selected_objects
 
-		filepath = os.path.join(path_models, library, category, filename, filename + ".blend")
+		filepath = os.path.join(path_models, library, category, asset_name, asset_name + ".blend")
 
-		if collection_or_meshdata == "COLLECTION":
-			directory_inside_file = os.path.join(filepath, "Collection")
-		elif collection_or_meshdata == "MESH":
-			directory_inside_file = os.path.join(filepath, "Mesh")
-			collection_name = "SM_" + collection_name
-		elif collection_or_meshdata == "OBJECT":
-			directory_inside_file = os.path.join(filepath, "Object")
-			collection_name = "SM_" + collection_name
-		else:
-			print("----------------- SOMETHING ERROR >> collection_or_meshdata << -----------------")
+		directory_inside_file = os.path.join(filepath, "Collection")
 
-		filepath_collection_name = directory_inside_file + collection_name
+		filepath_collection_name = directory_inside_file + asset_name
 
 
 		selected_objects = context.selected_objects
@@ -491,7 +348,7 @@ class VIEW3D_OT_AddModel(bpy.types.Operator):
 		if is_link:
 			bpy.ops.wm.link(
 				filepath=filepath_collection_name,
-				filename=collection_name,
+				filename=asset_name,
 				directory=directory_inside_file,
 				link=True,
 				instance_collections=inst_collections,
@@ -500,50 +357,24 @@ class VIEW3D_OT_AddModel(bpy.types.Operator):
 		else:
 			bpy.ops.wm.append(
 				filepath=filepath_collection_name,
-				filename=collection_name,
+				filename=asset_name,
 				directory=directory_inside_file,
 				link=False,
 				instance_collections=False,
 				autoselect=True
 			)
 
-		if collection_or_meshdata == "COLLECTION":
-			if add_dupli_to_sel:
-				collection = bpy.data.collections[collection_name]
-				for obj in selected_objects:
-					obj.dupli_collection = collection
-					obj.dupli_type = "COLLECTION"
+		if add_dupli_to_sel:
+			collection = bpy.data.collections[asset_name]
+			for obj in selected_objects:
+				obj.dupli_collection = collection
+				obj.dupli_type = "COLLECTION"
 
-			if len(bpy.context.selected_objects) > 0:
-				if nexus_model_SCN.add_location == "CURSOR":
-					bpy.context.selected_objects[0].location = context.scene.cursor.location
-				else:
-					bpy.context.selected_objects[0].location = (0.0, 0.0, 0.0)
-
-		elif collection_or_meshdata == "MESH":
-			if set_to_selected_objects:
-				mesh = bpy.data.meshes[collection_name]
-				for obj in selected_objects:
-					if obj.type == "MESH":
-						obj.data = mesh
-
-		elif collection_or_meshdata == "OBJECT":
-			if len(bpy.context.selected_objects) > 0:
-				if nexus_model_SCN.add_location == "CURSOR":
-					bpy.context.selected_objects[0].location = context.scene.cursor.location
-				else:
-					bpy.context.selected_objects[0].location = (0.0, 0.0, 0.0)
-
-		# if add_dupli_to_sel:
-		# 	collection = bpy.data.collections[collection_name]
-		# 	for obj in selected_objects:
-		# 		obj.dupli_collection = collection
-		# 		obj.dupli_type = "COLLECTION"
-
-		# if is_link and not inst_collections:
-		# 	return {"FINISHED"}
-
-
+		if len(bpy.context.selected_objects) > 0:
+			if nexus_model_SCN.add_location == "CURSOR":
+				bpy.context.selected_objects[0].location = context.scene.cursor.location
+			else:
+				bpy.context.selected_objects[0].location = (0.0, 0.0, 0.0)
 
 		return {"FINISHED"}
 
@@ -707,7 +538,7 @@ class VIEW3D_OT_ImagePath(bpy.types.Operator):
 		library = nexus_model_SCN.library_list
 		category = nexus_model_SCN.category_list
 		selected_preview = nexus_model_SCN.asset_previews
-		collection = nexus_model_SCN.collection_asset
+		# collection = nexus_model_SCN.collection_asset
 
 		render_path = os.path.join(model_dir, library, category, selected_preview, "render")
 
@@ -729,15 +560,6 @@ class VIEW3D_OT_ImagePath(bpy.types.Operator):
 
 
 class NexusModelManager_WM_Properties(bpy.types.PropertyGroup):
-
-	# scale_preview = FloatProperty(
-	# 	name="Scale preview",
-	# 	default=1.5,
-	# 	min=1.0,
-	# 	max=10.0,
-	# 	soft_min=1.0,
-	# 	soft_max=10.0
-	# )
 
 	create_new: BoolProperty(
 		name="Create new",
@@ -811,9 +633,9 @@ class NexusModelManager_WM_Properties(bpy.types.PropertyGroup):
 		items=make_category_list
 	)
 
-	collection_asset: EnumProperty(
-		items=enum_collections_asset
-	)
+	# collection_asset: EnumProperty(
+	# 	items=enum_collections_asset
+	# )
 
 	collection_or_meshdata: EnumProperty(
 		name="Collection or Mesh Data",
@@ -864,14 +686,6 @@ def register():
 	for cls in classes:
 		register_class(cls)
 
-	# bpy.utils.register_class(Preferences)
-	# bpy.utils.register_class(Library_Path)
-	# bpy.utils.register_class(Asset_Path)
-	# bpy.utils.register_class(Image_Path)
-	# # bpy.utils.register_class(AddExistCollection)
-	# bpy.utils.register_module(__name__)
-
-
 	preferences = bpy.context.preferences
 	addon_prefs = preferences.addons[__name__].preferences
 
@@ -887,12 +701,6 @@ def register():
 
 	asset_collections["main"] = pcoll
 
-	pcoll = bpy.utils.previews.new()
-	pcoll.collection_previews_dir = ""
-	pcoll.collection_previews = ()
-
-	collections_collection["main"] = pcoll
-
 	bpy.types.Scene.nexus_model_manager = bpy.props.PointerProperty(type=NexusModelManager_WM_Properties)
 
 
@@ -905,15 +713,6 @@ def unregister():
 	for cls in reversed(classes):
 		unregister_class(cls)
 
-	# bpy.utils.unregister_class(Preferences)
-	# bpy.utils.unregister_class(Library_Path)
-	# bpy.utils.unregister_class(Asset_Path)
-	# bpy.utils.unregister_class(Image_Path)
-	# bpy.utils.unregister_class(AddExistCollection)
-
-	# del WindowManager.nexus_model_manager_dir_resource
-	# del bpy.types.Scene.nexus_model_manager
-
 	for pcoll in asset_collections.values():
 		bpy.utils.previews.remove(pcoll)
 	asset_collections.clear()
@@ -921,9 +720,6 @@ def unregister():
 	for pcoll in collections_collection.values():
 		bpy.utils.previews.remove(pcoll)
 	collections_collection.clear()
-
-	# bpy.utils.unregister_module(__name__)
-
 
 
 if __name__ == "__main__":
