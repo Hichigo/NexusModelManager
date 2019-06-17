@@ -14,6 +14,8 @@ if __name__ == "__main__":
     cursor_rotation = sys.argv[10].split("|") # 0 - use or not; 1,2,3 - x,y,z
     use_rotation = bool(cursor_rotation[0])
 
+    file_pack_all = bool(sys.argv[11])
+
     save_file = os.path.join(save_dir, collection_name + ".blend")
 
     filepath = os.path.join(append_from_blendfile, directory_folder, collection_name)
@@ -75,6 +77,9 @@ if __name__ == "__main__":
 
     # remove HDRI image
     bpy.data.images.remove(bpy.data.images["tomoco_studio.exr"])
+
+    if file_pack_all:
+        bpy.ops.file.pack_all()
 
     # save file
     bpy.ops.wm.save_as_mainfile(filepath=save_file)

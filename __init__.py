@@ -224,6 +224,8 @@ class VIEW3D_PT_CreateAsset(bpy.types.Panel):
 
 		box.label(text="Settings")
 		box.prop(nexus_model_SCN, "apply_cursor_rotation")
+
+		box.prop(nexus_model_SCN, "file_pack_all")
 		
 		col = box.column()
 		col.label(text="Render Scene")
@@ -507,6 +509,7 @@ class VIEW3D_OT_CreateAsset(bpy.types.Operator):
 		collection_name = nexus_model_SCN.new_collection_name
 		create_new = nexus_model_SCN.create_new
 		open_blend_file = nexus_model_SCN.render_scenes
+		file_pack_all = "{}".format(nexus_model_SCN.file_pack_all)
 
 		if create_new:
 			library_name = nexus_model_SCN.new_library_name
@@ -566,7 +569,8 @@ class VIEW3D_OT_CreateAsset(bpy.types.Operator):
 				collection.name,       # append collection name
 				asset_dir_path,        # path save this file
 				cursor_location,       # cursor location it is pivot point new asset
-				cursor_rotation        # cursor rotation to new asset
+				cursor_rotation,       # cursor rotation to new asset
+				file_pack_all          # pack file to blend file
 			]
 		)
 
@@ -594,6 +598,12 @@ class VIEW3D_OT_ImagePath(bpy.types.Operator):
 
 
 class NexusModelManager_WM_Properties(bpy.types.PropertyGroup):
+
+	file_pack_all: BoolProperty(
+		name="Pack All Into .blend",
+		description="Pack to blend file textures and other",
+		default=False
+	)
 
 	create_new: BoolProperty(
 		name="Create new",
