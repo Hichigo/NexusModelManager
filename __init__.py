@@ -282,6 +282,7 @@ class VIEW3D_PT_ManagerPreviews(bpy.types.Panel):
 		row = box.row()
 		row.scale_y = 1.5
 		row.template_icon_view(nexus_model_SCN, "asset_previews", show_labels=True, scale_popup=10)
+		# row.template_search_preview(nexus_model_SCN, "asset_previews", search_data, "name")
 
 ####### Asset Name
 		row = box.row()
