@@ -299,6 +299,8 @@ class VIEW3D_PT_ManagerPreviews(bpy.types.Panel):
 		col = box.column()
 		row = col.row()
 		row.prop(nexus_model_SCN, "link_model")
+		row = col.row()
+		row.enabled = nexus_model_SCN.link_model
 		row.prop(nexus_model_SCN, "add_duplicollection")
 
 ####### Add Button
@@ -378,8 +380,8 @@ class VIEW3D_OT_AddModel(bpy.types.Operator):
 
 		selected_objects = context.selected_objects
 
-		if not add_dupli_to_sel:
-			bpy.ops.object.select_all(action="DESELECT")
+		# if not add_dupli_to_sel:
+		bpy.ops.object.select_all(action="DESELECT")
 
 		if is_link:
 			bpy.ops.wm.link(
@@ -400,18 +402,25 @@ class VIEW3D_OT_AddModel(bpy.types.Operator):
 				autoselect=True
 			)
 
-		if add_dupli_to_sel:
-			collection = bpy.data.collections[asset_name]
-			for obj in selected_objects:
-				obj.instance_type = "COLLECTION"
-				obj.instance_collection = collection
+		if is_link:
+			if add_dupli_to_sel:
+				collection = bpy.data.collections[asset_name]
+				bpy.data.objects.remove(context.active_object)
+				for obj in selected_objects:
+					obj.instance_type = "COLLECTION"
+					obj.instance_collection = collection
 
-		if not is_link:
-			if len(bpy.context.selected_objects) > 0:
+		if len(bpy.context.selected_objects) > 0:
+			if is_link:
 				if nexus_model_SCN.add_location == "CURSOR":
 					bpy.context.selected_objects[0].location = context.scene.cursor.location
 				else:
 					bpy.context.selected_objects[0].location = (0.0, 0.0, 0.0)
+			else:
+				if nexus_model_SCN.add_location == "CURSOR":
+					bpy.context.selected_objects[0].parent.location = context.scene.cursor.location
+				else:
+					bpy.context.selected_objects[0].parent.location = (0.0, 0.0, 0.0)
 
 		return {"FINISHED"}
 
