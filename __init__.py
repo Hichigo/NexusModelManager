@@ -12,17 +12,55 @@ bl_info = {
 
 import bpy
 import os
+import glob
 import subprocess
 from bpy.props import *
 import bpy.utils.previews
 from bpy.types import WindowManager
 
 from .mesh_paint_op import *
+from .functions import get_file_dir
 
 # separator symbols
 sep_lib = "_"
 sep_cat = "-"
 sep_name = "-"
+
+def enum_render_scenes(self, context):
+	scenes_list = []
+	addon_folder = get_file_dir(__file__)
+	scenes_dir = os.path.join(addon_folder, "resources", "render_scenes", "*.blend")
+	directory_icons = os.path.join(addon_folder, "resources", "render_scenes", "cameras_preview")
+
+	if context is None:
+		return scenes_list
+
+	pcoll = render_scene_collections["main"]
+
+	if directory_icons == pcoll.render_scene_previews_dir:
+		return pcoll.render_scene
+
+	scene_files_path = glob.glob(scenes_dir)
+
+	for i, scene_file_path in enumerate(scene_files_path):
+		if os.path.isfile(scene_file_path):
+			file_name = os.path.split(scene_file_path)[1] # get file name without path
+			file_name = file_name.split(".")[0] # get file name without extension
+			icon_path = os.path.join(directory_icons, file_name + ".png")
+			
+			if icon_path in pcoll:
+				scenes_list.append((scene_file_path, file_name, "", pcoll[icon_path].icon_id, i))
+			else:
+				thumb = pcoll.load(icon_path, icon_path, "IMAGE")
+				scenes_list.append((scene_file_path, file_name, "", thumb.icon_id, i))
+
+	scenes_list.sort()
+
+	pcoll.render_scene = scenes_list
+	pcoll.render_scene_previews_dir = directory_icons
+	return pcoll.render_scene
+
+render_scene_collections = {}
 
 ###########################################################################
 #################### function dinamicaly make category ####################
@@ -186,6 +224,11 @@ class VIEW3D_PT_CreateAsset(bpy.types.Panel):
 
 		box.label(text="Settings")
 		box.prop(nexus_model_SCN, "apply_cursor_rotation")
+		
+		col = box.column()
+		col.label(text="Render Scene")
+		col.scale_y = 1.5
+		col.template_icon_view(nexus_model_SCN, "render_scenes", show_labels=True, scale_popup=10)
 
 class VIEW3D_PT_ManagerPreviews(bpy.types.Panel):
 
@@ -453,6 +496,7 @@ class VIEW3D_OT_CreateAsset(bpy.types.Operator):
 		category_name = None
 		collection_name = nexus_model_SCN.new_collection_name
 		create_new = nexus_model_SCN.create_new
+		open_blend_file = nexus_model_SCN.render_scenes
 
 		if create_new:
 			library_name = nexus_model_SCN.new_library_name
@@ -488,7 +532,7 @@ class VIEW3D_OT_CreateAsset(bpy.types.Operator):
 		bpy.ops.wm.save_as_mainfile(filepath=bpy.data.filepath)
 
 		addon_path = get_file_dir(__file__)
-		empty_blend = os.path.join(addon_path, "resources", "empty.blend")
+		# empty_blend = os.path.join(addon_path, "resources", "empty.blend")
 		append_from_blendfile = bpy.data.filepath
 
 		tools = os.path.join(addon_path, "tools", "create_asset.py")
@@ -503,7 +547,7 @@ class VIEW3D_OT_CreateAsset(bpy.types.Operator):
 		sub = subprocess.Popen(
 			[
 				bpy.app.binary_path,   # path to blender.exe
-				empty_blend,           # open file
+				open_blend_file,       # open file
 				"-b",                  # open background blender
 				"--python",
 				tools,                 # path to python script
@@ -601,9 +645,9 @@ class NexusModelManager_WM_Properties(bpy.types.PropertyGroup):
 		items=make_category_list
 	)
 
-	# collection_asset: EnumProperty(
-	# 	items=enum_collections_asset
-	# )
+	render_scenes: EnumProperty(
+		items=enum_render_scenes
+	)
 
 	collection_or_meshdata: EnumProperty(
 		name="Collection or Mesh Data",
@@ -666,8 +710,12 @@ def register():
 	pcoll = bpy.utils.previews.new()
 	pcoll.asset_previews_dir = ""
 	pcoll.asset_previews = ()
-
 	asset_collections["main"] = pcoll
+
+	pcoll = bpy.utils.previews.new()
+	pcoll.render_scene_previews_dir = ""
+	pcoll.asset_previews = ()
+	render_scene_collections["main"] = pcoll
 
 	bpy.types.Scene.nexus_model_manager = bpy.props.PointerProperty(type=NexusModelManager_WM_Properties)
 
@@ -684,6 +732,10 @@ def unregister():
 	for pcoll in asset_collections.values():
 		bpy.utils.previews.remove(pcoll)
 	asset_collections.clear()
+
+	for pcoll in render_scene_collections.values():
+		bpy.utils.previews.remove(pcoll)
+	render_scene_collections.clear()
 
 if __name__ == "__main__":
 	register()
