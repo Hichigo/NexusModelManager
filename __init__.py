@@ -531,25 +531,11 @@ class VIEW3D_OT_ImagePath(bpy.types.Operator):
 		model_dir = context.window_manager.nexus_model_manager_dir_resource
 		library = nexus_model_SCN.library_list
 		category = nexus_model_SCN.category_list
-		selected_preview = nexus_model_SCN.asset_previews
-		# collection = nexus_model_SCN.collection_asset
+		asset_name = nexus_model_SCN.asset_previews
 
-		render_path = os.path.join(model_dir, library, category, selected_preview, "render")
+		render_path = os.path.join(model_dir, library, category, asset_name, "render", asset_name + ".png")
 
-		if os.path.exists(render_path):
-			num_collections = len(os.listdir(render_path)) > 1
-		else:
-			num_collections = False
-
-		if num_collections:
-			# collection = library + sep_lib + category + sep_cat + collection
-			filepath = os.path.join(model_dir, library, category, selected_preview, "render", collection + ".png")
-		else:
-			collection = collection.replace(library + sep_lib, "")
-			collection = collection.replace(category + sep_cat, "")
-			filepath = os.path.join(model_dir, library, category, selected_preview, "render", collection + ".png")
-
-		bpy.ops.wm.path_open(filepath=filepath)
+		bpy.ops.wm.path_open(filepath=render_path)
 		return {"FINISHED"}
 
 
