@@ -238,7 +238,7 @@ class VIEW3D_OT_MeshPaint(Operator):
 					rot = None
 					# apply rotation by normal if checket "align_by_normal"
 					if nexus_model_SCN.align_by_normal:
-						rot = self.normal.to_track_quat("Z","Y").to_euler()#.to_matrix().to_4x4() # rotation matrix
+						rot = self.normal.to_track_quat("Z","Y").to_euler()
 					else:
 						rot = Euler((0,0,0))
 
@@ -258,11 +258,6 @@ class VIEW3D_OT_MeshPaint(Operator):
 				delta_angle = self.test_angle - self.test_angle_old
 				self.new_model.rotation_euler.rotate_axis("Z", math.radians(delta_angle))# = Matrix.Rotation(math.radians(self.test_angle), 4, self.normal).to_euler()
 				self.test_angle_old = self.test_angle
-				
-				# if bHit:
-				# 	rot_dir = (pos_hit - self.new_model.location).normalized()
-				# 	self.rot_dir_arrow = pos_hit#rot_dir
-					
 				
 			elif self.state == "SCALE":
 				pass
