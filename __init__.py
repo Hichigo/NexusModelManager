@@ -73,10 +73,11 @@ def make_list_folder(path):
 	mode_options = []
 
 	for dir in dirs:
-		if os.path.isdir(os.path.join(path, dir)):
-			item = (dir, dir, "", i)
-			mode_options.append(item)
-			i += 1
+		if dir != "textures":
+			if os.path.isdir(os.path.join(path, dir)):
+				item = (dir, dir, "", i)
+				mode_options.append(item)
+				i += 1
 
 	return mode_options
 
