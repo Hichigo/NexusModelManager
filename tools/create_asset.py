@@ -12,9 +12,16 @@ if __name__ == "__main__":
     offset_location = Vector( (float(offset_location[0]), float(offset_location[1]), float(offset_location[2])) ) # make vector
 
     cursor_rotation = sys.argv[10].split("|") # 0 - use or not; 1,2,3 - x,y,z
-    use_rotation = bool(cursor_rotation[0])
+    if cursor_rotation[0] == "True":
+        use_rotation = True
+    else:
+        use_rotation = False
 
     file_pack_all = bool(sys.argv[11])
+    if file_pack_all == "True":
+        file_pack_all = True
+    else:
+        file_pack_all = False
 
     save_file = os.path.join(save_dir, collection_name + ".blend")
 
