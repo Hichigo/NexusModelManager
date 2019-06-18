@@ -510,7 +510,6 @@ class VIEW3D_OT_CreateAsset(bpy.types.Operator):
 		collection_name = nexus_model_SCN.new_collection_name
 		create_new = nexus_model_SCN.create_new
 		open_blend_file = nexus_model_SCN.render_scenes
-		file_pack_all = "{}".format(nexus_model_SCN.file_pack_all)
 
 		if create_new:
 			library_name = nexus_model_SCN.new_library_name
@@ -557,6 +556,9 @@ class VIEW3D_OT_CreateAsset(bpy.types.Operator):
 
 		cursor_location = "{}|{}|{}".format(cursor_location.x, cursor_location.y, cursor_location.z)
 		cursor_rotation = "{}|{}|{}|{}".format(nexus_model_SCN.apply_cursor_rotation, cursor_rotation.x, cursor_rotation.y, cursor_rotation.z)
+
+		# prepeare file_pack_all variable
+		file_pack_all = "{}".format(nexus_model_SCN.file_pack_all)
 
 		sub = subprocess.Popen(
 			[
