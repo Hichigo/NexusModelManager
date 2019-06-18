@@ -1,6 +1,7 @@
 import bpy
 import sys
 import os
+from shutil import copyfile
 from mathutils import Vector
 
 if __name__ == "__main__":
@@ -87,9 +88,30 @@ if __name__ == "__main__":
 
     if file_pack_all:
         bpy.ops.file.pack_all()
+    else:
+        # save images to root library
+        path_textures = os.path.abspath(os.path.join(save_dir, "../..", "textures"))
+
+        # create folder in not exist
+        if not os.path.exists(path_textures):
+            os.makedirs(path_textures)
+
+        for image in bpy.data.images:
+            if image.name != "Render Result":
+                # bpy.context.selected_objects[0].material_slots[0].material.node_tree.nodes[0].image
+                # get absolute path image
+                image_path = os.path.abspath(image.filepath_from_user())
+                # create new path image
+                new_image_path = os.path.join(path_textures, image.name)
+                # copy image to new path
+                copyfile(image_path, new_image_path)
+                # set new path image inside blender
+                image.filepath = new_image_path
+                print("save image to -> ", new_image_path)
 
     # save file
     bpy.ops.wm.save_as_mainfile(filepath=save_file)
+    print("Asset " + collection_name + " Saved!")
 
     # quit blender
     bpy.ops.wm.quit_blender()
