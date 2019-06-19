@@ -76,8 +76,8 @@ def draw_callback_3d(self, context):
 	# 	# arrow_rot_path[1].y = euler_rot.y
 	# 	# arrow_rot_path[1].z = euler_rot.z
 
-	# 	# arrow_rot_path[1].x = arrow_rot_path[0].x + radius*math.cos(math.radians(self.test_angle))
-	# 	# arrow_rot_path[1].y = arrow_rot_path[0].y + radius*math.sin(math.radians(self.test_angle))
+	# 	# arrow_rot_path[1].x = arrow_rot_path[0].x + radius*math.cos(math.radians(self.rotate_angle))
+	# 	# arrow_rot_path[1].y = arrow_rot_path[0].y + radius*math.sin(math.radians(self.rotate_angle))
 	# 	# arrow_rot_path[1].z = arrow_rot_path[0].z
 	# 	# arrow_rot_path[1] = arrow_rot_path[1] @ rot_mat
 		
@@ -123,7 +123,7 @@ def draw_callback_2d(self, context):
 		shader.uniform_float("color", (1.0, 1.0, 0.0, 1.0))
 		batch.draw(shader)
 
-		text_angle = "{}".format(round(self.test_angle, 2))
+		text_angle = "{}".format(round(self.rotate_angle, 2))
 		blf.size(1, 20, 72)
 		blf.position(2, line[0][0], line[0][1]+100, 1)
 		blf.draw(2, text_angle)
@@ -160,8 +160,8 @@ class VIEW3D_OT_MeshPaint(Operator):
 
 			self.rot_dir_arrow = Vector((1, 0, 0))
 			self.new_scale = 1.0
-			self.test_angle = 0
-			self.test_angle_old = 0
+			self.rotate_angle = 0
+			self.rotate_angle_old = 0
 
 			self.model_2d_point = None
 
@@ -201,10 +201,10 @@ class VIEW3D_OT_MeshPaint(Operator):
 
 		self.mouse_coord = self.model_2d_point + dir * 100
 
-		self.test_angle = math.degrees(math.atan2(self.mouse_coord.y - self.model_2d_point.y, self.mouse_coord.x - self.model_2d_point.x))
+		self.rotate_angle = math.degrees(math.atan2(self.mouse_coord.y - self.model_2d_point.y, self.mouse_coord.x - self.model_2d_point.x))
 
-		if self.test_angle < 0:
-			self.test_angle += 360
+		if self.rotate_angle < 0:
+			self.rotate_angle += 360
 
 	def modal(self, context, event):
 		context.area.tag_redraw()
@@ -243,7 +243,7 @@ class VIEW3D_OT_MeshPaint(Operator):
 
 					loc = Matrix.Translation(self.mouse_path[0])
 
-					rot_add = Euler( Vector( (0, 0, math.radians(self.test_angle) ) ) )
+					rot_add = Euler( Vector( (0, 0, math.radians(self.rotate_angle) ) ) )
 					rot_add = rot_add.to_matrix().to_4x4()
 
 					scale = Matrix.Scale(1, 4)
@@ -264,9 +264,9 @@ class VIEW3D_OT_MeshPaint(Operator):
 			elif self.state == "ROTATE":
 				self.calculate_angle(event, context)
 
-				delta_angle = self.test_angle - self.test_angle_old
-				self.new_model.rotation_euler.rotate_axis("Z", math.radians(delta_angle))# = Matrix.Rotation(math.radians(self.test_angle), 4, self.normal).to_euler()
-				self.test_angle_old = self.test_angle
+				delta_angle = self.rotate_angle - self.rotate_angle_old
+				self.new_model.rotation_euler.rotate_axis("Z", math.radians(delta_angle))
+				self.rotate_angle_old = self.rotate_angle
 				
 			elif self.state == "SCALE":
 				pass
@@ -274,12 +274,9 @@ class VIEW3D_OT_MeshPaint(Operator):
 		if event.type == "WHEELUPMOUSE":
 			self.new_scale += 0.1
 			self.new_model.scale = Vector((self.new_scale, self.new_scale, self.new_scale))
-			self.test_angle += 10
 		elif event.type == "WHEELDOWNMOUSE":
 			self.new_scale -= 0.1
 			self.new_model.scale = Vector((self.new_scale, self.new_scale, self.new_scale))
-			self.test_angle -= 10
-
 
 		if event.value == "PRESS":
 			if event.type == "LEFTMOUSE":
