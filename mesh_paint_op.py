@@ -123,6 +123,11 @@ def draw_callback_2d(self, context):
 		shader.uniform_float("color", (1.0, 1.0, 0.0, 1.0))
 		batch.draw(shader)
 
+		text_angle = "{}".format(round(self.test_angle, 2))
+		blf.size(1, 20, 72)
+		blf.position(2, line[0][0], line[0][1]+100, 1)
+		blf.draw(2, text_angle)
+
 		# restore opengl defaults
 		bgl.glLineWidth(1)
 		bgl.glDisable(bgl.GL_BLEND)
