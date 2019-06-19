@@ -91,9 +91,6 @@ if __name__ == "__main__":
     # render icon
     bpy.ops.render.render(write_still=True)
 
-    # remove camera
-    # bpy.data.objects.remove(bpy.data.objects["Camera"])
-
     # remove HDRI image
     bpy.data.images.remove(bpy.data.images["tomoco_studio.exr"])
 
@@ -101,7 +98,7 @@ if __name__ == "__main__":
         bpy.ops.file.pack_all()
     elif pack_data == "TEXTURE":
         # save images to root library
-        path_textures = os.path.abspath(os.path.join(save_dir, "../..", "textures"))
+        path_textures = os.path.abspath(os.path.join(save_dir, "../../..", "textures"))
 
         # create folder in not exist
         if not os.path.exists(path_textures):
@@ -109,7 +106,6 @@ if __name__ == "__main__":
 
         for image in bpy.data.images:
             if image.name != "Render Result":
-                # bpy.context.selected_objects[0].material_slots[0].material.node_tree.nodes[0].image
                 # get absolute path image
                 image_path = os.path.abspath(image.filepath_from_user())
                 # create new path image
