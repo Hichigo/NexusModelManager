@@ -18,16 +18,27 @@ if __name__ == "__main__":
     else:
         use_rotation = False
 
-    file_pack_all = bool(sys.argv[11])
-    if file_pack_all == "True":
-        file_pack_all = True
-    else:
-        file_pack_all = False
+    pack_data = sys.argv[11]
 
     save_file = os.path.join(save_dir, collection_name + ".blend")
 
     filepath = os.path.join(append_from_blendfile, directory_folder, collection_name)
     directory = os.path.join(append_from_blendfile, directory_folder)
+
+    if pack_data == "TEXTURE":
+        missing_file = False
+        for image in bpy.data.images:
+            if image.name != "Render Result":
+                image_path = os.path.abspath(image.filepath_from_user())
+
+                if not os.path.isfile(image_path):
+                    print("MISSING TEXTURE --> ", image_path)
+                    missing_file = True
+        
+        if missing_file:
+            print("------------------ ERROR ------------------")
+            print("------------- ASSET NOT SAVED -------------")
+            bpy.ops.wm.quit_blender()
 
     # set 3D cursor to center scene
     bpy.context.scene.cursor.location = Vector((0,0,0))
@@ -86,9 +97,9 @@ if __name__ == "__main__":
     # remove HDRI image
     bpy.data.images.remove(bpy.data.images["tomoco_studio.exr"])
 
-    if file_pack_all:
+    if pack_data == "PACK":
         bpy.ops.file.pack_all()
-    else:
+    elif pack_data == "TEXTURE":
         # save images to root library
         path_textures = os.path.abspath(os.path.join(save_dir, "../..", "textures"))
 
