@@ -238,12 +238,15 @@ class VIEW3D_OT_MeshPaint(Operator):
 					rot = None
 					# apply rotation by normal if checket "align_by_normal"
 					if nexus_model_SCN.align_by_normal:
-						rot = self.normal.to_track_quat("Z","Y").to_euler()
+						# rot = self.normal.to_track_quat("Z","Y").to_euler()
+						rot = self.normal.rotation_difference(Vector((0,0,1)))
+						rot.invert()
+						rot = rot.to_euler()
 					else:
 						rot = Euler((0,0,0))
 
 					self.new_model.rotation_euler = rot
-
+					
 					# self.calculate_angle(event, context) # calculate "self.test_angle" and "self.test_angle_old"
 					# delta_angle = self.test_angle - self.test_angle_old
 					# self.new_model.rotation_euler.rotate_axis("Z", math.radians(delta_angle))
