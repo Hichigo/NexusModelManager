@@ -66,9 +66,9 @@ def draw_callback_3d(self, context):
 	shader.uniform_float("color", (0.0, 1.0, 1.0, 1.0))
 	batch.draw(shader)
 
-	# if self.state == "ROTATE":
+	# if self.transform_mode == "ROTATE":
 	# 	arrow_rot_path = []
-	# 	arrow_rot_path.append(self.new_model.location + ( self.normal * (0.3) ))
+	# 	arrow_rot_path.append(self.current_model.location + ( self.normal * (0.3) ))
 	# 	# arrow_rot_path.append(arrow_rot_path[0] + (self.rot_dir_arrow * 2))
 	# 	arrow_rot_path.append(self.rot_dir_arrow)
 	# 	# euler_rot = arrow_rot_path[1].to_track_quat("-Y","Z").to_euler() # -Y Z - Look At?
@@ -110,7 +110,7 @@ def draw_callback_2d(self, context):
 	blf.position(1, xt - blf.dimensions(0, subtext)[0] / 2, 30 , 1)
 	blf.draw(1, subtext)
 
-	if self.state == "ROTATE":
+	if self.transform_mode == "ROTATE":
 		line = []
 		line.append((self.model_2d_point.x, self.model_2d_point.y))
 		line.append((self.mouse_coord.x, self.mouse_coord.y))
@@ -153,19 +153,22 @@ class VIEW3D_OT_MeshPaint(Operator):
 			self._handle_3d = bpy.types.SpaceView3D.draw_handler_add(draw_callback_3d, args, "WINDOW", "POST_VIEW")
 			self._handle_2d = bpy.types.SpaceView3D.draw_handler_add(draw_callback_2d, args, "WINDOW", "POST_PIXEL")
 
-			self.state = "MOVE"
+			self.transform_mode = "MOVE"
 
 			self.mouse_path = [Vector((0, 0, 0)), Vector((0, 0, 1))]
 			self.normal = Vector((0, 0, 1))
 
 			self.rot_dir_arrow = Vector((1, 0, 0))
-			self.new_scale = 1.0
+			self.scale_model = 1.0
 			self.rotate_angle = 0
 			self.rotate_angle_old = 0
 
 			self.model_2d_point = None
 
-			self.new_model = add_model(context, self.mouse_path[0], self.normal)
+			# self.start_distance_scale = 0
+			# self.current_distance_scale = 0
+
+			self.current_model = add_model(context, self.mouse_path[0], self.normal)
 
 			context.window_manager.modal_handler_add(self)
 			return {"RUNNING_MODAL"}
@@ -188,7 +191,7 @@ class VIEW3D_OT_MeshPaint(Operator):
 		region = context.region
 		region_3d = context.space_data.region_3d
 
-		result = location_3d_to_region_2d(region, region_3d, self.new_model.location)
+		result = location_3d_to_region_2d(region, region_3d, self.current_model.location)
 
 		return result
 	
@@ -206,25 +209,35 @@ class VIEW3D_OT_MeshPaint(Operator):
 		if self.rotate_angle < 0:
 			self.rotate_angle += 360
 
+	def change_scale_current_model(self, context, event):
+		loc, rot, scale = self.current_model.matrix_world.decompose()
+
+		loc = Matrix.Translation(self.mouse_path[0])
+		rot = rot.to_matrix().to_4x4()
+		scale = Matrix.Scale(self.scale_model, 4)
+
+		mat_w = loc @ rot @ scale
+		self.current_model.matrix_world = mat_w
+	
 	def modal(self, context, event):
 		context.area.tag_redraw()
 		nexus_model_SCN = context.scene.nexus_model_manager
-		# mod = []
-        # if event.shift:
-        #     mod.append("Shift")
+		mod = None
+		if event.shift:
+			mod = "SHIFT"
         # if event.alt:
         #     mod.append("Alt")
         # if event.ctrl:
         #     mod.append("Ctrl")
-		# context.area.header_text_set("%s %s - %s" % (mod, event.type, event.value))
+		context.area.header_text_set("%s %s - %s" % (mod, event.type, event.value))
 
 		if event.type == "MOUSEMOVE":
-			if self.state == "MOVE":
+			if self.transform_mode == "MOVE":
 				# new origin and normal
 				origin, direction = self.get_origin_and_direction(event, context)
 
 				# hide mesh
-				self.new_model.hide_set(True)
+				self.current_model.hide_set(True)
 				# trace
 				bHit, pos_hit, normal_hit, face_index_hit, obj_hit, matrix_world = context.scene.ray_cast(
 					view_layer=context.view_layer,
@@ -232,21 +245,21 @@ class VIEW3D_OT_MeshPaint(Operator):
 					direction=direction
 				)
 				# show mesh
-				self.new_model.hide_set(False)
+				self.current_model.hide_set(False)
 				
 				if bHit:
 					self.normal = normal_hit.normalized()
 					self.mouse_path[0] = pos_hit
 					self.mouse_path[1] = pos_hit + (self.normal * 2.0)
 
-					loc, rot, scale = self.new_model.matrix_world.decompose()
+					loc, rot, scale = self.current_model.matrix_world.decompose()
 
 					loc = Matrix.Translation(self.mouse_path[0])
 
 					rot_add = Euler( Vector( (0, 0, math.radians(self.rotate_angle) ) ) )
 					rot_add = rot_add.to_matrix().to_4x4()
 
-					scale = Matrix.Scale(1, 4)
+					scale = Matrix.Scale(self.scale_model, 4)
 
 					# apply rotation by normal if checked "align_by_normal"
 					if nexus_model_SCN.align_by_normal:
@@ -260,45 +273,61 @@ class VIEW3D_OT_MeshPaint(Operator):
 					rot = rot @ rot_add
 					mat_w = loc @ rot @ scale
 
-					self.new_model.matrix_world = mat_w
-			elif self.state == "ROTATE":
+					self.current_model.matrix_world = mat_w
+			elif self.transform_mode == "ROTATE":
 				self.calculate_angle(event, context)
 
 				delta_angle = self.rotate_angle - self.rotate_angle_old
-				self.new_model.rotation_euler.rotate_axis("Z", math.radians(delta_angle))
+				self.current_model.rotation_euler.rotate_axis("Z", math.radians(delta_angle))
 				self.rotate_angle_old = self.rotate_angle
 				
-			elif self.state == "SCALE":
-				pass
+			# elif self.transform_mode == "SCALE":
+				# self.model_2d_point = self.get_2d_point_from_3d(event, context)
+				# x = self.model_2d_point.x - event.mouse_region_x
+				# y = self.model_2d_point.y - event.mouse_region_y
+				# self.current_distance_scale = math.hypot(x, y)
+				# delta_scale = self.current_distance_scale - self.start_distance_scale
+				# self.scale_model = self.scale_model + delta_scale * 0.1
+				# self.current_model.scale = Vector((self.scale_model, self.scale_model, self.scale_model))
 
 		if event.type == "WHEELUPMOUSE":
-			self.new_scale += 0.1
-			self.new_model.scale = Vector((self.new_scale, self.new_scale, self.new_scale))
+			if mod != "SHIFT":
+				self.scale_model += 0.1
+			else:
+				self.scale_model += 0.01
+			self.change_scale_current_model(context, event)
 		elif event.type == "WHEELDOWNMOUSE":
-			self.new_scale -= 0.1
-			self.new_model.scale = Vector((self.new_scale, self.new_scale, self.new_scale))
+			if mod != "SHIFT":
+				self.scale_model -= 0.1
+			else:
+				self.scale_model -= 0.01
+			self.change_scale_current_model(context, event)
 
 		if event.value == "PRESS":
 			if event.type == "LEFTMOUSE":
-				self.state = "MOVE"
-				self.new_model = add_model(context, self.mouse_path[0], self.normal)
+				self.transform_mode = "MOVE"
+				self.current_model = add_model(context, self.mouse_path[0], self.normal)
 				return {"RUNNING_MODAL"}
 			elif event.type == "R":
-				self.state = "ROTATE"
+				self.transform_mode = "ROTATE"
 				return {"RUNNING_MODAL"}
 			elif event.type == "G":
-				self.state = "MOVE"
+				self.transform_mode = "MOVE"
 				return {"RUNNING_MODAL"}
-			elif event.type == "S":
-				self.state = "SCALE"
-				return {"RUNNING_MODAL"}
+			# elif event.type == "S":
+			# 	self.transform_mode = "SCALE"
+			# 	self.model_2d_point = self.get_2d_point_from_3d(event, context)
+			# 	x = self.model_2d_point.x - event.mouse_region_x
+			# 	y = self.model_2d_point.y - event.mouse_region_y
+			# 	self.start_distance_scale = math.hypot(x, y)	
+			# 	return {"RUNNING_MODAL"}
 			elif event.type == "N":
 				nexus_model_SCN.align_by_normal = not nexus_model_SCN.align_by_normal
 				return {"RUNNING_MODAL"}
 			elif event.type in {"RIGHTMOUSE", "ESC"}:
 				
 				bpy.ops.object.select_all(action="DESELECT")
-				self.new_model.select_set(True)
+				self.current_model.select_set(True)
 				bpy.ops.object.delete()
 
 				bpy.types.SpaceView3D.draw_handler_remove(self._handle_3d, "WINDOW")
