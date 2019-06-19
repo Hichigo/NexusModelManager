@@ -234,27 +234,28 @@ class VIEW3D_OT_MeshPaint(Operator):
 					self.mouse_path[0] = pos_hit
 					self.mouse_path[1] = pos_hit + (self.normal * 2.0)
 
-					#mat_trans = Matrix.Translation(self.mouse_path[0]) # location matrix
-					rot = None
-					# apply rotation by normal if checket "align_by_normal"
+					loc, rot, scale = self.new_model.matrix_world.decompose()
+
+					loc = Matrix.Translation(self.mouse_path[0])
+
+					rot_add = Euler( Vector( (0, 0, math.radians(self.test_angle) ) ) )
+					rot_add = rot_add.to_matrix().to_4x4()
+
+					scale = Matrix.Scale(1, 4)
+
+					# apply rotation by normal if checked "align_by_normal"
 					if nexus_model_SCN.align_by_normal:
 						# rot = self.normal.to_track_quat("Z","Y").to_euler()
 						rot = self.normal.rotation_difference(Vector((0,0,1)))
 						rot.invert()
-						rot = rot.to_euler()
+						rot = rot.to_euler().to_matrix().to_4x4()
 					else:
-						rot = Euler((0,0,0))
-
-					self.new_model.rotation_euler = rot
+						rot = Euler((0,0,0)).to_matrix().to_4x4()
 					
-					# self.calculate_angle(event, context) # calculate "self.test_angle" and "self.test_angle_old"
-					# delta_angle = self.test_angle - self.test_angle_old
-					# self.new_model.rotation_euler.rotate_axis("Z", math.radians(delta_angle))
+					rot = rot @ rot_add
+					mat_w = loc @ rot @ scale
 
-					self.new_model.location = self.mouse_path[0]
-					self.new_model.scale = Vector((self.new_scale, self.new_scale, self.new_scale))
-
-					#self.new_model.matrix_world = mat_trans @ mat_rot # apply both matrix
+					self.new_model.matrix_world = mat_w
 			elif self.state == "ROTATE":
 				self.calculate_angle(event, context)
 
