@@ -98,7 +98,7 @@ def draw_callback_2d(self, context):
 	# Draw text to indicate that draw mode is active
 	region = context.region
 	text = "- Mesh Paint Mode -"
-	subtext = "LMB - Add Model | G - Move, R - Rotate, S - Scale | RMB / ESC - Cancel"
+	# subtext = "LMB - Add Model | G - Move, R - Rotate, MOUSEWHEEL 0.1, 0.01 (shift) - Scale | RMB / ESC - Cancel"
 
 	xt = int(region.width / 2.0)
 	
@@ -106,9 +106,9 @@ def draw_callback_2d(self, context):
 	blf.position(0, xt - blf.dimensions(0, text)[0] / 2, 60 , 0)
 	blf.draw(0, text) 
 
-	blf.size(1, 20, 72)
-	blf.position(1, xt - blf.dimensions(0, subtext)[0] / 2, 30 , 1)
-	blf.draw(1, subtext)
+	# blf.size(font_id, 20, 72)
+	# blf.position(1, xt - blf.dimensions(0, subtext)[0] / 2, 30 , 1)
+	# blf.draw(1, subtext)
 
 	if self.transform_mode == "ROTATE":
 		line = []
@@ -124,7 +124,7 @@ def draw_callback_2d(self, context):
 		batch.draw(shader)
 
 		text_angle = "{}".format(round(self.rotate_angle, 2))
-		blf.size(1, 20, 72)
+		blf.size(font_id, 20, 72)
 		blf.position(2, line[0][0], line[0][1]+100, 1)
 		blf.draw(2, text_angle)
 
@@ -229,7 +229,8 @@ class VIEW3D_OT_MeshPaint(Operator):
         #     mod.append("Alt")
         # if event.ctrl:
         #     mod.append("Ctrl")
-		context.area.header_text_set("%s %s - %s" % (mod, event.type, event.value))
+		tip_text = "LMB - Add Model | G - Move, R - Rotate, MOUSEWHEEL 0.1, +shift 0.01 - Scale | RMB / ESC - Cancel"
+		context.area.header_text_set(tip_text)
 
 		if event.type == "MOUSEMOVE":
 			if self.transform_mode == "MOVE":
@@ -332,6 +333,7 @@ class VIEW3D_OT_MeshPaint(Operator):
 
 				bpy.types.SpaceView3D.draw_handler_remove(self._handle_3d, "WINDOW")
 				bpy.types.SpaceView3D.draw_handler_remove(self._handle_2d, "WINDOW")
+				context.area.header_text_set(text=None) # return header text to default
 				return {"CANCELLED"}
 
 		return {"RUNNING_MODAL"}
