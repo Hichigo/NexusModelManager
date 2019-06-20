@@ -328,7 +328,25 @@ class VIEW3D_PT_MeshPaint(bpy.types.Panel):
 		nexus_model_SCN = context.scene.nexus_model_manager
 		
 		layout.prop(nexus_model_SCN, "align_by_normal")
-		layout.operator(VIEW3D_OT_MeshPaint.bl_idname, text="Mesh Paint", icon="STYLUS_PRESSURE")
+		layout.operator(VIEW3D_OT_MeshPaint.bl_idname, text="Place Asset", icon="SCENE_DATA")
+		layout.prop(nexus_model_SCN, "distance_between_asset")
+
+		box = layout.box()
+		box.label(text="Random rotation")
+		col = box.column(align=True)
+		col.prop(nexus_model_SCN, "use_random_rotation")
+		if nexus_model_SCN.use_random_rotation:
+			col.prop(nexus_model_SCN, "random_rotation_x")
+			col.prop(nexus_model_SCN, "random_rotation_y")
+			col.prop(nexus_model_SCN, "random_rotation_z")
+
+		box = layout.box()
+		box.label(text="Random scale")
+		col = box.column(align=True)
+		col.prop(nexus_model_SCN, "use_random_scale")
+		if nexus_model_SCN.use_random_scale:
+			col.prop(nexus_model_SCN, "random_scale_from")
+			col.prop(nexus_model_SCN, "random_scale_to")
 
 ################################################################
 ############################ Append ############################
@@ -372,7 +390,6 @@ class VIEW3D_OT_AddModel(bpy.types.Operator):
 		library = nexus_model_SCN.library_list
 		is_link = nexus_model_SCN.link_model
 		add_dupli_to_sel = nexus_model_SCN.add_duplicollection
-		collection_or_meshdata = nexus_model_SCN.collection_or_meshdata
 		set_to_selected_objects = nexus_model_SCN.set_to_selected_objects
 
 		filepath = os.path.join(path_models, library, category, asset_name, asset_name + ".blend")
@@ -650,6 +667,59 @@ class NexusModelManager_WM_Properties(bpy.types.PropertyGroup):
 		default=False
 	)
 
+	distance_between_asset: FloatProperty(
+		name="Distance",
+		description="Distance to which assets can be placed",
+		min=0,
+		default=200
+	)
+
+	use_random_rotation: BoolProperty(
+		name="Use random rotation",
+		description="Set random rotation to asset",
+		default=False
+	)
+
+	random_rotation_x: FloatProperty(
+		name="X",
+		description="Random rotation by X",
+		min=0,
+		max=359,
+		default=0
+	)
+	random_rotation_y: FloatProperty(
+		name="Y",
+		description="Random rotation by Y",
+		min=0,
+		max=359,
+		default=0
+	)
+	random_rotation_z: FloatProperty(
+		name="Z",
+		description="Random rotation by Z",
+		min=0,
+		max=359,
+		default=0
+	)
+
+	use_random_scale: BoolProperty(
+		name="Use random scale",
+		description="Set random scale to asset",
+		default=False
+	)
+	random_scale_from: FloatProperty(
+		name="From",
+		description="Random scale from",
+		min=0,
+		default=1
+	)
+	random_scale_to: FloatProperty(
+		name="To",
+		description="Random scale to",
+		min=0,
+		default=2
+	)
+
 	asset_previews: EnumProperty(
 		items=enum_previews_asset_items
 	)
@@ -674,16 +744,6 @@ class NexusModelManager_WM_Properties(bpy.types.PropertyGroup):
 			("TEXTURE", "Texture to library", "", 2)
 		],
 		default = "NONE"
-	)
-
-	collection_or_meshdata: EnumProperty(
-		name="Collection or Mesh Data",
-		items=[
-			("COLLECTION", "Collection", "", 0),
-			("MESH", "Mesh Data", "", 1),
-			("OBJECT", "Object", "", 2)
-		],
-		default = "COLLECTION"
 	)
 
 	add_location: EnumProperty(
