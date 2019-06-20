@@ -10,6 +10,7 @@ from gpu_extras.batch import batch_for_shader
 
 import mathutils
 import math
+from random import uniform
 
 from mathutils import Vector, Matrix, Euler, Quaternion
 
@@ -132,7 +133,36 @@ def draw_callback_2d(self, context):
 		bgl.glLineWidth(1)
 		bgl.glDisable(bgl.GL_BLEND)
 		
+def random_scale_and_rotation(obj, normal, NM_SCN):
+	loc, rot, scale = obj.matrix_world.decompose()
 
+	loc = Matrix.Translation(loc)
+
+	if NM_SCN.use_random_scale:
+		new_scale = uniform(NM_SCN.random_scale_from, NM_SCN.random_scale_to)
+		scale = Matrix.Scale(new_scale, 4)
+	else:
+		scale = Matrix.Scale(1, 4)
+
+	# apply rotation by normal if checked "align_by_normal"
+	if NM_SCN.align_by_normal:
+		rot = normal.rotation_difference(Vector((0,0,1)))
+		rot.invert()
+		rot = rot.to_euler().to_matrix().to_4x4()
+	else:
+		rot = Euler((0,0,0)).to_matrix().to_4x4()
+	
+	if NM_SCN.use_random_rotation:
+		x_angle = math.radians(uniform(0, NM_SCN.random_rotation_x))
+		y_angle = math.radians(uniform(0, NM_SCN.random_rotation_y))
+		z_angle = math.radians(uniform(0, NM_SCN.random_rotation_z))
+
+		rot_add = Euler( Vector( (x_angle, y_angle, z_angle ) ) ).to_matrix().to_4x4()
+		rot = rot @ rot_add
+
+	mat_w = loc @ rot @ scale
+
+	obj.matrix_world = mat_w
 
 class VIEW3D_OT_MeshPaint(Operator):
 	bl_idname = "viev3d.mesh_paint"
@@ -164,6 +194,9 @@ class VIEW3D_OT_MeshPaint(Operator):
 			self.rotate_angle_old = 0
 
 			self.model_2d_point = None
+
+			self.LMB_PRESS = False
+			self.draw_mouse_path = []
 
 			# self.start_distance_scale = 0
 			# self.current_distance_scale = 0
@@ -219,6 +252,30 @@ class VIEW3D_OT_MeshPaint(Operator):
 		mat_w = loc @ rot @ scale
 		self.current_model.matrix_world = mat_w
 	
+	def draw_asset(self, context, event):
+		if self.LMB_PRESS:
+			nexus_model_SCN = context.scene.nexus_model_manager
+			self.draw_mouse_path.append((event.mouse_region_x, event.mouse_region_y))
+			distance = 0
+			old_point = None
+
+			for point in self.draw_mouse_path:
+				if old_point != None:
+					distance += math.hypot(old_point[0] - point[0], old_point[1] - point[1])
+				# else:
+				# 	distance += math.hypot(point[0], point[1])
+			
+				old_point = point
+
+			if distance >= nexus_model_SCN.distance_between_asset:
+				self.draw_mouse_path = []
+				self.draw_mouse_path.append((event.mouse_region_x, event.mouse_region_y))
+				distance = 0
+				
+				random_scale_and_rotation(self.current_model, self.normal, nexus_model_SCN)
+
+				self.current_model = add_model(context, self.mouse_path[0], self.normal)
+
 	def modal(self, context, event):
 		context.area.tag_redraw()
 		nexus_model_SCN = context.scene.nexus_model_manager
@@ -229,7 +286,7 @@ class VIEW3D_OT_MeshPaint(Operator):
         #     mod.append("Alt")
         # if event.ctrl:
         #     mod.append("Ctrl")
-		tip_text = "LMB - Add Model | G - Move, R - Rotate, MOUSEWHEEL 0.1, +shift 0.01 - Scale | RMB / ESC - Cancel"
+		tip_text = "LMB - Add Model | G - Move, R - Rotate, MOUSEWHEEL 0.1, +shift 0.01 - Scale | N - Align by normal | RMB / ESC - Cancel"
 		context.area.header_text_set(tip_text)
 
 		if event.type == "MOUSEMOVE":
@@ -275,6 +332,10 @@ class VIEW3D_OT_MeshPaint(Operator):
 					mat_w = loc @ rot @ scale
 
 					self.current_model.matrix_world = mat_w
+
+					# draw assets
+					self.draw_asset(context, event)
+
 			elif self.transform_mode == "ROTATE":
 				self.calculate_angle(event, context)
 
@@ -307,6 +368,9 @@ class VIEW3D_OT_MeshPaint(Operator):
 		if event.value == "PRESS":
 			if event.type == "LEFTMOUSE":
 				self.transform_mode = "MOVE"
+				self.LMB_PRESS = True
+				self.draw_mouse_path.append((event.mouse_region_x, event.mouse_region_y))
+				random_scale_and_rotation(self.current_model, self.normal, nexus_model_SCN)
 				self.current_model = add_model(context, self.mouse_path[0], self.normal)
 				return {"RUNNING_MODAL"}
 			elif event.type == "R":
@@ -335,5 +399,10 @@ class VIEW3D_OT_MeshPaint(Operator):
 				bpy.types.SpaceView3D.draw_handler_remove(self._handle_2d, "WINDOW")
 				context.area.header_text_set(text=None) # return header text to default
 				return {"CANCELLED"}
+
+		if event.value == "RELEASE":
+			if event.type == "LEFTMOUSE":
+				self.LMB_PRESS = False
+				self.draw_mouse_path = []
 
 		return {"RUNNING_MODAL"}
