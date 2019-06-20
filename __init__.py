@@ -21,11 +21,6 @@ from bpy.types import WindowManager
 from .mesh_paint_op import *
 from .functions import get_file_dir
 
-# separator symbols
-sep_lib = "_"
-sep_cat = "-"
-sep_name = "-"
-
 def enum_render_scenes(self, context):
 	scenes_list = []
 	addon_folder = get_file_dir(__file__)
