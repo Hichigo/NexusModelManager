@@ -21,11 +21,17 @@ from bpy.types import WindowManager
 from .mesh_paint_op import *
 from .functions import get_file_dir
 
+def get_addon_prefs():
+	preferences = bpy.context.preferences
+	addon_prefs = preferences.addons[__name__].preferences
+	return addon_prefs
+
 def enum_render_scenes(self, context):
 	scenes_list = []
 	addon_folder = get_file_dir(__file__)
-	scenes_dir = os.path.join(addon_folder, "resources", "render_scenes", "*.blend")
-	directory_icons = os.path.join(addon_folder, "resources", "render_scenes", "cameras_preview")
+	addon_prefs = get_addon_prefs()
+	scenes_dir = os.path.join(addon_prefs.path_to_render_scenes, "*.blend")
+	directory_icons = os.path.join(addon_prefs.path_to_render_scenes, "cameras_preview")
 
 	if context is None:
 		return scenes_list
@@ -78,17 +84,17 @@ def make_list_folder(path):
 
 ############################ Category ##########################
 def make_category_list(self, context):
-	path_library = context.window_manager.nexus_model_manager_dir_resource
+	library_dir = context.window_manager.nexus_model_manager_dir_resource
 	library = context.scene.nexus_model_manager.library_list
-	path_category = os.path.join(path_library, library)
+	path_category = os.path.join(library_dir, library)
 
 	return make_list_folder(path_category)
 
 ############################ Library ##########################
 def make_library_list(self, context):
-	path_library = context.window_manager.nexus_model_manager_dir_resource
+	library_dir = context.window_manager.nexus_model_manager_dir_resource
 
-	return make_list_folder(path_library)
+	return make_list_folder(library_dir)
 
 ##################################################################
 ############################ Previews ############################
@@ -101,10 +107,10 @@ def enum_previews_asset_items(self, context):
 	""" create assets items prewiews """
 	enum_items = []
 
-	path_models = bpy.data.window_managers["WinMan"].nexus_model_manager_dir_resource
+	library_dir = bpy.data.window_managers["WinMan"].nexus_model_manager_dir_resource
 	category = context.scene.nexus_model_manager.category_list
 	library = context.scene.nexus_model_manager.library_list
-	directory = os.path.join(path_models, library, category)
+	directory = os.path.join(library_dir, library, category)
 
 
 	if context is None:
@@ -215,6 +221,7 @@ class VIEW3D_PT_CreateAsset(bpy.types.Panel):
 		return context.mode == "OBJECT"
 
 	def draw(self, context):
+		addon_prefs = get_addon_prefs()
 		layout = self.layout
 		nexus_model_SCN = context.scene.nexus_model_manager
 		create_new = nexus_model_SCN.create_new
@@ -243,7 +250,7 @@ class VIEW3D_PT_CreateAsset(bpy.types.Panel):
 		col = box.column()
 		col.label(text="Render Scene")
 		col.scale_y = 1.5
-		col.template_icon_view(nexus_model_SCN, "render_scenes", show_labels=True, scale_popup=10)
+		col.template_icon_view(nexus_model_SCN, "render_scenes", show_labels=True, scale_popup=addon_prefs.preview_asset_scale)
 
 class VIEW3D_PT_ManagerPreviews(bpy.types.Panel):
 
@@ -260,16 +267,17 @@ class VIEW3D_PT_ManagerPreviews(bpy.types.Panel):
 		return context.mode == "OBJECT"
 
 	def draw(self, context):
+		addon_prefs = get_addon_prefs()
 		layout = self.layout
 		wm = context.window_manager
 		nexus_model_SCN = context.scene.nexus_model_manager
 
-		path_models = bpy.data.window_managers["WinMan"].nexus_model_manager_dir_resource
+		library_dir = bpy.data.window_managers["WinMan"].nexus_model_manager_dir_resource
 		asset_name = os.path.splitext(nexus_model_SCN.asset_previews)[0]
 		category = nexus_model_SCN.category_list
 		library = nexus_model_SCN.library_list
 
-		render_path = os.path.join(path_models, library, category, asset_name, "render")
+		render_path = os.path.join(library_dir, library, category, asset_name, "render")
 
 
 ############## Panel ##############
@@ -296,7 +304,7 @@ class VIEW3D_PT_ManagerPreviews(bpy.types.Panel):
 ####### Previews
 		row = box.row()
 		row.scale_y = 1.5
-		row.template_icon_view(nexus_model_SCN, "asset_previews", show_labels=True, scale_popup=10)
+		row.template_icon_view(nexus_model_SCN, "asset_previews", show_labels=True, scale_popup=addon_prefs.preview_asset_scale)
 		# row.template_search_preview(nexus_model_SCN, "asset_previews", search_data, "name")
 
 ####### Asset Name
@@ -396,7 +404,7 @@ class VIEW3D_OT_AddModel(bpy.types.Operator):
 
 	def execute(self, context):
 		nexus_model_SCN = context.scene.nexus_model_manager
-		path_models = bpy.data.window_managers["WinMan"].nexus_model_manager_dir_resource
+		library_dir = bpy.data.window_managers["WinMan"].nexus_model_manager_dir_resource
 		asset_name = nexus_model_SCN.asset_previews
 		category = nexus_model_SCN.category_list
 		library = nexus_model_SCN.library_list
@@ -404,7 +412,7 @@ class VIEW3D_OT_AddModel(bpy.types.Operator):
 		add_dupli_to_sel = nexus_model_SCN.add_duplicollection
 		set_to_selected_objects = nexus_model_SCN.set_to_selected_objects
 
-		filepath = os.path.join(path_models, library, category, asset_name, asset_name + ".blend")
+		filepath = os.path.join(library_dir, library, category, asset_name, asset_name + ".blend")
 
 		directory_inside_file = os.path.join(filepath, "Collection")
 
@@ -468,8 +476,8 @@ class VIEW3D_OT_LibraryPath(bpy.types.Operator):
 	bl_label = "Library Path"
 	
 	def execute(self, context):
-		filepath = context.window_manager.nexus_model_manager_dir_resource
-		bpy.ops.wm.path_open(filepath=filepath)
+		library_dir = context.window_manager.nexus_model_manager_dir_resource
+		bpy.ops.wm.path_open(filepath=library_dir)
 		return {"FINISHED"}
 
 ######################################################################
@@ -618,12 +626,12 @@ class VIEW3D_OT_ImagePath(bpy.types.Operator):
 	def execute(self, context):
 
 		nexus_model_SCN = context.scene.nexus_model_manager
-		model_dir = context.window_manager.nexus_model_manager_dir_resource
+		library_dir = context.window_manager.nexus_model_manager_dir_resource
 		library = nexus_model_SCN.library_list
 		category = nexus_model_SCN.category_list
 		asset_name = nexus_model_SCN.asset_previews
 
-		render_path = os.path.join(model_dir, library, category, asset_name, "render", asset_name + ".png")
+		render_path = os.path.join(library_dir, library, category, asset_name, "render", asset_name + ".png")
 
 		bpy.ops.wm.path_open(filepath=render_path)
 		return {"FINISHED"}
@@ -797,11 +805,10 @@ def register():
 	for cls in classes:
 		register_class(cls)
 
-	preferences = bpy.context.preferences
-	addon_prefs = preferences.addons[__name__].preferences
+	addon_prefs = get_addon_prefs()
 
 	WindowManager.nexus_model_manager_dir_resource = StringProperty(
-		name="Folder Path",
+		name="Library Directory",
 		subtype="DIR_PATH",
 		default=addon_prefs.path_to_library
 	)
