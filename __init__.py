@@ -302,16 +302,15 @@ class VIEW3D_PT_ManagerPreviews(bpy.types.Panel):
 		row.operator("view3d.image_path", icon="FILE_IMAGE", text="Open Image")
 
 ####### Previews
-		row = box.row()
-		row.scale_y = 1.5
-		row.template_icon_view(nexus_model_SCN, "asset_previews", show_labels=True, scale_popup=addon_prefs.preview_asset_scale)
-		# row.template_search_preview(nexus_model_SCN, "asset_previews", search_data, "name")
+		col = box.column()
+		col.scale_y = 1.5
+		col.template_icon_view(nexus_model_SCN, "asset_previews", show_labels=True, scale_popup=addon_prefs.preview_asset_scale)
+		# col.template_ID_preview(asset_collections["main"].asset_previews, "name", rows=3, cols=8)
+		# col.template_search_preview(nexus_model_SCN, "asset_previews", search_data, "name")
+		col.label(text=asset_name)
 
-####### Asset Name
 		row = box.row()
-		row.alignment = "CENTER"
-		row.scale_y = 0.5
-		row.label(text=asset_name)
+		row.operator("view3d.search_asset", icon="VIEWZOOM", text="Search Asset")
 
 # ####### Add location
 		row = box.row()
@@ -636,6 +635,24 @@ class VIEW3D_OT_ImagePath(bpy.types.Operator):
 		bpy.ops.wm.path_open(filepath=render_path)
 		return {"FINISHED"}
 
+class VIEW3D_OT_SearchAsset(bpy.types.Operator):
+	bl_idname = "view3d.search_asset"
+	bl_label = "Search Asset"
+	bl_property = "search_asset"
+
+	search_asset: EnumProperty(
+		name="Search Asset",
+		items=enum_previews_asset_items,
+	)
+
+	def execute(self, context):
+		nexus_model_SCN = context.scene.nexus_model_manager
+		nexus_model_SCN.asset_previews = self.search_asset
+		return {'FINISHED'}
+
+	def invoke(self, context, event):
+		context.window_manager.invoke_search_popup(self)
+		return {'RUNNING_MODAL'}
 
 class NexusModelManager_WM_Properties(bpy.types.PropertyGroup):
 
@@ -797,7 +814,8 @@ classes = (
 	VIEW3D_OT_ImagePath,
 	NexusModelManager_WM_Properties,
 	VIEW3D_OT_MeshPaint,
-	VIEW3D_OT_AddModel
+	VIEW3D_OT_AddModel,
+	VIEW3D_OT_SearchAsset
 )
 
 def register():
