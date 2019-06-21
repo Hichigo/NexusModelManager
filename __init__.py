@@ -143,11 +143,26 @@ asset_collections = {}
 class Preferences(bpy.types.AddonPreferences):
 	bl_idname = __name__
 
-	path_to_library = bpy.types.Scene.path_to_library = StringProperty(
-		name="Path",
+	path_to_library: StringProperty(
+		name="Library Path",
 		default=os.path.join(os.path.dirname(__file__), "LibraryModels"),
 		description="The path to your library",
 		subtype="DIR_PATH"
+	)
+
+	path_to_render_scenes: StringProperty(
+		name="Render Scene Path",
+		default=os.path.join(os.path.dirname(__file__), "resources", "render_scenes"),
+		description="The path to your render scenes",
+		subtype="DIR_PATH"
+	)
+
+	preview_asset_scale: FloatProperty(
+		name="Asset Image Scale",
+		description="Preview assets image scale",
+		min=1,
+		max=100,
+		default=7
 	)
 
 	def draw(self, context):
@@ -155,6 +170,8 @@ class Preferences(bpy.types.AddonPreferences):
 
 		col = layout.column(align=True)
 		col.prop(self, "path_to_library")
+		col.prop(self, "path_to_render_scenes")
+		col.prop(self, "preview_asset_scale")
 
 
 
