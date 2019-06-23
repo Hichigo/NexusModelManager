@@ -374,7 +374,10 @@ class VIEW3D_PT_MeshPaint(bpy.types.Panel):
 		col.prop(nexus_model_SCN, "use_random_asset")
 		if nexus_model_SCN.use_random_asset:
 			col.template_list("STRING_UL_RandomAssets", "random_assets", random_asset_list, "list_item", random_asset_list, "active_index")
-			col.operator("scene.add_list_item")
+			col = box.column()
+			row = col.row(align=True)
+			row.operator("scene.add_list_item", icon="ADD")
+			row.operator("scene.remove_list_item", icon="REMOVE")
 
 ################################################################
 ############################ Append ############################
@@ -709,6 +712,20 @@ class SCENE_OT_AddListItem(bpy.types.Operator):
 		
 		return {'FINISHED'}
 
+class SCENE_OT_RemoveListItem(bpy.types.Operator):
+	bl_idname = "scene.remove_list_item"
+	bl_label = "Remove Item"
+
+
+	def execute(self, context):
+		random_asset_list = context.scene.random_asset_list
+		remove_index = random_asset_list.active_index
+		
+		# remove item
+		random_asset_list.list_item.remove(remove_index)
+
+		return {'FINISHED'}
+
 class NexusModelManager_WM_Properties(bpy.types.PropertyGroup):
 
 	use_random_asset: BoolProperty(
@@ -716,7 +733,7 @@ class NexusModelManager_WM_Properties(bpy.types.PropertyGroup):
 		description="If True get asset from list",
 		default=False
 	)
-	
+
 	create_new: BoolProperty(
 		name="Create new",
 		description="Change behavior create asset and change UI",
@@ -884,6 +901,7 @@ classes = (
 	VIEW3D_OT_CreateAsset,
 	VIEW3D_OT_ImagePath,
 	SCENE_OT_AddListItem,
+	SCENE_OT_RemoveListItem,
 	NexusModelManager_WM_Properties,
 	UIList_WM_Properties,
 	VIEW3D_OT_MeshPaint,
