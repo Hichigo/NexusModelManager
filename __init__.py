@@ -18,6 +18,7 @@ from bpy.props import *
 import bpy.utils.previews
 from bpy.types import WindowManager
 
+from .ui import *
 from .mesh_paint_op import *
 from .functions import get_file_dir
 
