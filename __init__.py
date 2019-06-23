@@ -799,11 +799,21 @@ class NexusModelManager_WM_Properties(bpy.types.PropertyGroup):
 		default=False
 	)
 
+class ListItem(bpy.types.PropertyGroup):
+	# name_asset: StringProperty(name="Name", default="Empty")
+	path_to_asset: StringProperty(name="Name", default="")
+
+class UIList_WM_Properties(bpy.types.PropertyGroup):
+    list_item: CollectionProperty(name="List item", type=ListItem)
+    active_index: IntProperty(name="Active Index", default=-1)
+
 ######################################################################
 ############################## Register ##############################
 ######################################################################
 
 classes = (
+	ListItem,
+	STRING_UL_RandomAssets,
 	VIEW3D_PT_MainPanel,
 	VIEW3D_PT_CreateAsset,
 	VIEW3D_PT_ManagerPreviews,
@@ -813,7 +823,9 @@ classes = (
 	VIEW3D_OT_AssetPath,
 	VIEW3D_OT_CreateAsset,
 	VIEW3D_OT_ImagePath,
+	SCENE_OT_AddListItem,
 	NexusModelManager_WM_Properties,
+	UIList_WM_Properties,
 	VIEW3D_OT_MeshPaint,
 	VIEW3D_OT_AddModel,
 	VIEW3D_OT_SearchAsset
@@ -843,6 +855,7 @@ def register():
 	render_scene_collections["main"] = pcoll
 
 	bpy.types.Scene.nexus_model_manager = bpy.props.PointerProperty(type=NexusModelManager_WM_Properties)
+	bpy.types.Scene.random_asset_list = bpy.props.PointerProperty(type=UIList_WM_Properties)
 
 
 ######################################################################
@@ -863,6 +876,7 @@ def unregister():
 	render_scene_collections.clear()
 
 	del bpy.types.Scene.nexus_model_manager
+	del bpy.types.Scene.random_asset_list
 
 if __name__ == "__main__":
 	register()
