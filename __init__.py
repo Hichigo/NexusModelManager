@@ -861,5 +861,7 @@ def unregister():
 		bpy.utils.previews.remove(pcoll)
 	render_scene_collections.clear()
 
+	del bpy.types.Scene.nexus_model_manager
+
 if __name__ == "__main__":
 	register()
