@@ -17,7 +17,9 @@ def add_model(context, location, normal):
     asset_name = None
     directory_inside_file = None
 
-    if nexus_model_SCN.use_random_asset:
+    random_asset_not_empty = len(context.scene.random_asset_list.list_item)
+
+    if nexus_model_SCN.use_random_asset and random_asset_not_empty:
         random_asset_list = context.scene.random_asset_list
         number_assets = len(random_asset_list.list_item) - 1
 
