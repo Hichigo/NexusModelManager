@@ -1,6 +1,7 @@
 import bpy
 import os
 import math
+from random import randint
 
 from mathutils import Vector, Matrix, Euler
 
@@ -11,18 +12,37 @@ def get_file_dir(file):
 
 def add_model(context, location, normal):
     nexus_model_SCN = context.scene.nexus_model_manager
-    path_models = bpy.data.window_managers["WinMan"].nexus_model_manager_dir_resource
-    asset_name = nexus_model_SCN.asset_previews
-    category = nexus_model_SCN.category_list
-    library = nexus_model_SCN.library_list
 
-    filepath = os.path.join(path_models, library, category, asset_name, asset_name + ".blend")
+    filepath_collection_name = None
+    asset_name = None
+    directory_inside_file = None
 
-    directory_inside_file = os.path.join(filepath, "Collection")
+    if nexus_model_SCN.use_random_asset:
+        random_asset_list = context.scene.random_asset_list
+        number_assets = len(random_asset_list.list_item) - 1
 
-    filepath_collection_name = directory_inside_file + asset_name
+        index_asset = randint(0, number_assets)
 
-    bpy.ops.object.select_all(action="DESELECT")
+        filepath = random_asset_list.list_item[index_asset].path_to_asset
+        directory_inside_file = os.path.join(filepath, "Collection")
+
+        asset_name = random_asset_list.list_item[index_asset].name
+
+        filepath_collection_name = directory_inside_file + asset_name
+    
+    else:
+        path_models = bpy.data.window_managers["WinMan"].nexus_model_manager_dir_resource
+        asset_name = nexus_model_SCN.asset_previews
+        category = nexus_model_SCN.category_list
+        library = nexus_model_SCN.library_list
+
+        filepath = os.path.join(path_models, library, category, asset_name, asset_name + ".blend")
+
+        directory_inside_file = os.path.join(filepath, "Collection")
+
+        filepath_collection_name = directory_inside_file + asset_name
+
+        bpy.ops.object.select_all(action="DESELECT")
 
     bpy.ops.wm.link(
         filepath=filepath_collection_name,
