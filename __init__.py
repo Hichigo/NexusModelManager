@@ -261,7 +261,6 @@ class VIEW3D_PT_ManagerPreviews(bpy.types.Panel):
 	bl_region_type = "UI"
 	bl_category = "Nexus"
 	bl_parent_id = "VIEW3D_PT_MainPanel"
-	bl_options = {"DEFAULT_CLOSED"}
 
 	@classmethod
 	def poll(cls, context):
@@ -346,6 +345,7 @@ class VIEW3D_PT_MeshPaint(bpy.types.Panel):
 	def draw(self, context):
 		layout = self.layout
 		nexus_model_SCN = context.scene.nexus_model_manager
+		random_asset_list = context.scene.random_asset_list
 		
 		layout.prop(nexus_model_SCN, "align_by_normal")
 		layout.operator(VIEW3D_OT_MeshPaint.bl_idname, text="Place Asset", icon="SCENE_DATA")
@@ -367,6 +367,14 @@ class VIEW3D_PT_MeshPaint(bpy.types.Panel):
 		if nexus_model_SCN.use_random_scale:
 			col.prop(nexus_model_SCN, "random_scale_from")
 			col.prop(nexus_model_SCN, "random_scale_to")
+
+		box = layout.box()
+		box.label(text="Random assets")
+		col = box.column(align=True)
+		col.prop(nexus_model_SCN, "use_random_asset")
+		if nexus_model_SCN.use_random_asset:
+			col.template_list("STRING_UL_RandomAssets", "random_assets", random_asset_list, "list_item", random_asset_list, "active_index")
+			col.operator("scene.add_list_item")
 
 ################################################################
 ############################ Append ############################
@@ -649,14 +657,66 @@ class VIEW3D_OT_SearchAsset(bpy.types.Operator):
 	def execute(self, context):
 		nexus_model_SCN = context.scene.nexus_model_manager
 		nexus_model_SCN.asset_previews = self.search_asset
-		return {'FINISHED'}
+		return {"FINISHED"}
 
 	def invoke(self, context, event):
 		context.window_manager.invoke_search_popup(self)
-		return {'RUNNING_MODAL'}
+		return {"RUNNING_MODAL"}
+
+class SCENE_OT_AddListItem(bpy.types.Operator):
+	bl_idname = "scene.add_list_item"
+	bl_label = "Add Item"
+	bl_property = "search_asset"
+
+	search_asset: EnumProperty(
+		name="Search Asset",
+		items=enum_previews_asset_items,
+	)
+
+	def invoke(self, context, event):
+		context.window_manager.invoke_search_popup(self)
+		return {"RUNNING_MODAL"}
+
+	def execute(self, context):
+		random_asset_list = context.scene.random_asset_list
+		new_index = len(random_asset_list.list_item)
+		asset_name = self.search_asset
+		if new_index > 0: # if list items not empty, check item exists
+			if random_asset_list.list_item.find(asset_name) != -1:
+				self.report({"INFO"}, "This asset exists in list!")
+				return {"CANCELLED"}
+
+		# create new item
+		random_asset_list.list_item.add()
+		
+		# set item name
+		random_asset_list.list_item[new_index].name = asset_name
+
+		# make path to asset
+		nexus_model_SCN = context.scene.nexus_model_manager
+		library_dir = context.window_manager.nexus_model_manager_dir_resource
+		
+		library = nexus_model_SCN.library_list
+		category = nexus_model_SCN.category_list
+
+		filepath_to_asset = os.path.join(library_dir, library, category, asset_name, asset_name + ".blend")
+
+		# set filepath to asset
+		random_asset_list.list_item[new_index].path_to_asset = filepath_to_asset
+
+		# set active index
+		random_asset_list.active_index = new_index
+		
+		return {'FINISHED'}
 
 class NexusModelManager_WM_Properties(bpy.types.PropertyGroup):
 
+	use_random_asset: BoolProperty(
+		name="Use random asset",
+		description="If True get asset from list",
+		default=False
+	)
+	
 	create_new: BoolProperty(
 		name="Create new",
 		description="Change behavior create asset and change UI",
