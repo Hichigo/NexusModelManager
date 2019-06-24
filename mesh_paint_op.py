@@ -257,7 +257,7 @@ class VIEW3D_OT_MeshPaint(Operator):
 	def draw_asset(self, context, event):
 		if self.LMB_PRESS:
 			nexus_model_SCN = context.scene.nexus_model_manager
-			self.draw_mouse_path.append((event.mouse_region_x, event.mouse_region_y))
+			# self.draw_mouse_path.append((event.mouse_region_x, event.mouse_region_y)) # 2d path screen space
 			distance = 0
 			distance_vector = Vector(
 				(
