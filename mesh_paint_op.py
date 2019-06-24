@@ -24,11 +24,12 @@ from bpy_extras.view3d_utils import (
 from .functions import *
 
 def draw_callback_3d(self, context):
-	align_by_normal = context.scene.nexus_model_manager.align_by_normal
+	nexus_model_SCN = context.scene.nexus_model_manager
+	align_by_normal = nexus_model_SCN.align_by_normal
 	# draw brush circle
 	steps = 16
 	angle = (2 * math.pi) / steps
-	radius = 1
+	radius = nexus_model_SCN.distance_between_asset
 	
 	# calculate circle points
 	rot_mat = self.normal.rotation_difference(Vector((0,0,1))).to_matrix().to_3x3()
@@ -196,7 +197,8 @@ class VIEW3D_OT_MeshPaint(Operator):
 			self.model_2d_point = None
 
 			self.LMB_PRESS = False
-			self.draw_mouse_path = []
+			# self.draw_mouse_path = [] # 2d path screen space
+			self.prev_location = None
 
 			# self.start_distance_scale = 0
 			# self.current_distance_scale = 0
@@ -257,19 +259,28 @@ class VIEW3D_OT_MeshPaint(Operator):
 			nexus_model_SCN = context.scene.nexus_model_manager
 			self.draw_mouse_path.append((event.mouse_region_x, event.mouse_region_y))
 			distance = 0
-			old_point = None
+			distance_vector = Vector(
+				(
+					self.prev_location.x - self.current_model.location.x,
+					self.prev_location.y - self.current_model.location.y,
+					self.prev_location.z - self.current_model.location.z
+				)
+			)
 
-			for point in self.draw_mouse_path:
-				if old_point != None:
-					distance += math.hypot(old_point[0] - point[0], old_point[1] - point[1])
-				# else:
-				# 	distance += math.hypot(point[0], point[1])
+			distance = distance_vector.length
+
+			# for point in self.draw_mouse_path:
+			# 	if old_point != None:
+			# 		distance += math.hypot(old_point[0] - point[0], old_point[1] - point[1])
+			# 	# else:
+			# 	# 	distance += math.hypot(point[0], point[1])
 			
-				old_point = point
+			# 	old_point = point
 
 			if distance >= nexus_model_SCN.distance_between_asset:
-				self.draw_mouse_path = []
-				self.draw_mouse_path.append((event.mouse_region_x, event.mouse_region_y))
+				# self.draw_mouse_path = []
+				# self.draw_mouse_path.append((event.mouse_region_x, event.mouse_region_y))
+				self.prev_location = self.current_model.location
 				distance = 0
 				
 				random_scale_and_rotation(self.current_model, self.normal, nexus_model_SCN)
@@ -369,8 +380,9 @@ class VIEW3D_OT_MeshPaint(Operator):
 			if event.type == "LEFTMOUSE":
 				self.transform_mode = "MOVE"
 				self.LMB_PRESS = True
-				self.draw_mouse_path.append((event.mouse_region_x, event.mouse_region_y))
+				# self.draw_mouse_path.append((event.mouse_region_x, event.mouse_region_y)) # 2d path screen space
 				random_scale_and_rotation(self.current_model, self.normal, nexus_model_SCN)
+				self.prev_location = self.current_model.location # 3d path world path
 				self.current_model = add_model(context, self.mouse_path[0], self.normal)
 				return {"RUNNING_MODAL"}
 			elif event.type == "R":
@@ -403,6 +415,6 @@ class VIEW3D_OT_MeshPaint(Operator):
 		if event.value == "RELEASE":
 			if event.type == "LEFTMOUSE":
 				self.LMB_PRESS = False
-				self.draw_mouse_path = []
+				# self.draw_mouse_path = [] # 2d path screen space
 
 		return {"RUNNING_MODAL"}
