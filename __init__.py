@@ -22,6 +22,9 @@ from .ui import *
 from .mesh_paint_op import *
 from .functions import get_file_dir
 
+def filter_on_mesh_prop(self, object):
+    return "MESH" == object.type
+
 def get_addon_prefs():
 	preferences = bpy.context.preferences
 	addon_prefs = preferences.addons[__name__].preferences
@@ -350,6 +353,7 @@ class VIEW3D_PT_MeshPaint(bpy.types.Panel):
 		layout.prop(nexus_model_SCN, "align_by_normal")
 		layout.operator(VIEW3D_OT_MeshPaint.bl_idname, text="Place Asset", icon="SCENE_DATA")
 		layout.prop(nexus_model_SCN, "distance_between_asset")
+		layout.prop_search(nexus_model_SCN, "canvas_object", context.scene, "objects")
 
 		box = layout.box()
 		box.label(text="Random rotation")
@@ -728,6 +732,13 @@ class SCENE_OT_RemoveListItem(bpy.types.Operator):
 
 class NexusModelManager_WM_Properties(bpy.types.PropertyGroup):
 
+	canvas_object: PointerProperty(
+		name="Canvas",
+		description="If empty then will draw over all objects. APPLY TRANSFORM TO OBJECT!!!",
+        type=bpy.types.Object,
+        poll=filter_on_mesh_prop
+    )
+
 	use_random_asset: BoolProperty(
 		name="Use random asset",
 		description="If True get asset from list",
@@ -786,7 +797,7 @@ class NexusModelManager_WM_Properties(bpy.types.PropertyGroup):
 		name="Distance",
 		description="Distance to which assets can be placed",
 		min=0,
-		default=200
+		default=2
 	)
 
 	use_random_rotation: BoolProperty(

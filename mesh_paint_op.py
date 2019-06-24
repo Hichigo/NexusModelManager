@@ -305,14 +305,32 @@ class VIEW3D_OT_MeshPaint(Operator):
 				# new origin and normal
 				origin, direction = self.get_origin_and_direction(event, context)
 
+
+				bHit = None
+				pos_hit = None
+				normal_hit = None
+				face_index_hit = None
+				obj_hit = None
+				matrix_world = None
+
 				# hide mesh
 				self.current_model.hide_set(True)
-				# trace
-				bHit, pos_hit, normal_hit, face_index_hit, obj_hit, matrix_world = context.scene.ray_cast(
-					view_layer=context.view_layer,
-					origin=origin,
-					direction=direction
-				)
+
+				canvas = nexus_model_SCN.canvas_object
+				if canvas == None:
+					# trace
+					bHit, pos_hit, normal_hit, face_index_hit, obj_hit, matrix_world = context.scene.ray_cast(
+						view_layer=context.view_layer,
+						origin=origin,
+						direction=direction
+					)
+				else:
+					# trace
+					bHit, pos_hit, normal_hit, face_index_hit = canvas.ray_cast(
+						origin=origin,
+						direction=direction
+					)
+
 				# show mesh
 				self.current_model.hide_set(False)
 				
