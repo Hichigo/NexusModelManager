@@ -5,8 +5,14 @@ from random import randint
 
 from mathutils import Vector, Matrix, Euler
 
-def get_file_dir(file):
-    path = os.path.realpath(file)
+def get_addon_prefs():
+    addon_name = __name__.split(".")[0]
+    preferences = bpy.context.preferences
+    addon_prefs = preferences.addons[addon_name].preferences
+    return addon_prefs
+
+def get_addon_dir():
+    path = os.path.realpath(__file__)
     path = os.path.dirname(path)
     return path
 

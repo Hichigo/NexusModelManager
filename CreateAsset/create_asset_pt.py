@@ -1,6 +1,8 @@
 import bpy
 from bpy.types import Panel
 
+from .. functions import get_addon_prefs
+
 class VIEW3D_PT_CreateAsset(Panel):
     """Create .blend file and render icon"""
     bl_label = "Create Asset"
@@ -16,8 +18,7 @@ class VIEW3D_PT_CreateAsset(Panel):
         return context.mode == "OBJECT"
 
     def draw(self, context):
-        preferences = context.preferences
-        addon_prefs = preferences.addons["NexusModelManager"].preferences
+        addon_prefs = get_addon_prefs()
         layout = self.layout
         nexus_model_SCN = context.scene.nexus_model_manager
 

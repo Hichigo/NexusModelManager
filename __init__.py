@@ -23,7 +23,7 @@ from .CreateAsset.create_asset_pt import *
 
 from .random_list_ui import *
 from .mesh_paint_op import *
-from .functions import get_file_dir
+from .functions import get_addon_dir
 
 def filter_on_mesh_prop(self, object):
     return object.type == "MESH"
@@ -35,7 +35,7 @@ def get_addon_prefs():
 
 def enum_render_scenes(self, context):
 	scenes_list = []
-	addon_folder = get_file_dir(__file__)
+	addon_folder = get_addon_dir()
 	addon_prefs = get_addon_prefs()
 	scenes_dir = os.path.join(addon_prefs.path_to_render_scenes, "*.blend")
 	directory_icons = os.path.join(addon_prefs.path_to_render_scenes, "cameras_preview")

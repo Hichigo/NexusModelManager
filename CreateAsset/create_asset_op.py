@@ -4,6 +4,8 @@ from bpy.types import Operator
 import subprocess
 import os
 
+from .. functions import get_addon_dir, get_addon_prefs
+
 class VIEW3D_OT_CreateAsset(Operator):
     """Create .blend file and render icon"""
     bl_idname = "view3d.create_asset_path"
@@ -14,7 +16,6 @@ class VIEW3D_OT_CreateAsset(Operator):
         layout.label(text="Really?")
 
     def invoke(self, context, event):
-
         if not os.path.isfile(bpy.data.filepath):
             self.report({"ERROR"}, "Please save the file!")
             return {"FINISHED"}
@@ -73,8 +74,7 @@ class VIEW3D_OT_CreateAsset(Operator):
         # save file
         bpy.ops.wm.save_as_mainfile(filepath=bpy.data.filepath)
 
-        addons_folder = bpy.utils.user_resource("SCRIPTS", "addons")
-        addon_path = os.path.join(addons_folder, "NexusModelManager")
+        addon_path = get_addon_dir()
         
         append_from_blendfile = bpy.data.filepath
 
