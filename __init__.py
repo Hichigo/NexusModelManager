@@ -13,17 +13,20 @@ bl_info = {
 import bpy
 import os
 import glob
-import subprocess
+
 from bpy.props import *
 import bpy.utils.previews
-from bpy.types import WindowManager
+from bpy.types import AddonPreferences, WindowManager, Panel, Operator, PropertyGroup
 
-from .ui import *
+from .CreateAsset.create_asset_op import *
+from .CreateAsset.create_asset_pt import *
+
+from .random_list_ui import *
 from .mesh_paint_op import *
 from .functions import get_file_dir
 
 def filter_on_mesh_prop(self, object):
-    return "MESH" == object.type
+    return object.type == "MESH"
 
 def get_addon_prefs():
 	preferences = bpy.context.preferences
@@ -104,7 +107,6 @@ def make_library_list(self, context):
 ############################ Previews ############################
 ##################################################################
 
-
 ######### Assets Previews ##########
 
 def enum_previews_asset_items(self, context):
@@ -150,7 +152,7 @@ asset_collections = {}
 ############################ Addon preferences ############################
 ###########################################################################
 
-class Preferences(bpy.types.AddonPreferences):
+class Preferences(AddonPreferences):
 	bl_idname = __name__
 
 	path_to_library: StringProperty(
@@ -183,12 +185,10 @@ class Preferences(bpy.types.AddonPreferences):
 		col.prop(self, "path_to_render_scenes")
 		col.prop(self, "preview_asset_scale")
 
-
-
 #################################################################
 ############################ Toolbar ############################
 #################################################################
-class VIEW3D_PT_MainPanel(bpy.types.Panel):
+class VIEW3D_PT_MainPanel(Panel):
 	bl_label = "Nexus Model Manager"
 	bl_idname = "VIEW3D_PT_MainPanel"
 	bl_space_type = "VIEW_3D"
@@ -210,54 +210,7 @@ class VIEW3D_PT_MainPanel(bpy.types.Panel):
 		col.prop(wm, "nexus_model_manager_dir_resource")
 		col.operator("view3d.library_path", icon="FILE_FOLDER", text="Open Library Folder")
 
-class VIEW3D_PT_CreateAsset(bpy.types.Panel):
-
-	bl_label = "Create Asset"
-	bl_idname = "VIEW3D_PT_CreateAsset"
-	bl_space_type = "VIEW_3D"
-	bl_region_type = "UI"
-	bl_category = "Nexus"
-	bl_parent_id = "VIEW3D_PT_MainPanel"
-	bl_options = {"DEFAULT_CLOSED"}
-
-	@classmethod
-	def poll(cls, context):
-		return context.mode == "OBJECT"
-
-	def draw(self, context):
-		addon_prefs = get_addon_prefs()
-		layout = self.layout
-		nexus_model_SCN = context.scene.nexus_model_manager
-		
-		col = layout.column(align=True)
-		row = col.row()
-		row.prop(nexus_model_SCN, "library_list", text="Library", icon="FILE_FOLDER")
-		row.operator("view3d.add_folder", text="", icon="NEWFOLDER").folder_place = "LIBRARY"
-		# row.operator("view3d.remove_folder", text="", icon="TRASH").folder_place = "LIBRARY"
-
-		col = layout.column(align=True)
-		row = col.row()
-		row.prop(nexus_model_SCN, "category_list", text="Category", icon="FILE_FOLDER")
-		row.operator("view3d.add_folder", text="", icon="NEWFOLDER").folder_place = "CATEGORY"
-		# row.operator("view3d.remove_folder", text="", icon="TRASH").folder_place = "CATEGORY"
-
-		col = layout.column(align=True)
-		col.prop(nexus_model_SCN, "new_collection_name")
-		col.operator("view3d.create_asset_path", text="Create Asset", icon="FILE_NEW")
-
-		box = layout.box()
-
-		box.label(text="Settings")
-		box.prop(nexus_model_SCN, "apply_cursor_rotation")
-
-		box.prop(nexus_model_SCN, "pack_data", text="Pack data")
-		
-		col = box.column()
-		col.label(text="Render Scene")
-		col.scale_y = 1.5
-		col.template_icon_view(nexus_model_SCN, "render_scenes", show_labels=True, scale_popup=addon_prefs.preview_asset_scale)
-
-class VIEW3D_PT_ManagerPreviews(bpy.types.Panel):
+class VIEW3D_PT_ManagerPreviews(Panel):
 
 	bl_label = "Model Manager"
 	bl_idname = "VIEW3D_PT_ManagerPreviews"
@@ -282,7 +235,6 @@ class VIEW3D_PT_ManagerPreviews(bpy.types.Panel):
 		library = nexus_model_SCN.library_list
 
 		render_path = os.path.join(library_dir, library, category, asset_name, "render")
-
 
 ############## Panel ##############
 
@@ -334,7 +286,7 @@ class VIEW3D_PT_ManagerPreviews(bpy.types.Panel):
 		col = box.column(align=True)
 		col.operator("view3d.add_model", icon="ADD", text="Add Asset")
 
-class VIEW3D_PT_MeshPaint(bpy.types.Panel):
+class VIEW3D_PT_MeshPaint(Panel):
 	bl_label = "Mesh Paint Settings"
 	bl_space_type = "VIEW_3D"
 	bl_region_type = "UI"
@@ -388,7 +340,7 @@ class VIEW3D_PT_MeshPaint(bpy.types.Panel):
 ############################ Append ############################
 ################################################################
 
-class VIEW3D_OT_AddModel(bpy.types.Operator):
+class VIEW3D_OT_AddModel(Operator):
 
 	bl_idname = "view3d.add_model"
 	bl_label = "Add Model?"
@@ -481,7 +433,7 @@ class VIEW3D_OT_AddModel(bpy.types.Operator):
 
 		return {"FINISHED"}
 
-class VIEW3D_OT_AddFolder(bpy.types.Operator):
+class VIEW3D_OT_AddFolder(Operator):
 	"""Create new folder"""
 	bl_idname = "view3d.add_folder"
 	bl_label = "Add Folder?"
@@ -570,7 +522,7 @@ class VIEW3D_OT_AddFolder(bpy.types.Operator):
 ############################ Library path ############################
 ######################################################################
 
-class VIEW3D_OT_LibraryPath(bpy.types.Operator):
+class VIEW3D_OT_LibraryPath(Operator):
 
 	bl_idname = "view3d.library_path"
 	bl_label = "Library Path"
@@ -584,7 +536,7 @@ class VIEW3D_OT_LibraryPath(bpy.types.Operator):
 ############################ Asset path ############################
 ######################################################################
 
-class VIEW3D_OT_AssetPath(bpy.types.Operator):
+class VIEW3D_OT_AssetPath(Operator):
 
 	bl_idname = "view3d.asset_path"
 	bl_label = "Library Asset Path"
@@ -602,113 +554,7 @@ class VIEW3D_OT_AssetPath(bpy.types.Operator):
 		bpy.ops.wm.path_open(filepath=filepath)
 		return {"FINISHED"}
 
-class VIEW3D_OT_CreateAsset(bpy.types.Operator):
-	""" Create Asset """
-	bl_idname = "view3d.create_asset_path"
-	bl_label = "Overwrite file?"
-
-	def draw(self, context):
-		layout = self.layout
-		layout.label(text="Really?")
-
-	def invoke(self, context, event):
-
-		if not os.path.isfile(bpy.data.filepath):
-			self.report({"ERROR"}, "Please save the file!")
-			return {"FINISHED"}
-
-		nexus_model_SCN = context.scene.nexus_model_manager
-		
-		library_dir = context.window_manager.nexus_model_manager_dir_resource #nexus_model_SCN.create_asset_dir
-		library_name = None
-		category_name = None
-		collection_name = nexus_model_SCN.new_collection_name
-
-		library_name = nexus_model_SCN.library_list
-		category_name = nexus_model_SCN.category_list
-
-		file_check = os.path.join(library_dir, library_name, category_name, collection_name, collection_name + ".blend")
-		if os.path.isfile(file_check):
-			return context.window_manager.invoke_confirm(self, event)
-		
-		return self.execute(context)
-
-	def execute(self, context):
-		nexus_model_SCN = context.scene.nexus_model_manager
-		
-		library_dir = context.window_manager.nexus_model_manager_dir_resource #nexus_model_SCN.create_asset_dir
-		library_name = None
-		category_name = None
-		collection_name = nexus_model_SCN.new_collection_name
-		open_blend_file = nexus_model_SCN.render_scenes
-
-		library_name = nexus_model_SCN.library_list
-		category_name = nexus_model_SCN.category_list
-
-		asset_dir_path = os.path.join(library_dir, library_name, category_name, collection_name)
-
-		if not os.path.exists(asset_dir_path):
-			os.makedirs(asset_dir_path)
-			render_path = os.path.join(asset_dir_path, "render")
-			os.mkdir(render_path)
-			self.report({"INFO"}, "Dirs created: " + asset_dir_path)
-		else:
-			self.report({"INFO"}, "Dirs already exist" + asset_dir_path)
-
-		collection = None
-
-		if not collection_name in bpy.data.collections:
-			collection = bpy.data.collections.new(collection_name)
-			bpy.context.scene.collection.children.link(collection)
-		else:
-			collection = bpy.data.collections[collection_name]
-		
-		# link selected objects to new collection
-		selected_objects = context.selected_objects
-		for obj in selected_objects:
-			collection.objects.link(obj)
-
-		# save file
-		bpy.ops.wm.save_as_mainfile(filepath=bpy.data.filepath)
-
-		addon_path = get_file_dir(__file__)
-		# empty_blend = os.path.join(addon_path, "resources", "empty.blend")
-		append_from_blendfile = bpy.data.filepath
-
-		tools = os.path.join(addon_path, "tools", "create_asset.py")
-		
-		# get cursor location and roration
-		cursor_location = bpy.context.scene.cursor.location.copy()
-		cursor_rotation = bpy.context.scene.cursor.rotation_euler.copy()
-
-		cursor_location = "{}|{}|{}".format(cursor_location.x, cursor_location.y, cursor_location.z)
-		cursor_rotation = "{}|{}|{}|{}".format(nexus_model_SCN.apply_cursor_rotation, cursor_rotation.x, cursor_rotation.y, cursor_rotation.z)
-
-		# prepeare pack_data variable
-		pack_data = nexus_model_SCN.pack_data
-
-		sub = subprocess.Popen(
-			[
-				bpy.app.binary_path,   # path to blender.exe
-				open_blend_file,       # open file
-				"-b",                  # open background blender
-				"--python",
-				tools,                 # path to python script
-				append_from_blendfile, # from blendfile append collection
-				"Collection",
-				collection.name,       # append collection name
-				asset_dir_path,        # path save this file
-				cursor_location,       # cursor location it is pivot point new asset
-				cursor_rotation,       # cursor rotation to new asset
-				pack_data             # None or pack file to blend file or save textures to root library
-			]
-		)
-
-		bpy.data.collections.remove(bpy.data.collections[collection_name])
-
-		return {"FINISHED"}
-
-class VIEW3D_OT_ImagePath(bpy.types.Operator):
+class VIEW3D_OT_ImagePath(Operator):
 
 	bl_idname = "view3d.image_path"
 	bl_label = "Library Image Path"
@@ -726,7 +572,7 @@ class VIEW3D_OT_ImagePath(bpy.types.Operator):
 		bpy.ops.wm.path_open(filepath=render_path)
 		return {"FINISHED"}
 
-class VIEW3D_OT_SearchAsset(bpy.types.Operator):
+class VIEW3D_OT_SearchAsset(Operator):
 	bl_idname = "view3d.search_asset"
 	bl_label = "Search Asset"
 	bl_property = "search_asset"
@@ -745,7 +591,7 @@ class VIEW3D_OT_SearchAsset(bpy.types.Operator):
 		context.window_manager.invoke_search_popup(self)
 		return {"RUNNING_MODAL"}
 
-class SCENE_OT_AddListItem(bpy.types.Operator):
+class SCENE_OT_AddListItem(Operator):
 	bl_idname = "scene.add_list_item"
 	bl_label = "Add Item"
 	bl_property = "search_asset"
@@ -791,7 +637,7 @@ class SCENE_OT_AddListItem(bpy.types.Operator):
 		
 		return {'FINISHED'}
 
-class SCENE_OT_RemoveListItem(bpy.types.Operator):
+class SCENE_OT_RemoveListItem(Operator):
 	bl_idname = "scene.remove_list_item"
 	bl_label = "Remove Item"
 
@@ -805,7 +651,7 @@ class SCENE_OT_RemoveListItem(bpy.types.Operator):
 
 		return {'FINISHED'}
 
-class NexusModelManager_WM_Properties(bpy.types.PropertyGroup):
+class NexusModelManager_WM_Properties(PropertyGroup):
 
 	canvas_object: PointerProperty(
 		name="Canvas",
@@ -943,14 +789,6 @@ class NexusModelManager_WM_Properties(bpy.types.PropertyGroup):
 		description="Add duplicollection to selected objects",
 		default=False
 	)
-
-class ListItem(bpy.types.PropertyGroup):
-	# name_asset: StringProperty(name="Name", default="Empty")
-	path_to_asset: StringProperty(name="Name", default="")
-
-class UIList_WM_Properties(bpy.types.PropertyGroup):
-    list_item: CollectionProperty(name="List item", type=ListItem)
-    active_index: IntProperty(name="Active Index", default=-1)
 
 ######################################################################
 ############################## Register ##############################
