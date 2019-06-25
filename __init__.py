@@ -228,21 +228,22 @@ class VIEW3D_PT_CreateAsset(bpy.types.Panel):
 		addon_prefs = get_addon_prefs()
 		layout = self.layout
 		nexus_model_SCN = context.scene.nexus_model_manager
-		create_new = nexus_model_SCN.create_new
 		
-		layout.prop(nexus_model_SCN, "create_new")
-		# layout.prop(nexus_model_SCN, "create_asset_dir")
-		if create_new:
-			layout.prop(nexus_model_SCN, "new_library_name")
-			layout.prop(nexus_model_SCN, "new_category_name")			
-		else:
-			layout.prop(nexus_model_SCN, "library_list", text="Library")
-			layout.prop(nexus_model_SCN, "category_list", text="Category")
+		col = layout.column(align=True)
+		row = col.row()
+		row.prop(nexus_model_SCN, "library_list", text="Library", icon="FILE_FOLDER")
+		row.operator("view3d.add_folder", text="", icon="NEWFOLDER").folder_place = "LIBRARY"
+		row.operator("view3d.remove_folder", text="", icon="TRASH").folder_place = "LIBRARY"
 
+		col = layout.column(align=True)
+		row = col.row()
+		row.prop(nexus_model_SCN, "category_list", text="Category", icon="FILE_FOLDER")
+		row.operator("view3d.add_folder", text="", icon="NEWFOLDER").folder_place = "CATEGORY"
+		row.operator("view3d.remove_folder", text="", icon="TRASH").folder_place = "CATEGORY"
 
-		layout.prop(nexus_model_SCN, "new_collection_name")
-
-		layout.operator("view3d.create_asset_path", text="Create Asset", icon="NEWFOLDER")
+		col = layout.column(align=True)
+		col.prop(nexus_model_SCN, "new_collection_name")
+		col.operator("view3d.create_asset_path", text="Create Asset", icon="FILE_NEW")
 
 		box = layout.box()
 
@@ -331,7 +332,7 @@ class VIEW3D_PT_ManagerPreviews(bpy.types.Panel):
 
 ####### Add Button
 		col = box.column(align=True)
-		col.operator("view3d.model", icon="ADD", text="Add Asset")
+		col.operator("view3d.add_model", icon="ADD", text="Add Asset")
 
 class VIEW3D_PT_MeshPaint(bpy.types.Panel):
 	bl_label = "Mesh Paint Settings"
@@ -389,7 +390,7 @@ class VIEW3D_PT_MeshPaint(bpy.types.Panel):
 
 class VIEW3D_OT_AddModel(bpy.types.Operator):
 
-	bl_idname = "view3d.model"
+	bl_idname = "view3d.add_model"
 	bl_label = "Add Model?"
 
 	# def draw(self, context):
@@ -480,6 +481,90 @@ class VIEW3D_OT_AddModel(bpy.types.Operator):
 
 		return {"FINISHED"}
 
+class VIEW3D_OT_AddFolder(bpy.types.Operator):
+	"""Create new folder"""
+	bl_idname = "view3d.add_folder"
+	bl_label = "Add Folder?"
+
+	folder_place: StringProperty()
+	name_new_folder: StringProperty(
+		name="Name New Folder",
+		default=""
+	)
+
+	def draw(self, context):
+		layout = self.layout
+		row = layout.row()
+		row.label(text="Name New Folder")
+		row.prop(self, "name_new_folder", text="")
+
+	def invoke(self, context, event):
+		return context.window_manager.invoke_props_dialog(self)
+
+	def execute(self, context):
+		nexus_model_SCN = context.scene.nexus_model_manager
+		
+		library_dir = context.window_manager.nexus_model_manager_dir_resource
+		library_name = None
+		category_name = None
+
+		if self.folder_place == "LIBRARY": # create library folder
+			library_name = self.name_new_folder
+			new_folder_path = os.path.join(library_dir, library_name)
+			if os.path.exists(new_folder_path):
+				self.report({"ERROR"}, "Folder already exists!")
+			else:
+				os.makedirs(new_folder_path)
+				# nexus_model_SCN.library_list = library_name # move to new folder
+				self.report({"INFO"}, "Folder created: {}".format(new_folder_path))
+			
+		elif self.folder_place == "CATEGORY": # create category folder
+			library_name = nexus_model_SCN.library_list
+			category_name = self.name_new_folder
+			new_folder_path = os.path.join(library_dir, library_name, category_name)
+			if os.path.exists(new_folder_path):
+				self.report({"ERROR"}, "Folder already exists!")
+			else:
+				os.makedirs(new_folder_path)
+				# nexus_model_SCN.category_list = library_name # move to new folder
+				self.report({"INFO"}, "Folder created: {}".format(new_folder_path))
+
+		self.name_new_folder = "" # clear string
+		return {"FINISHED"}
+
+class VIEW3D_OT_RemoveFolder(bpy.types.Operator):
+	"""Remove Folder"""
+	bl_idname = "view3d.remove_folder"
+	bl_label = "Do you really want to delete the folder and everything inside?"
+	bl_options = {'REGISTER', 'INTERNAL'}
+
+	folder_place: StringProperty()
+
+	def invoke(self, context, event):
+		return context.window_manager.invoke_confirm(self, event)
+
+	def execute(self, context):
+		import shutil
+
+		nexus_model_SCN = context.scene.nexus_model_manager
+		
+		library_dir = context.window_manager.nexus_model_manager_dir_resource
+		library_name = nexus_model_SCN.library_list
+		category_name = nexus_model_SCN.category_list
+		remove_folder_path = os.path.join(library_dir, library_name)
+
+		if self.folder_place == "LIBRARY":
+			shutil.rmtree(remove_folder_path)
+		elif self.folder_place == "CATEGORY":
+			remove_folder_path = os.path.join(remove_folder_path, category_name)
+			shutil.rmtree(remove_folder_path)
+		else:
+			self.report({"INFO"}, "Something went wrong!")
+			return {'FINISHED'}
+
+		self.report({"INFO"}, "Folder removed: {}".format(remove_folder_path))
+
+		return {'FINISHED'}
 
 ######################################################################
 ############################ Library path ############################
@@ -538,14 +623,9 @@ class VIEW3D_OT_CreateAsset(bpy.types.Operator):
 		library_name = None
 		category_name = None
 		collection_name = nexus_model_SCN.new_collection_name
-		create_new = nexus_model_SCN.create_new
 
-		if create_new:
-			library_name = nexus_model_SCN.new_library_name
-			category_name = nexus_model_SCN.new_category_name
-		else:
-			library_name = nexus_model_SCN.library_list
-			category_name = nexus_model_SCN.category_list
+		library_name = nexus_model_SCN.library_list
+		category_name = nexus_model_SCN.category_list
 
 		file_check = os.path.join(library_dir, library_name, category_name, collection_name, collection_name + ".blend")
 		if os.path.isfile(file_check):
@@ -560,15 +640,10 @@ class VIEW3D_OT_CreateAsset(bpy.types.Operator):
 		library_name = None
 		category_name = None
 		collection_name = nexus_model_SCN.new_collection_name
-		create_new = nexus_model_SCN.create_new
 		open_blend_file = nexus_model_SCN.render_scenes
 
-		if create_new:
-			library_name = nexus_model_SCN.new_library_name
-			category_name = nexus_model_SCN.new_category_name
-		else:
-			library_name = nexus_model_SCN.library_list
-			category_name = nexus_model_SCN.category_list
+		library_name = nexus_model_SCN.library_list
+		category_name = nexus_model_SCN.category_list
 
 		asset_dir_path = os.path.join(library_dir, library_name, category_name, collection_name)
 
@@ -745,24 +820,6 @@ class NexusModelManager_WM_Properties(bpy.types.PropertyGroup):
 		default=False
 	)
 
-	create_new: BoolProperty(
-		name="Create new",
-		description="Change behavior create asset and change UI",
-		default=False
-	)
-
-	new_library_name: StringProperty(
-		name="Library",
-		description="Name of New Library, if it does not exist",
-		default="Awesome_Library"
-	)
-
-	new_category_name: StringProperty(
-		name="Category",
-		description="Name of New Category, if it does not exist",
-		default="Awesome_Category"
-	)
-
 	new_collection_name: StringProperty(
 		name="Collection",
 		description="Name of New Collection",
@@ -917,6 +974,8 @@ classes = (
 	UIList_WM_Properties,
 	VIEW3D_OT_MeshPaint,
 	VIEW3D_OT_AddModel,
+	VIEW3D_OT_AddFolder,
+	VIEW3D_OT_RemoveFolder,
 	VIEW3D_OT_SearchAsset
 )
 
