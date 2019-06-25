@@ -23,15 +23,10 @@ from .CreateAsset.create_asset_pt import *
 
 from .random_list_ui import *
 from .mesh_paint_op import *
-from .functions import get_addon_dir
+from .functions import get_addon_dir, get_addon_prefs
 
 def filter_on_mesh_prop(self, object):
     return object.type == "MESH"
-
-def get_addon_prefs():
-	preferences = bpy.context.preferences
-	addon_prefs = preferences.addons[__name__].preferences
-	return addon_prefs
 
 def enum_render_scenes(self, context):
 	scenes_list = []
