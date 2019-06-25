@@ -233,13 +233,13 @@ class VIEW3D_PT_CreateAsset(bpy.types.Panel):
 		row = col.row()
 		row.prop(nexus_model_SCN, "library_list", text="Library", icon="FILE_FOLDER")
 		row.operator("view3d.add_folder", text="", icon="NEWFOLDER").folder_place = "LIBRARY"
-		row.operator("view3d.remove_folder", text="", icon="TRASH").folder_place = "LIBRARY"
+		# row.operator("view3d.remove_folder", text="", icon="TRASH").folder_place = "LIBRARY"
 
 		col = layout.column(align=True)
 		row = col.row()
 		row.prop(nexus_model_SCN, "category_list", text="Category", icon="FILE_FOLDER")
 		row.operator("view3d.add_folder", text="", icon="NEWFOLDER").folder_place = "CATEGORY"
-		row.operator("view3d.remove_folder", text="", icon="TRASH").folder_place = "CATEGORY"
+		# row.operator("view3d.remove_folder", text="", icon="TRASH").folder_place = "CATEGORY"
 
 		col = layout.column(align=True)
 		col.prop(nexus_model_SCN, "new_collection_name")
@@ -532,39 +532,39 @@ class VIEW3D_OT_AddFolder(bpy.types.Operator):
 		self.name_new_folder = "" # clear string
 		return {"FINISHED"}
 
-class VIEW3D_OT_RemoveFolder(bpy.types.Operator):
-	"""Remove Folder"""
-	bl_idname = "view3d.remove_folder"
-	bl_label = "Do you really want to delete the folder and everything inside?"
-	bl_options = {'REGISTER', 'INTERNAL'}
+# class VIEW3D_OT_RemoveFolder(bpy.types.Operator):
+# 	"""Remove Folder"""
+# 	bl_idname = "view3d.remove_folder"
+# 	bl_label = "Do you really want to delete the folder and everything inside?"
+# 	bl_options = {'REGISTER', 'INTERNAL'}
 
-	folder_place: StringProperty()
+# 	folder_place: StringProperty()
 
-	def invoke(self, context, event):
-		return context.window_manager.invoke_confirm(self, event)
+# 	def invoke(self, context, event):
+# 		return context.window_manager.invoke_confirm(self, event)
 
-	def execute(self, context):
-		import shutil
+# 	def execute(self, context):
+# 		import shutil
 
-		nexus_model_SCN = context.scene.nexus_model_manager
+# 		nexus_model_SCN = context.scene.nexus_model_manager
 		
-		library_dir = context.window_manager.nexus_model_manager_dir_resource
-		library_name = nexus_model_SCN.library_list
-		category_name = nexus_model_SCN.category_list
-		remove_folder_path = os.path.join(library_dir, library_name)
+# 		library_dir = context.window_manager.nexus_model_manager_dir_resource
+# 		library_name = nexus_model_SCN.library_list
+# 		category_name = nexus_model_SCN.category_list
+# 		remove_folder_path = os.path.join(library_dir, library_name)
 
-		if self.folder_place == "LIBRARY":
-			shutil.rmtree(remove_folder_path)
-		elif self.folder_place == "CATEGORY":
-			remove_folder_path = os.path.join(remove_folder_path, category_name)
-			shutil.rmtree(remove_folder_path)
-		else:
-			self.report({"INFO"}, "Something went wrong!")
-			return {'FINISHED'}
+# 		if self.folder_place == "LIBRARY":
+# 			shutil.rmtree(remove_folder_path)
+# 		elif self.folder_place == "CATEGORY":
+# 			remove_folder_path = os.path.join(remove_folder_path, category_name)
+# 			shutil.rmtree(remove_folder_path)
+# 		else:
+# 			self.report({"INFO"}, "Something went wrong!")
+# 			return {'FINISHED'}
 
-		self.report({"INFO"}, "Folder removed: {}".format(remove_folder_path))
+# 		self.report({"INFO"}, "Folder removed: {}".format(remove_folder_path))
 
-		return {'FINISHED'}
+# 		return {'FINISHED'}
 
 ######################################################################
 ############################ Library path ############################
@@ -975,7 +975,7 @@ classes = (
 	VIEW3D_OT_MeshPaint,
 	VIEW3D_OT_AddModel,
 	VIEW3D_OT_AddFolder,
-	VIEW3D_OT_RemoveFolder,
+	# VIEW3D_OT_RemoveFolder,
 	VIEW3D_OT_SearchAsset
 )
 
