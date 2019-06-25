@@ -48,7 +48,7 @@ class VIEW3D_OT_CreateAsset(Operator):
         category_name = nexus_model_SCN.category_list
 
         asset_dir_path = os.path.join(library_dir, library_name, category_name, collection_name)
-        print(asset_dir_path)
+
         if not os.path.exists(asset_dir_path):
             os.makedirs(asset_dir_path)
             render_path = os.path.join(asset_dir_path, "render")
