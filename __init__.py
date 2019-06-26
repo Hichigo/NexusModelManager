@@ -3,7 +3,7 @@ bl_info = {
 	"author": "Nexus Studio",
 	"version": (0, 9, 0),
 	"blender": (2, 80, 0),
-	"location": "View 3D > Tool Shelf",
+	"location": "View 3D > 'N' menu",
 	"description": "Tools",
 	"warning": "",
 	"wiki_url": "https://github.com/Hichigo/NexusModelManager",
@@ -28,7 +28,6 @@ from .properties import *
 from .random_list_ui import *
 
 from .functions import get_addon_prefs
-
 
 ###########################################################################
 ############################ Addon preferences ############################
@@ -372,65 +371,6 @@ class VIEW3D_OT_SearchAsset(Operator):
 		context.window_manager.invoke_search_popup(self)
 		return {"RUNNING_MODAL"}
 
-class SCENE_OT_AddListItem(Operator):
-	bl_idname = "scene.add_list_item"
-	bl_label = "Add Item"
-	bl_property = "search_asset"
-
-	search_asset: EnumProperty(
-		name="Search Asset",
-		items=enum_previews_asset_items,
-	)
-
-	def invoke(self, context, event):
-		context.window_manager.invoke_search_popup(self)
-		return {"RUNNING_MODAL"}
-
-	def execute(self, context):
-		random_asset_list = context.scene.random_asset_list
-		new_index = len(random_asset_list.list_item)
-		asset_name = self.search_asset
-		if new_index > 0: # if list items not empty, check item exists
-			if random_asset_list.list_item.find(asset_name) != -1:
-				self.report({"INFO"}, "This asset exists in list!")
-				return {"CANCELLED"}
-
-		# create new item
-		random_asset_list.list_item.add()
-		
-		# set item name
-		random_asset_list.list_item[new_index].name = asset_name
-
-		# make path to asset
-		nexus_model_SCN = context.scene.nexus_model_manager
-		library_dir = context.window_manager.nexus_model_manager_dir_resource
-		
-		library = nexus_model_SCN.library_list
-		category = nexus_model_SCN.category_list
-
-		filepath_to_asset = os.path.join(library_dir, library, category, asset_name, asset_name + ".blend")
-
-		# set filepath to asset
-		random_asset_list.list_item[new_index].path_to_asset = filepath_to_asset
-
-		# set active index
-		random_asset_list.active_index = new_index
-		
-		return {'FINISHED'}
-
-class SCENE_OT_RemoveListItem(Operator):
-	bl_idname = "scene.remove_list_item"
-	bl_label = "Remove Item"
-
-
-	def execute(self, context):
-		random_asset_list = context.scene.random_asset_list
-		remove_index = random_asset_list.active_index
-		
-		# remove item
-		random_asset_list.list_item.remove(remove_index)
-
-		return {'FINISHED'}
 
 ######################################################################
 ############################## Register ##############################
