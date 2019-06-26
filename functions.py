@@ -5,6 +5,9 @@ from random import randint
 
 from mathutils import Vector, Matrix, Euler
 
+def filter_on_mesh_prop(self, object):
+    return object.type == "MESH"
+
 def get_addon_prefs():
     addon_name = __name__.split(".")[0]
     preferences = bpy.context.preferences
