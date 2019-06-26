@@ -39,7 +39,7 @@ class Preferences(AddonPreferences):
 
 	path_to_library: StringProperty(
 		name="Library Path",
-		default=os.path.join(os.path.dirname(__file__), "LibraryModels"),
+		default=os.path.join(os.path.dirname(__file__), "resources", "LibraryModels"),
 		description="The path to your library",
 		subtype="DIR_PATH"
 	)
