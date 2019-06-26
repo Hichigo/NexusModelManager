@@ -1,11 +1,11 @@
 bl_info = {
 	"name": "Nexus Model Manager",
 	"author": "Nexus Studio",
-	"version": (0, 9, 0),
+	"version": (1, 0, 0),
 	"blender": (2, 80, 0),
 	"location": "View 3D > 'N' menu",
 	"description": "Tools",
-	"warning": "",
+	"warning": "BETA",
 	"wiki_url": "https://github.com/Hichigo/NexusModelManager",
 	"category": "Object"
 }
