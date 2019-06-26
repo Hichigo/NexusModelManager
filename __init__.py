@@ -35,7 +35,6 @@ from .functions import get_addon_prefs
 ###########################################################################
 ############################ Addon preferences ############################
 ###########################################################################
-
 class Preferences(AddonPreferences):
 	bl_idname = __name__
 
@@ -94,10 +93,6 @@ class VIEW3D_PT_MainPanel(Panel):
 		col.prop(wm, "nexus_model_manager_dir_resource")
 		col.operator("view3d.library_path", icon="FILE_FOLDER", text="Open Library Folder")
 
-################################################################
-############################ Append ############################
-################################################################
-
 # class VIEW3D_OT_RemoveFolder(bpy.types.Operator):
 # 	"""Remove Folder"""
 # 	bl_idname = "view3d.remove_folder"
@@ -135,7 +130,6 @@ class VIEW3D_PT_MainPanel(Panel):
 ######################################################################
 ############################ Library path ############################
 ######################################################################
-
 class VIEW3D_OT_LibraryPath(Operator):
 	"""Open folder library"""
 	bl_idname = "view3d.library_path"
@@ -149,7 +143,6 @@ class VIEW3D_OT_LibraryPath(Operator):
 ######################################################################
 ############################## Register ##############################
 ######################################################################
-
 classes = (
 	ListItem,
 	STRING_UL_RandomAssets,
@@ -199,11 +192,9 @@ def register():
 	bpy.types.Scene.nexus_model_manager = bpy.props.PointerProperty(type=NexusModelManager_WM_Properties)
 	bpy.types.Scene.random_asset_list = bpy.props.PointerProperty(type=UIList_WM_Properties)
 
-
 ######################################################################
 ############################# Unregister #############################
 ######################################################################
-
 def unregister():
 	from bpy.utils import unregister_class
 	for cls in reversed(classes):
