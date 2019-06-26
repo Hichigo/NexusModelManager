@@ -21,7 +21,7 @@ from bpy_extras.view3d_utils import (
 	location_3d_to_region_2d
 )
 
-from .functions import *
+from .. functions import *
 
 def draw_callback_3d(self, context):
 	nexus_model_SCN = context.scene.nexus_model_manager
