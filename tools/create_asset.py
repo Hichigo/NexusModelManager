@@ -118,7 +118,7 @@ if __name__ == "__main__":
 
     # save file
     bpy.ops.wm.save_as_mainfile(filepath=save_file)
-    print("Asset " + collection_name + " Saved!")
+    print("------------------ Asset " + collection_name + " Saved! ------------------")
 
     # quit blender
     bpy.ops.wm.quit_blender()
