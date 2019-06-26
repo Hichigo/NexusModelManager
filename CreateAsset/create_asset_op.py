@@ -72,7 +72,7 @@ class VIEW3D_OT_CreateAsset(Operator):
         
         append_from_blendfile = bpy.data.filepath
 
-        tools = os.path.join(addon_path, "tools", "create_asset.py")
+        tools = os.path.join(addon_path, "resources", "tools", "create_asset.py")
 
         # get cursor location and roration
         cursor_location = bpy.context.scene.cursor.location.copy()
