@@ -25,10 +25,9 @@ from .PreviewAssets.preview_assets_pt import *
 
 from .MeshPaint.mesh_paint_op import *
 from .MeshPaint.mesh_paint_pt import *
+from .MeshPaint.random_list_ui import *
 
 from .properties import *
-
-from .random_list_ui import *
 
 from .functions import get_addon_prefs
 
