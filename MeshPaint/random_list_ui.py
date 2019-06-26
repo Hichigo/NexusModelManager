@@ -15,7 +15,7 @@ class STRING_UL_RandomAssets(bpy.types.UIList):
 
 class ListItem(bpy.types.PropertyGroup):
 	# name_asset: StringProperty(name="Name", default="Empty")
-	path_to_asset: StringProperty(name="Name", default="")
+	path_to_asset: StringProperty(name="Path to asset", default="")
 
 class UIList_WM_Properties(bpy.types.PropertyGroup):
     list_item: CollectionProperty(name="List item", type=ListItem)
