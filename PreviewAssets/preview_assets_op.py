@@ -38,7 +38,8 @@ class VIEW3D_OT_AddModel(Operator):
 
     def execute(self, context):
         nexus_model_SCN = context.scene.nexus_model_manager
-        library_dir = context.window_manager.nexus_model_manager_dir_resource
+        addon_prefs = get_addon_prefs()
+        library_dir = addon_prefs.library_list
         asset_name = nexus_model_SCN.asset_previews
         category = nexus_model_SCN.category_list
         library = nexus_model_SCN.library_list
@@ -100,57 +101,59 @@ class VIEW3D_OT_AddModel(Operator):
         return {"FINISHED"}
 
 class VIEW3D_OT_AssetPath(Operator):
-	"""Open folder asset"""
-	bl_idname = "view3d.asset_path"
-	bl_label = "Library Asset Path"
+    """Open folder asset"""
+    bl_idname = "view3d.asset_path"
+    bl_label = "Library Asset Path"
 
-	def execute(self, context):
+    def execute(self, context):
 
-		nexus_model_SCN = context.scene.nexus_model_manager
-		model_dir = context.window_manager.nexus_model_manager_dir_resource
-		library = nexus_model_SCN.library_list
-		category = nexus_model_SCN.category_list
-		selected_preview = nexus_model_SCN.asset_previews
+        nexus_model_SCN = context.scene.nexus_model_manager
+        addon_prefs = get_addon_prefs()
+        library_dir = addon_prefs.library_list
+        library = nexus_model_SCN.library_list
+        category = nexus_model_SCN.category_list
+        selected_preview = nexus_model_SCN.asset_previews
 
-		filepath = os.path.join(model_dir, library, category, selected_preview)
+        filepath = os.path.join(model_dir, library, category, selected_preview)
 
-		bpy.ops.wm.path_open(filepath=filepath)
-		return {"FINISHED"}
+        bpy.ops.wm.path_open(filepath=filepath)
+        return {"FINISHED"}
 
 class VIEW3D_OT_ImagePath(Operator):
-	"""Open image preview asset"""
-	bl_idname = "view3d.image_path"
-	bl_label = "Library Image Path"
+    """Open image preview asset"""
+    bl_idname = "view3d.image_path"
+    bl_label = "Library Image Path"
 
-	def execute(self, context):
+    def execute(self, context):
 
-		nexus_model_SCN = context.scene.nexus_model_manager
-		library_dir = context.window_manager.nexus_model_manager_dir_resource
-		library = nexus_model_SCN.library_list
-		category = nexus_model_SCN.category_list
-		asset_name = nexus_model_SCN.asset_previews
+        nexus_model_SCN = context.scene.nexus_model_manager
+        addon_prefs = get_addon_prefs()
+        library_dir = addon_prefs.library_list
+        library = nexus_model_SCN.library_list
+        category = nexus_model_SCN.category_list
+        asset_name = nexus_model_SCN.asset_previews
 
-		render_path = os.path.join(library_dir, library, category, asset_name, "render", asset_name + ".png")
+        render_path = os.path.join(library_dir, library, category, asset_name, "render", asset_name + ".png")
 
-		bpy.ops.wm.path_open(filepath=render_path)
-		return {"FINISHED"}
+        bpy.ops.wm.path_open(filepath=render_path)
+        return {"FINISHED"}
 
 class VIEW3D_OT_SearchAsset(Operator):
-	"""Search asset by name in current category"""
-	bl_idname = "view3d.search_asset"
-	bl_label = "Search Asset"
-	bl_property = "search_asset"
+    """Search asset by name in current category"""
+    bl_idname = "view3d.search_asset"
+    bl_label = "Search Asset"
+    bl_property = "search_asset"
 
-	search_asset: EnumProperty(
-		name="Search Asset",
-		items=enum_previews_asset_items,
-	)
+    search_asset: EnumProperty(
+        name="Search Asset",
+        items=enum_previews_asset_items,
+    )
 
-	def execute(self, context):
-		nexus_model_SCN = context.scene.nexus_model_manager
-		nexus_model_SCN.asset_previews = self.search_asset
-		return {"FINISHED"}
+    def execute(self, context):
+        nexus_model_SCN = context.scene.nexus_model_manager
+        nexus_model_SCN.asset_previews = self.search_asset
+        return {"FINISHED"}
 
-	def invoke(self, context, event):
-		context.window_manager.invoke_search_popup(self)
-		return {"RUNNING_MODAL"}
+    def invoke(self, context, event):
+        context.window_manager.invoke_search_popup(self)
+        return {"RUNNING_MODAL"}
