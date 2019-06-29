@@ -4,6 +4,24 @@ import glob
 
 from .functions import get_addon_dir, get_addon_prefs
 
+def make_library_list_folders(self, context):
+	addon_prefs = get_addon_prefs()
+
+	items = []
+	i = 0
+	for lib in addon_prefs.library_folders:
+		items.append((lib.path_to_folder, lib.name, "", i))
+		i += 1
+
+	if len(items) == 0:
+		addon_folder = get_addon_dir()
+		default_library_path = os.path.join(addon_folder, "resources", "LibraryModels")
+		items.append((default_library_path, "Default Library", "", 0))
+
+	items.sort()
+
+	return items
+
 def enum_render_scenes(self, context):
 	scenes_list = []
 	addon_folder = get_addon_dir()
