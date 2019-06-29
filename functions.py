@@ -42,12 +42,13 @@ def add_model(context, location, normal):
         filepath_collection_name = directory_inside_file + asset_name
     
     else:
-        path_models = bpy.data.window_managers["WinMan"].nexus_model_manager_dir_resource
+        addon_prefs = get_addon_prefs()
+        library_dir = addon_prefs.library_list
         asset_name = nexus_model_SCN.asset_previews
         category = nexus_model_SCN.category_list
         library = nexus_model_SCN.library_list
 
-        filepath = os.path.join(path_models, library, category, asset_name, asset_name + ".blend")
+        filepath = os.path.join(library_dir, library, category, asset_name, asset_name + ".blend")
 
         directory_inside_file = os.path.join(filepath, "Collection")
 

@@ -58,7 +58,8 @@ def make_list_folder(path):
 
 ############################ Category ##########################
 def make_category_list(self, context):
-	library_dir = context.window_manager.nexus_model_manager_dir_resource
+	addon_prefs = get_addon_prefs()
+	library_dir = addon_prefs.library_list
 	library = context.scene.nexus_model_manager.library_list
 	path_category = os.path.join(library_dir, library)
 
@@ -66,7 +67,8 @@ def make_category_list(self, context):
 
 ############################ Library ##########################
 def make_library_list(self, context):
-	library_dir = context.window_manager.nexus_model_manager_dir_resource
+	addon_prefs = get_addon_prefs()
+	library_dir = addon_prefs.library_list
 
 	return make_list_folder(library_dir)
 
@@ -75,7 +77,8 @@ def enum_previews_asset_items(self, context):
 	""" create assets items prewiews """
 	enum_items = []
 
-	library_dir = context.window_manager.nexus_model_manager_dir_resource
+	addon_prefs = get_addon_prefs()
+	library_dir = addon_prefs.library_list
 	category = context.scene.nexus_model_manager.category_list
 	library = context.scene.nexus_model_manager.library_list
 	directory = os.path.join(library_dir, library, category)

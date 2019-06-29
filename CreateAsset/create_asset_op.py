@@ -19,7 +19,8 @@ class VIEW3D_OT_CreateAsset(Operator):
 
         nexus_model_SCN = context.scene.nexus_model_manager
 
-        library_dir = context.window_manager.nexus_model_manager_dir_resource
+        addon_prefs = get_addon_prefs()
+        library_dir = addon_prefs.library_list
         library_name = nexus_model_SCN.library_list
         category_name = nexus_model_SCN.category_list
         collection_name = nexus_model_SCN.new_collection_name
@@ -33,7 +34,8 @@ class VIEW3D_OT_CreateAsset(Operator):
     def execute(self, context):
         nexus_model_SCN = context.scene.nexus_model_manager
 
-        library_dir = context.window_manager.nexus_model_manager_dir_resource
+        addon_prefs = get_addon_prefs()
+        library_dir = addon_prefs.library_list
         library_name = None
         category_name = None
         collection_name = nexus_model_SCN.new_collection_name

@@ -471,7 +471,8 @@ class SCENE_OT_AddListItem(Operator):
 
 		# make path to asset
 		nexus_model_SCN = context.scene.nexus_model_manager
-		library_dir = context.window_manager.nexus_model_manager_dir_resource
+		addon_prefs = get_addon_prefs()
+		library_dir = addon_prefs.library_list
 		
 		library = nexus_model_SCN.library_list
 		category = nexus_model_SCN.category_list
