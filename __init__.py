@@ -27,49 +27,13 @@ from .MeshPaint.mesh_paint_op import *
 from .MeshPaint.mesh_paint_pt import *
 from .MeshPaint.random_list_ui import *
 
+from .Preferences.preferences_pt import *
+from .Preferences.preferences_op import *
+
 from .properties import *
 
 from .functions import get_addon_prefs
 
-###########################################################################
-############################ Addon preferences ############################
-###########################################################################
-class Preferences(AddonPreferences):
-	bl_idname = __name__
-
-	path_to_library: StringProperty(
-		name="Library Path",
-		default=os.path.join(os.path.dirname(__file__), "resources", "LibraryModels"),
-		description="The path to your library",
-		subtype="DIR_PATH"
-	)
-
-	path_to_render_scenes: StringProperty(
-		name="Render Scene Path",
-		default=os.path.join(os.path.dirname(__file__), "resources", "render_scenes"),
-		description="The path to your render scenes",
-		subtype="DIR_PATH"
-	)
-
-	preview_asset_scale: FloatProperty(
-		name="Asset Image Scale",
-		description="Preview assets image scale",
-		min=1,
-		max=100,
-		default=7
-	)
-
-	def draw(self, context):
-		layout = self.layout
-
-		col = layout.column(align=True)
-		col.prop(self, "path_to_library")
-		col.prop(self, "path_to_render_scenes")
-		col.prop(self, "preview_asset_scale")
-
-#################################################################
-############################ Toolbar ############################
-#################################################################
 class VIEW3D_PT_MainPanel(Panel):
 	bl_label = "Nexus Model Manager"
 	bl_idname = "VIEW3D_PT_MainPanel"
@@ -83,67 +47,36 @@ class VIEW3D_PT_MainPanel(Panel):
 
 	def draw(self, context):
 		layout = self.layout
-		wm = context.window_manager
+
+		addon_prefs = get_addon_prefs()
+		library_dir = addon_prefs.library_list
 
 		############## Library folder button ##############
 		box = layout.box()
 		box.label(text="Library Folder:")
 		col = box.column(align=True)
-		col.prop(wm, "nexus_model_manager_dir_resource")
+		col.prop(addon_prefs, "library_list")
 		col.operator("view3d.library_path", icon="FILE_FOLDER", text="Open Library Folder")
 
-# class VIEW3D_OT_RemoveFolder(bpy.types.Operator):
-# 	"""Remove Folder"""
-# 	bl_idname = "view3d.remove_folder"
-# 	bl_label = "Do you really want to delete the folder and everything inside?"
-# 	bl_options = {'REGISTER', 'INTERNAL'}
-
-# 	folder_place: StringProperty()
-
-# 	def invoke(self, context, event):
-# 		return context.window_manager.invoke_confirm(self, event)
-
-# 	def execute(self, context):
-# 		import shutil
-
-# 		nexus_model_SCN = context.scene.nexus_model_manager
-		
-# 		library_dir = context.window_manager.nexus_model_manager_dir_resource
-# 		library_name = nexus_model_SCN.library_list
-# 		category_name = nexus_model_SCN.category_list
-# 		remove_folder_path = os.path.join(library_dir, library_name)
-
-# 		if self.folder_place == "LIBRARY":
-# 			shutil.rmtree(remove_folder_path)
-# 		elif self.folder_place == "CATEGORY":
-# 			remove_folder_path = os.path.join(remove_folder_path, category_name)
-# 			shutil.rmtree(remove_folder_path)
-# 		else:
-# 			self.report({"INFO"}, "Something went wrong!")
-# 			return {'FINISHED'}
-
-# 		self.report({"INFO"}, "Folder removed: {}".format(remove_folder_path))
-
-# 		return {'FINISHED'}
-
-######################################################################
 ############################ Library path ############################
-######################################################################
 class VIEW3D_OT_LibraryPath(Operator):
 	"""Open folder library"""
 	bl_idname = "view3d.library_path"
 	bl_label = "Library Path"
 	
 	def execute(self, context):
-		library_dir = context.window_manager.nexus_model_manager_dir_resource
-		bpy.ops.wm.path_open(filepath=library_dir)
+		addon_prefs = get_addon_prefs()
+		library_dir = addon_prefs.library_list
+		if os.path.isdir(library_dir):
+			bpy.ops.wm.path_open(filepath=library_dir)
+		else:
+			self.report({"ERROR"}, "Folder not exists!")
 		return {"FINISHED"}
 
-######################################################################
 ############################## Register ##############################
-######################################################################
 classes = (
 	ListItem,
+	ListFolder,
 	STRING_UL_RandomAssets,
 	VIEW3D_PT_MainPanel,
 	VIEW3D_PT_CreateAsset,
@@ -161,7 +94,8 @@ classes = (
 	VIEW3D_OT_MeshPaint,
 	VIEW3D_OT_AddModel,
 	VIEW3D_OT_AddFolder,
-	# VIEW3D_OT_RemoveFolder,
+	WM_OT_AddLibraryFolder,
+	WM_OT_RemoveLibraryFolder,
 	VIEW3D_OT_SearchAsset
 )
 
@@ -172,10 +106,10 @@ def register():
 
 	addon_prefs = get_addon_prefs()
 
-	WindowManager.nexus_model_manager_dir_resource = StringProperty(
-		name="Library Directory",
+	WindowManager.new_library_path = StringProperty(
+		name="New Library Path",
 		subtype="DIR_PATH",
-		default=addon_prefs.path_to_library
+		default=""
 	)
 
 	pcoll = bpy.utils.previews.new()
@@ -191,9 +125,7 @@ def register():
 	bpy.types.Scene.nexus_model_manager = bpy.props.PointerProperty(type=NexusModelManager_WM_Properties)
 	bpy.types.Scene.random_asset_list = bpy.props.PointerProperty(type=UIList_WM_Properties)
 
-######################################################################
 ############################# Unregister #############################
-######################################################################
 def unregister():
 	from bpy.utils import unregister_class
 	for cls in reversed(classes):
