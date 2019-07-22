@@ -137,32 +137,40 @@ def draw_callback_2d(self, context):
 		bgl.glLineWidth(1)
 		bgl.glDisable(bgl.GL_BLEND)
 		
-def random_scale_and_rotation(obj, normal, NM_SCN):
+def random_scale_and_rotation(obj, normal, NM_SCN, self_data):
 	loc, rot, scale = obj.matrix_world.decompose()
 
 	loc = Matrix.Translation(loc)
+	rot = rot.to_euler().to_matrix().to_4x4()
+
+	rot_add = Euler( Vector( (0, 0, math.radians(self_data.rotate_angle) ) ) )
+	rot_add = rot_add.to_matrix().to_4x4()
+
+
 
 	if NM_SCN.use_random_scale:
 		new_scale = uniform(NM_SCN.random_scale_from, NM_SCN.random_scale_to)
 		scale = Matrix.Scale(new_scale, 4)
 	else:
-		scale = Matrix.Scale(1, 4)
+		scale = Matrix.Scale(self_data.scale_model, 4)
 
 	# apply rotation by normal if checked "align_by_normal"
 	if NM_SCN.align_by_normal:
-		rot = normal.rotation_difference(Vector((0,0,1)))
-		rot.invert()
-		rot = rot.to_euler().to_matrix().to_4x4()
+		rot_by_normal = normal.rotation_difference(Vector((0,0,1)))
+		rot_by_normal.invert()
+		rot_by_normal = rot_by_normal.to_euler().to_matrix().to_4x4()
+		rot = rot_by_normal @ rot_add
 	else:
 		rot = Euler((0,0,0)).to_matrix().to_4x4()
+		rot = rot @ rot_add
 	
 	if NM_SCN.use_random_rotation:
 		x_angle = math.radians(uniform(0, NM_SCN.random_rotation_x))
 		y_angle = math.radians(uniform(0, NM_SCN.random_rotation_y))
 		z_angle = math.radians(uniform(0, NM_SCN.random_rotation_z))
 
-		rot_add = Euler( Vector( (x_angle, y_angle, z_angle ) ) ).to_matrix().to_4x4()
-		rot = rot @ rot_add
+		rot_rand = Euler( Vector( (x_angle, y_angle, z_angle ) ) ).to_matrix().to_4x4()
+		rot = rot @ rot_rand
 
 	mat_w = loc @ rot @ scale
 
@@ -206,7 +214,7 @@ class VIEW3D_OT_MeshPaint(Operator):
 			# self.start_distance_scale = 0
 			# self.current_distance_scale = 0
 
-			self.current_model = add_model(context, self.mouse_path[0], self.normal)
+			self.current_model = add_model(context, self.mouse_path[0], self.normal, self.scale_model)
 
 			context.window_manager.modal_handler_add(self)
 			return {"RUNNING_MODAL"}
@@ -286,9 +294,9 @@ class VIEW3D_OT_MeshPaint(Operator):
 				self.prev_location = self.current_model.location
 				distance = 0
 				
-				random_scale_and_rotation(self.current_model, self.normal, nexus_model_SCN)
+				random_scale_and_rotation(self.current_model, self.normal, nexus_model_SCN, self)
 
-				self.current_model = add_model(context, self.mouse_path[0], self.normal)
+				self.current_model = add_model(context, self.mouse_path[0], self.normal, self.scale_model)
 
 	def modal(self, context, event):
 		context.area.tag_redraw()
@@ -402,9 +410,9 @@ class VIEW3D_OT_MeshPaint(Operator):
 				self.transform_mode = "MOVE"
 				self.LMB_PRESS = True
 				# self.draw_mouse_path.append((event.mouse_region_x, event.mouse_region_y)) # 2d path screen space
-				random_scale_and_rotation(self.current_model, self.normal, nexus_model_SCN)
+				random_scale_and_rotation(self.current_model, self.normal, nexus_model_SCN, self)
 				self.prev_location = self.current_model.location # 3d path world path
-				self.current_model = add_model(context, self.mouse_path[0], self.normal)
+				self.current_model = add_model(context, self.mouse_path[0], self.normal, self.scale_model)
 				return {"RUNNING_MODAL"}
 			elif event.type == "R":
 				self.transform_mode = "ROTATE"
