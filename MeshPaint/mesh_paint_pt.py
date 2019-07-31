@@ -2,7 +2,7 @@ import bpy
 from bpy.types import Panel
 
 class VIEW3D_PT_MeshPaint(Panel):
-	bl_label = "Mesh Paint Settings"
+	bl_label = "Asset Paint Settings"
 	bl_space_type = "VIEW_3D"
 	bl_region_type = "UI"
 	bl_category = "Nexus"
