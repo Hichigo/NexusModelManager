@@ -5,7 +5,7 @@ bl_info = {
 	"blender": (2, 80, 0),
 	"location": "View 3D > 'N' menu",
 	"description": "Tools",
-	"warning": "BETA",
+	"warning": "",
 	"wiki_url": "https://github.com/Hichigo/NexusModelManager",
 	"category": "Object"
 }
