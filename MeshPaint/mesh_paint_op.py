@@ -304,11 +304,13 @@ class VIEW3D_OT_MeshPaint(Operator):
 		mod = None
 		if event.shift:
 			mod = "SHIFT"
+		elif event.ctrl:
+			mod = "CTRL"
         # if event.alt:
         #     mod.append("Alt")
         # if event.ctrl:
         #     mod.append("Ctrl")
-		tip_text = "LMB - Add Model | G - Move, R - Rotate, MOUSEWHEEL 0.1, +shift 0.01 - Scale | N - Align by normal | RMB / ESC - Cancel"
+		tip_text = "LMB - Add Model | G - Move, R - Rotate, MOUSEWHEEL +ctrl 0.1, +shift 0.01 - Scale | N - Align by normal | RMB / ESC - Cancel"
 		context.area.header_text_set(tip_text)
 
 		if event.type == "MOUSEMOVE":
@@ -393,15 +395,15 @@ class VIEW3D_OT_MeshPaint(Operator):
 				# self.current_model.scale = Vector((self.scale_model, self.scale_model, self.scale_model))
 
 		if event.type == "WHEELUPMOUSE":
-			if mod != "SHIFT":
+			if mod == "CTRL":
 				self.scale_model += 0.1
-			else:
+			elif mod == "SHIFT":
 				self.scale_model += 0.01
 			self.change_scale_current_model(context, event)
 		elif event.type == "WHEELDOWNMOUSE":
-			if mod != "SHIFT":
+			if mod == "CTRL":
 				self.scale_model -= 0.1
-			else:
+			elif mod == "SHIFT":
 				self.scale_model -= 0.01
 			self.change_scale_current_model(context, event)
 
@@ -413,13 +415,13 @@ class VIEW3D_OT_MeshPaint(Operator):
 				random_scale_and_rotation(self.current_model, self.normal, nexus_model_SCN, self)
 				self.prev_location = self.current_model.location # 3d path world path
 				self.current_model = add_model(context, self.mouse_path[0], self.normal, self.scale_model)
-				return {"RUNNING_MODAL"}
+				return {"PASS_THROUGH"}#{"RUNNING_MODAL"}
 			elif event.type == "R":
 				self.transform_mode = "ROTATE"
-				return {"RUNNING_MODAL"}
+				return {"PASS_THROUGH"}#{"RUNNING_MODAL"}
 			elif event.type == "G":
 				self.transform_mode = "MOVE"
-				return {"RUNNING_MODAL"}
+				return {"PASS_THROUGH"}#{"RUNNING_MODAL"}
 			# elif event.type == "S":
 			# 	self.transform_mode = "SCALE"
 			# 	self.model_2d_point = self.get_2d_point_from_3d(event, context)
@@ -429,7 +431,7 @@ class VIEW3D_OT_MeshPaint(Operator):
 			# 	return {"RUNNING_MODAL"}
 			elif event.type == "N":
 				nexus_model_SCN.align_by_normal = not nexus_model_SCN.align_by_normal
-				return {"RUNNING_MODAL"}
+				return {"PASS_THROUGH"}#{"RUNNING_MODAL"}
 			elif event.type in {"RIGHTMOUSE", "ESC"}:
 				
 				bpy.ops.object.select_all(action="DESELECT")
@@ -446,7 +448,7 @@ class VIEW3D_OT_MeshPaint(Operator):
 				self.LMB_PRESS = False
 				# self.draw_mouse_path = [] # 2d path screen space
 
-		return {"RUNNING_MODAL"}
+		return {"PASS_THROUGH"}#{"RUNNING_MODAL"}
 
 class SCENE_OT_AddListItem(Operator):
 	bl_idname = "scene.add_list_item"
