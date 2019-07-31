@@ -24,7 +24,6 @@ class VIEW3D_PT_MeshPaint(Panel):
 		layout.prop_search(nexus_model_SCN, "canvas_object", context.scene, "objects")
 
 		box = layout.box()
-		box.label(text="Random rotation")
 		col = box.column(align=True)
 		col.prop(nexus_model_SCN, "use_random_rotation")
 		if nexus_model_SCN.use_random_rotation:
@@ -33,7 +32,6 @@ class VIEW3D_PT_MeshPaint(Panel):
 			col.prop(nexus_model_SCN, "random_rotation_z")
 
 		box = layout.box()
-		box.label(text="Random scale")
 		col = box.column(align=True)
 		col.prop(nexus_model_SCN, "use_random_scale")
 		if nexus_model_SCN.use_random_scale:
@@ -41,7 +39,6 @@ class VIEW3D_PT_MeshPaint(Panel):
 			col.prop(nexus_model_SCN, "random_scale_to")
 
 		box = layout.box()
-		box.label(text="Random assets")
 		col = box.column(align=True)
 		col.prop(nexus_model_SCN, "use_random_asset")
 		if nexus_model_SCN.use_random_asset:
