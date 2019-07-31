@@ -5,6 +5,7 @@ from bpy.props import EnumProperty
 import os
 
 from .. enum_preview_utils import enum_previews_asset_items
+from .. functions import get_addon_prefs
 
 class VIEW3D_OT_AddModel(Operator):
     """Add asset from library"""
