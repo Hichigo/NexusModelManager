@@ -5,7 +5,7 @@ from .. functions import get_addon_prefs
 
 class VIEW3D_PT_ManagerPreviews(Panel):
 
-    bl_label = "Model Manager"
+    bl_label = "Select Asset"
     bl_idname = "VIEW3D_PT_ManagerPreviews"
     bl_space_type = "VIEW_3D"
     bl_region_type = "UI"
@@ -26,7 +26,6 @@ class VIEW3D_PT_ManagerPreviews(Panel):
 
         ############## Panel ##############
         box = layout.box()
-        box.label(text="Model Manager")
 
         ####### Drop Down Menu library
         row = box.row()
