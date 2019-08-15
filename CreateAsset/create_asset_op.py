@@ -41,8 +41,8 @@ class VIEW3D_OT_CreateAsset(Operator):
         collection_name = nexus_model_SCN.new_collection_name
         open_blend_file = nexus_model_SCN.render_scenes
 
-        library_name = nexus_model_SCN.library_list
-        category_name = nexus_model_SCN.category_list
+        library_name = nexus_model_SCN.new_library_name
+        category_name = nexus_model_SCN.new_category_name
 
         asset_dir_path = os.path.join(library_dir, library_name, category_name, collection_name)
 
