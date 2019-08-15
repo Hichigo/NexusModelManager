@@ -415,13 +415,13 @@ class VIEW3D_OT_MeshPaint(Operator):
 				random_scale_and_rotation(self.current_model, self.normal, nexus_model_SCN, self)
 				self.prev_location = self.current_model.location # 3d path world path
 				self.current_model = add_model(context, self.mouse_path[0], self.normal, self.scale_model)
-				return {"PASS_THROUGH"}#{"RUNNING_MODAL"}
+				return {"RUNNING_MODAL"}
 			elif event.type == "R":
 				self.transform_mode = "ROTATE"
-				return {"PASS_THROUGH"}#{"RUNNING_MODAL"}
+				return {"RUNNING_MODAL"}
 			elif event.type == "G":
 				self.transform_mode = "MOVE"
-				return {"PASS_THROUGH"}#{"RUNNING_MODAL"}
+				return {"RUNNING_MODAL"}
 			# elif event.type == "S":
 			# 	self.transform_mode = "SCALE"
 			# 	self.model_2d_point = self.get_2d_point_from_3d(event, context)
@@ -431,7 +431,7 @@ class VIEW3D_OT_MeshPaint(Operator):
 			# 	return {"RUNNING_MODAL"}
 			elif event.type == "N":
 				nexus_model_SCN.align_by_normal = not nexus_model_SCN.align_by_normal
-				return {"PASS_THROUGH"}#{"RUNNING_MODAL"}
+				return {"RUNNING_MODAL"}
 			elif event.type in {"RIGHTMOUSE", "ESC"}:
 				
 				bpy.ops.object.select_all(action="DESELECT")
@@ -448,7 +448,7 @@ class VIEW3D_OT_MeshPaint(Operator):
 				self.LMB_PRESS = False
 				# self.draw_mouse_path = [] # 2d path screen space
 
-		return {"PASS_THROUGH"}#{"RUNNING_MODAL"}
+		return {"RUNNING_MODAL"}
 
 class SCENE_OT_AddListItem(Operator):
 	bl_idname = "scene.add_list_item"
