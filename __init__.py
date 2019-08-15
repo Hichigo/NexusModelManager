@@ -93,7 +93,7 @@ classes = (
 	UIList_WM_Properties,
 	VIEW3D_OT_MeshPaint,
 	VIEW3D_OT_AddModel,
-	VIEW3D_OT_AddFolder,
+	# VIEW3D_OT_AddFolder,
 	WM_OT_AddLibraryFolder,
 	WM_OT_RemoveLibraryFolder,
 	VIEW3D_OT_SearchAsset

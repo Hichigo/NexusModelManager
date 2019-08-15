@@ -14,10 +14,16 @@ class NexusModelManager_WM_Properties(PropertyGroup):
         poll=filter_on_mesh_prop
     )
 
-	use_random_asset: BoolProperty(
-		name="Use random asset",
-		description="If True get asset from list",
-		default=False
+	new_library_name: StringProperty(
+		name="Library",
+		description="Name of New Library",
+		default="Awesome_Library"
+	)
+
+	new_category_name: StringProperty(
+		name="Category",
+		description="Name of New Category",
+		default="Awesome_Category"
 	)
 
 	new_collection_name: StringProperty(
@@ -55,6 +61,12 @@ class NexusModelManager_WM_Properties(PropertyGroup):
 		description="Distance to which assets can be placed",
 		min=0,
 		default=2
+	)
+
+	use_random_asset: BoolProperty(
+		name="Use random asset",
+		description="If True get asset from list",
+		default=False
 	)
 
 	use_random_rotation: BoolProperty(
