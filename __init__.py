@@ -1,7 +1,7 @@
 bl_info = {
 	"name": "Nexus Model Manager",
 	"author": "Nexus Studio",
-	"version": (1, 0, 0),
+	"version": (1, 0, 1),
 	"blender": (2, 80, 0),
 	"location": "View 3D > 'N' menu",
 	"description": "Tools",
