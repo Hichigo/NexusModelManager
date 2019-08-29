@@ -1,11 +1,12 @@
 import bpy
 from bpy.types import Operator
-from bpy.props import StringProperty
+from bpy.props import StringProperty, EnumProperty
 
 import subprocess
 import os
 
 from .. functions import get_addon_dir, get_addon_prefs
+from .. enum_preview_utils import make_category_list, make_library_list
 
 class VIEW3D_OT_CreateAsset(Operator):
     """Create .blend file and render icon"""
@@ -107,6 +108,43 @@ class VIEW3D_OT_CreateAsset(Operator):
 
         return {"FINISHED"}
 
+class VIEW3D_OT_SetNewLibrary(Operator):
+	bl_idname = "view3d.set_new_library"
+	bl_label = "Set New Library"
+	bl_property = "search_new_library"
+
+	search_new_library: EnumProperty(
+		name="Search New Library",
+		items=make_library_list,
+	)
+
+	def invoke(self, context, event):
+		context.window_manager.invoke_search_popup(self)
+		return {"RUNNING_MODAL"}
+
+	def execute(self, context):
+		nexus_model_SCN = context.scene.nexus_model_manager
+		nexus_model_SCN.new_library_name = self.search_new_library
+		return {'FINISHED'}
+
+class VIEW3D_OT_SetNewCategory(Operator):
+	bl_idname = "view3d.set_new_category"
+	bl_label = "Set New Category"
+	bl_property = "search_new_category"
+
+	search_new_category: EnumProperty(
+		name="Search New Category",
+		items=make_category_list,
+	)
+
+	def invoke(self, context, event):
+		context.window_manager.invoke_search_popup(self)
+		return {"RUNNING_MODAL"}
+
+	def execute(self, context):
+		nexus_model_SCN = context.scene.nexus_model_manager
+		nexus_model_SCN.new_category_name = self.search_new_category
+		return {'FINISHED'}
 # class VIEW3D_OT_AddFolder(Operator):
 #     """Create new folder"""
 #     bl_idname = "view3d.add_folder"

@@ -86,6 +86,8 @@ classes = (
 	VIEW3D_OT_LibraryPath,
 	VIEW3D_OT_AssetPath,
 	VIEW3D_OT_CreateAsset,
+	VIEW3D_OT_SetNewLibrary,
+	VIEW3D_OT_SetNewCategory,
 	VIEW3D_OT_ImagePath,
 	SCENE_OT_AddListItem,
 	SCENE_OT_RemoveListItem,

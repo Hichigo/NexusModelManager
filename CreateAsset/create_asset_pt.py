@@ -25,12 +25,14 @@ class VIEW3D_PT_CreateAsset(Panel):
         col = layout.column(align=True)
         row = col.row()
         row.prop(nexus_model_SCN, "new_library_name")
+        row.operator("view3d.set_new_library", text="", icon="BACK")
         #row.operator("view3d.add_folder", text="", icon="NEWFOLDER").folder_place = "LIBRARY"
         # row.operator("view3d.remove_folder", text="", icon="TRASH").folder_place = "LIBRARY"
 
         col = layout.column(align=True)
         row = col.row()
         row.prop(nexus_model_SCN, "new_category_name",)
+        row.operator("view3d.set_new_category", text="", icon="BACK")
         #row.operator("view3d.add_folder", text="", icon="NEWFOLDER").folder_place = "CATEGORY"
         # row.operator("view3d.remove_folder", text="", icon="TRASH").folder_place = "CATEGORY"
 
