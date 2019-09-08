@@ -145,6 +145,56 @@ class VIEW3D_OT_SetNewCategory(Operator):
 		nexus_model_SCN = context.scene.nexus_model_manager
 		nexus_model_SCN.new_category_name = self.search_new_category
 		return {'FINISHED'}
+
+class VIEW3D_OT_OpenInNewFile(Operator):
+    """Open selected objects in new clear .blend file"""
+    bl_idname = "view3d.open_in_new_file"
+    bl_label = "Overwrite file?"
+
+    def invoke(self, context, event):
+        if not os.path.isfile(bpy.data.filepath):
+            self.report({"ERROR"}, "Please save the file!")
+            return {"FINISHED"}
+        
+        if len(context.selected_objects) == 0:
+            self.report({"ERROR"}, "Please select any object!")
+            return {"FINISHED"}
+        
+        return self.execute(context)
+
+    def execute(self, context):
+        nexus_model_SCN = context.scene.nexus_model_manager
+
+        addon_path = get_addon_dir()
+        
+        append_from_blendfile = bpy.data.filepath
+
+        tools = os.path.join(addon_path, "resources", "tools", "open_selected.py")
+        open_blend_file = os.path.join(addon_path, "resources", "empty_file.blend")
+
+        selected_objects = ""
+        for ob in context.selected_objects:
+            if ob.type == "MESH":
+                selected_objects += ob.name + "|"
+
+        selected_objects = selected_objects[:-1] # remove last character
+
+        sub = subprocess.Popen(
+            [
+                bpy.app.binary_path,   # path to blender.exe
+                open_blend_file,       # open file
+                "--python",
+                tools,                 # path to python script
+                append_from_blendfile, # from blendfile append collection
+                "Object",
+                selected_objects       # selected objects A|B|C|D etc
+            ]
+        )
+
+        return {"FINISHED"}
+
+
+
 # class VIEW3D_OT_AddFolder(Operator):
 #     """Create new folder"""
 #     bl_idname = "view3d.add_folder"

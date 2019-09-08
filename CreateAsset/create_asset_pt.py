@@ -40,6 +40,10 @@ class VIEW3D_PT_CreateAsset(Panel):
         col.prop(nexus_model_SCN, "new_collection_name")
         col.operator("view3d.create_asset_path", text="Create Asset", icon="FILE_NEW")
 
+        col = layout.column(align=True)
+        col.enabled = False
+        col.operator("view3d.open_in_new_file", text="Open Asset In New File")
+
         box = layout.box()
 
         box.label(text="Settings")

@@ -1,7 +1,7 @@
 bl_info = {
 	"name": "Nexus Model Manager",
 	"author": "Nexus Studio",
-	"version": (1, 0, 1),
+	"version": (1, 1, 1),
 	"blender": (2, 80, 0),
 	"location": "View 3D > 'N' menu",
 	"description": "Tools",
@@ -88,6 +88,7 @@ classes = (
 	VIEW3D_OT_CreateAsset,
 	VIEW3D_OT_SetNewLibrary,
 	VIEW3D_OT_SetNewCategory,
+	VIEW3D_OT_OpenInNewFile,
 	VIEW3D_OT_ImagePath,
 	SCENE_OT_AddListItem,
 	SCENE_OT_RemoveListItem,
