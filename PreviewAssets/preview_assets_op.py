@@ -115,7 +115,7 @@ class VIEW3D_OT_AssetPath(Operator):
         category = nexus_model_SCN.category_list
         selected_preview = nexus_model_SCN.asset_previews
 
-        filepath = os.path.join(model_dir, library, category, selected_preview)
+        filepath = os.path.join(library_dir, library, category, selected_preview)
 
         bpy.ops.wm.path_open(filepath=filepath)
         return {"FINISHED"}
