@@ -26,6 +26,10 @@ class VIEW3D_OT_CreateAsset(Operator):
         category_name = nexus_model_SCN.category_list
         collection_name = nexus_model_SCN.new_collection_name
 
+        if bpy.data.collections[collection_name] is not None:
+            self.report({"ERROR"}, "delete the collection '{}' before creating the asset".format(collection_name))
+            return {"FINISHED"}
+
         file_check = os.path.join(library_dir, library_name, category_name, collection_name, collection_name + ".blend")
         if os.path.isfile(file_check):
             return context.window_manager.invoke_confirm(self, event)
