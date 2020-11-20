@@ -26,7 +26,7 @@ class VIEW3D_OT_CreateAsset(Operator):
         category_name = nexus_model_SCN.category_list
         collection_name = nexus_model_SCN.new_collection_name
 
-        if bpy.data.collections[collection_name] is not None:
+        if bpy.data.collections.find(collection_name) != -1:
             self.report({"ERROR"}, "delete the collection '{}' before creating the asset".format(collection_name))
             return {"FINISHED"}
 
