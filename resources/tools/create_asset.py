@@ -92,10 +92,28 @@ if __name__ == "__main__":
     bpy.ops.render.render(write_still=True)
 
     # remove HDRI image
-    bpy.data.images.remove(bpy.data.images["tomoco_studio.exr"])
+    # bpy.data.images.remove(bpy.data.images["tomoco_studio.exr"])
 
     if pack_data == "PACK":
-        bpy.ops.file.pack_all()
+        # bpy.ops.file.pack_all()
+        # save images to root library
+        path_textures = os.path.abspath(os.path.join(save_dir, "textures"))
+
+        # create folder in not exist
+        if not os.path.exists(path_textures):
+            os.makedirs(path_textures)
+
+        for image in bpy.data.images:
+            if image.name != "Render Result":
+                # get absolute path image
+                image_path = os.path.abspath(image.filepath_from_user())
+                # create new path image
+                new_image_path = os.path.join(path_textures, image.name)
+                # copy image to new path
+                copyfile(image_path, new_image_path)
+                # set new path image inside blender
+                image.filepath = new_image_path
+                print("save image to -> ", new_image_path)
     elif pack_data == "TEXTURE":
         # save images to root library
         path_textures = os.path.abspath(os.path.join(save_dir, "../../..", "textures"))
