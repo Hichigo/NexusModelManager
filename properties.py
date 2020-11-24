@@ -10,9 +10,9 @@ class NexusModelManager_WM_Properties(PropertyGroup):
 	canvas_object: PointerProperty(
 		name="Canvas",
 		description="If empty then will draw over all objects. APPLY TRANSFORM TO OBJECT!!!",
-        type=bpy.types.Object,
-        poll=filter_on_mesh_prop
-    )
+    type=bpy.types.Object,
+    poll=filter_on_mesh_prop
+  )
 
 	new_library_name: StringProperty(
 		name="Library",
@@ -117,6 +117,10 @@ class NexusModelManager_WM_Properties(PropertyGroup):
 
 	asset_previews: EnumProperty(
 		items=enum_previews_asset_items
+	)
+
+	collection_previews: EnumProperty(
+		items=enum_previews_collection_items
 	)
 
 	library_list: EnumProperty(

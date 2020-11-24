@@ -54,6 +54,10 @@ class VIEW3D_PT_ManagerPreviews(Panel):
         row = box.row()
         row.operator("view3d.search_asset", icon="VIEWZOOM", text="Search Asset")
 
+        col = box.column()
+        col.scale_y = 1.5
+        col.template_icon_view(nexus_model_SCN, "collection_previews", show_labels=True, scale_popup=addon_prefs.preview_asset_scale)
+
         ######### Add location
         row = box.row()
         row.label(text="Add location")

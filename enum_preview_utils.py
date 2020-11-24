@@ -130,3 +130,50 @@ def enum_previews_asset_items(self, context):
 	return pcoll.asset_previews
 
 asset_collections = {}
+
+def enum_previews_collection_items(self, context):
+	enum_items = []
+
+	addon_prefs = get_addon_prefs()
+	library_dir = addon_prefs.library_list
+	category = context.scene.nexus_model_manager.category_list
+	library = context.scene.nexus_model_manager.library_list
+	asset_name = context.scene.nexus_model_manager.asset_previews
+	directory = os.path.join(library_dir, library, category)
+
+	filepath = os.path.join(directory, asset_name, asset_name + ".blend")
+	render_path = os.path.join(directory, asset_name, "render")
+
+	if context is None:
+		return enum_items
+
+	pcoll = file_collections_previews["main"]
+
+	if render_path == pcoll.file_collections_previews_dir:
+		return pcoll.file_collections_previews
+
+	with bpy.data.libraries.load(filepath) as (df, dt):
+		list_collections = df.collections
+	list_collections.sort()
+
+	# if render_path and os.path.exists(render_path):
+	# 	images_names = []
+	# 	for fn in os.listdir(render_path):
+	# 		images_names.append(os.path.splitext(fn)[0])
+
+	for i, name in enumerate(list_collections):
+		filepath = os.path.join(render_path, name + ".png")
+
+		icon_name = name.replace(asset_name + "_", "")
+		if filepath in pcoll:
+			enum_items.append((name, icon_name, "", pcoll[filepath].icon_id, i))
+		else:
+			thumb = pcoll.load(filepath, filepath, 'IMAGE')
+			enum_items.append((name, icon_name, "", thumb.icon_id, i))
+	# enum_items.sort()
+
+	pcoll.file_collections_previews = enum_items
+	pcoll.file_collections_previews_dir = render_path
+	return pcoll.file_collections_previews
+
+file_collections_previews = {}

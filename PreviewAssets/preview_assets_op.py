@@ -42,6 +42,7 @@ class VIEW3D_OT_AddModel(Operator):
         addon_prefs = get_addon_prefs()
         library_dir = addon_prefs.library_list
         asset_name = nexus_model_SCN.asset_previews
+        collection_name = nexus_model_SCN.collection_previews
         category = nexus_model_SCN.category_list
         library = nexus_model_SCN.library_list
         is_link = nexus_model_SCN.link_model
@@ -52,8 +53,7 @@ class VIEW3D_OT_AddModel(Operator):
 
         directory_inside_file = os.path.join(filepath, "Collection")
 
-        filepath_collection_name = directory_inside_file + asset_name
-
+        filepath_collection_name = directory_inside_file + collection_name
 
         selected_objects = context.selected_objects
 
@@ -63,7 +63,7 @@ class VIEW3D_OT_AddModel(Operator):
         if is_link:
             bpy.ops.wm.link(
                 filepath=filepath_collection_name,
-                filename=asset_name,
+                filename=collection_name,
                 directory=directory_inside_file,
                 link=True,
                 instance_collections=True,
@@ -72,7 +72,7 @@ class VIEW3D_OT_AddModel(Operator):
         else:
             bpy.ops.wm.append(
                 filepath=filepath_collection_name,
-                filename=asset_name,
+                filename=collection_name,
                 directory=directory_inside_file,
                 link=False,
                 instance_collections=False,

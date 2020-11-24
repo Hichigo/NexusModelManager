@@ -121,6 +121,11 @@ def register():
 	asset_collections["main"] = pcoll
 
 	pcoll = bpy.utils.previews.new()
+	pcoll.file_collections_previews_dir = ""
+	pcoll.file_collections_previews = ()
+	file_collections_previews["main"] = pcoll
+
+	pcoll = bpy.utils.previews.new()
 	pcoll.render_scene_previews_dir = ""
 	pcoll.asset_previews = ()
 	render_scene_collections["main"] = pcoll
@@ -137,6 +142,10 @@ def unregister():
 	for pcoll in asset_collections.values():
 		bpy.utils.previews.remove(pcoll)
 	asset_collections.clear()
+
+	for pcoll in file_collections_previews.values():
+		bpy.utils.previews.remove(pcoll)
+	file_collections_previews.clear()
 
 	for pcoll in render_scene_collections.values():
 		bpy.utils.previews.remove(pcoll)

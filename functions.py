@@ -45,6 +45,7 @@ def add_model(context, location, normal, scale):
         addon_prefs = get_addon_prefs()
         library_dir = addon_prefs.library_list
         asset_name = nexus_model_SCN.asset_previews
+        collection_name = nexus_model_SCN.collection_previews
         category = nexus_model_SCN.category_list
         library = nexus_model_SCN.library_list
 
@@ -52,13 +53,14 @@ def add_model(context, location, normal, scale):
 
         directory_inside_file = os.path.join(filepath, "Collection")
 
-        filepath_collection_name = directory_inside_file + asset_name
+        filepath_collection_name = directory_inside_file + collection_name
 
         bpy.ops.object.select_all(action="DESELECT")
-
+    print(filepath_collection_name)
+    print(collection_name)
     bpy.ops.wm.link(
         filepath=filepath_collection_name,
-        filename=asset_name,
+        filename=collection_name,
         directory=directory_inside_file,
         link=True,
         instance_collections=True,
